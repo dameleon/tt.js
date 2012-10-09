@@ -1,0 +1,102 @@
+@mixin prefix ($prop, $val) {
+	$usePrefix: webkit, moz, o, ms;
+	@each $prefix in $usePrefix {
+		-#{$prefix}-#{$prop}: #{$val};
+	}
+	#{$prop}: #{$val};
+}
+
+html, body {
+    min-height: 100%;
+}
+
+body {
+    background: #000 url(../img/bg_common.jpg) no-repeat left bottom;
+}
+
+#container {
+    padding: 0 0 50px;
+    width: 900px;
+    margin: 0 auto;
+}
+
+#header {
+    margin-bottom: 15px;
+    text-align: center;
+
+    h1 {
+        padding: 20px;
+    }
+}
+
+#globalNav {
+    overflow: hidden;
+    width: 600px;
+    margin: 0 auto;
+
+    li {
+        float: left;
+        width: 120px;
+        a {
+            display: block;
+            padding: 10px 0 5px;
+            font-size: 16px;
+            color: white;
+
+            &.current, &:hover {
+                background: url(../img/bg_nav_light.gif) no-repeat center bottom;
+            }
+        }
+    }
+}
+
+.content {
+    padding: 15px;
+    @include prefix(border-radius, 5px);
+    background: #fff;
+    font-size: 13px;
+
+    h2 {
+        margin: 0 auto 10px;
+        padding: 4px 0;
+        background: url(../img/bg_h2.jpg) no-repeat left bottom;
+        font-size: 18px;
+        font-weight: bold;
+    }
+    .inner {
+        margin: 10px auto 15px;
+        color: #333;
+
+        &:last-child {
+            margin-bottom: 0;
+        }
+    }
+    footer {
+        margin: 10px auto 0;
+        padding: 10px 0 0;
+        border-top: #999 1px dotted;
+        text-align: center;
+        font-weight: bold;
+        color: #666;
+    }
+}
+
+.visual {
+    overflow: hidden;
+    .floatR {
+        float: right;
+    }
+    .floatL {
+        float: left;
+    }
+    img {
+        margin: 5px 10px;
+    }
+    .txt {
+        padding: 15px 0;
+    }
+}
+
+.red {
+    color: #f52105;
+}
