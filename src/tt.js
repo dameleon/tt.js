@@ -152,11 +152,15 @@
             return this;
         },
         addClass:
-            (tt.env.android && tt.env.versionCode < 3000) ?
+            ((tt.env.android && tt.env.versionCode < 3000) ||
+             (tt.env.ios && tt.env.versionCode < 5000) ||
+             (tt.env.opera)) ?
                 _addClassByClassNameStr :
                 _addClassByClassList,
         removeClass:
-            (tt.env.android && tt.env.versionCode < 3000) ?
+            ((tt.env.android && tt.env.versionCode < 3000) ||
+             (tt.env.ios && tt.env.versionCode < 5000) ||
+             (tt.env.opera)) ?
                 _removeClassByClassList :
                 _removeClassByClassNameStr,
         toggleClass: function(className, strict) {
