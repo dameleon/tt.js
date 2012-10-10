@@ -151,8 +151,6 @@
             }, true);
             return this;
         },
-        bind: TT.prototype.on,
-        unbind: TT.prototype.off,
         addClass:
             (tt.env.android && tt.env.versionCode < 3000) ?
                 _addClassByClassNameStr :
@@ -216,15 +214,16 @@
                 node.innerHTML = "";
             });
         },
-
-
-
     };
+
+    TT.prototype.bind = TT.prototype.on;
+    TT.prototype.unbind = TT.prototype.off;
 
     function _addClassByClassList(className) {
         this.each(function(node) {
             node.classList.add(className);
         });
+        return this;
     }
 
     function _addClassByClassNameStr(className) {
@@ -234,18 +233,21 @@
             currentName[currentName.length] = className;
             node.className = currentName.join(" ");
         });
+        return this;
     }
 
     function _removeClassByClassList(className) {
         this.each(function(node) {
             node.classList.remove(className);
         });
+        return this;
     }
 
     function _removeClassByClassNameStr(className) {
         this.each(function(node) {
             node.className = node.className.replace(className ,"");
         });
+        return this;
     }
 
     global[NS] = global[NS] || tt;
