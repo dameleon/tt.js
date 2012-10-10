@@ -164,7 +164,7 @@
 
             strict ? _strictToggle() : _simpleToggle();
 
-            function _strictToggle(node) {
+            function _strictToggle() {
                 self.each(function(node) {
                     var tt = new tt(node);
 
@@ -174,7 +174,7 @@
                 });
             }
 
-            function _simpleToggle(node, index) {
+            function _simpleToggle() {
                 if (self.nodeList[0].className.search(className)) {
                     self.removeClass(className);
                 } else {
