@@ -54,9 +54,11 @@
 
         res.android = /android/.test(ua);
         res.ios = /ip(hone|od|ad)/.test(ua);
+        res.windowsPhone = /windows\sphone/.test(ua);
         res.chrome = /chrome/.test(ua);
         res.firefox = /firefox/.test(ua);
         res.opera = /opera/.test(ua);
+        res.ie = /msie/.test(ua);
         res.androidBrowser = res.android && /applewebkit/.test(ua);
         res.mobileSafari = res.ios && /applewebkit/.test(ua);
         res.other = !(res.androidBrowser || res.mobileSafari || res.chrome || res.firefox || res.opera);
