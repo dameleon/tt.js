@@ -96,7 +96,7 @@
         this.length = 0;
 
         if (querySelectorRe.test(mix)) {    // "#hoge#fuga", "#hoge.fuga", "#hoge[attr='fuga']", "#hoge > .fuga", and more
-            method = "mixSelectorAll";
+            method = "querySelectorAll";
         } else if (mix[0] === '#') {        // id
             method = "getElementById";
             mix = mix.substr(1, mix.length);
