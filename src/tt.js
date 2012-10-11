@@ -109,7 +109,7 @@
 
         if (method !== undefined) {
             target = (parent || document)[method](mix);
-            target && this._registNode(target);
+            target !== null && this._registNode(target);
         }
 
         return this;
@@ -177,6 +177,7 @@
             var self = this;
 
             strict ? _strictToggle() : _simpleToggle();
+            return this;
 
             function _strictToggle() {
                 self.each(function(node) {
@@ -201,6 +202,7 @@
             this.each(function(node) {
                 node.setAttribute(key, value);
             });
+            return this;
         },
         html: function(mix) {
             if (mix && mix.nodeType === 1) {
@@ -227,6 +229,7 @@
             this.each(function(node) {
                 node.innerHTML = "";
             });
+            return this;
         },
     };
 
