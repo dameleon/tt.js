@@ -61,7 +61,7 @@
         res.ie = /msie/.test(ua);
         res.androidBrowser = res.android && /applewebkit/.test(ua);
         res.mobileSafari = res.ios && /applewebkit/.test(ua);
-        res.other = !(res.androidBrowser || res.mobileSafari || res.chrome || res.firefox || res.opera);
+        res.other = !(res.androidBrowser || res.mobileSafari || res.chrome || res.firefox || res.opera || res.ie);
         res.version =
             (res.androidBrowser || res.chrome) ? ua.match(/android\s(\S.*?)\;/) :
             res.mobileSafari ? ua.match(/os\s(\S.*?)\s/) :
