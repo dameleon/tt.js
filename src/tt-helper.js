@@ -7,19 +7,16 @@
 
     var delegateHandler = {
         listeners: {},
-        HandleEvent: function(ev) {
-            var self = this;
+        handleEvent: function(ev) {
+            var listeners = this.listeners[ev.type];
 
-            zz.each(Object.keys(this.listeners), function(type) {
-                if (ev.type === type) {
-                    self.dispatcher(type, ev);
-                    break;
-                }
-            });
+            if (listeners !== undefined && listeners.length > 0) {
+                this.dispatcher(type, ev);
+            }
         },
         dispatcher: function(type, ev) {
             zz.each(this.listeners[type], function(listener) {
-                var match = listener["node"].match(function(node) {
+                var match = zz(listener["node"]).match(function(node) {
                     var res = node.compareDocumentPosition(ev.target);
 
                     if (res === 0 || res & NODE.DOCUMENT_POSITION_CONTAINED_BY) {
@@ -27,51 +24,62 @@
                     }
                     return false;
                 });
-                match && listener["fn"](ev, match);
+
+                if (match) {
+                    listener["fn"](ev, match);
+                    break;
+                }
             });
         },
         addListener: function(node, type, fn) {
-            var listener = {
+            var listeners = this.listeners[type],
+                listener = {
                 node: node,
                 fn: fn
             };
 
-            if (this.listeners[type] === undefined) {
-                this.listeners[type] = [];
+            if (listeners === undefined) {
+                listeners = [];
+            }
+            if (listeners.length === 0) {
                 document.addEventListener(type, this, false);
             }
-            this.listeners[type].push(listener);
+            listeners.push(listener);
         },
         removeListener: function(node, type, fn) {
-            var i = 0, iz = this.listeners[type]["length"];
+            var self = this,
+                listeners = this.listeners[type];
 
-            for (; i < iz; ++i) {
-                if () {
-
-                }
+            if (listeners === undefined || listeners.length === 0) {
+                return;
             }
-
-
-            zz.each(this.listeners[type], function(listner) {
-                if (listener["node"] === node && listener["fn"] === fn) {
-
-                    break;
+            zz.each(listeners, function(listner, index) {
+                if (listener["node"] !== node || listener["fn"] !== fn) {
+                    return;
                 }
+                listeners.splice(index, 1);
+                if (listeners.length === 0) {
+                    document.removeEventListener(type, self);
+                }
+                break;
             });
         }
     };
 
     tt.delegate = function(mix, type, fn) {
-        var listeners = delegateHandler.Listeners;
-
-        if (listeners[type] === undefined) {
-            listeners[type] = [];
+        if (!mix ||
+            typeof type !== "string" ||
+            typeof fn !== "function") {
+                return;
         }
-        Listeners[type].add({});
+        delegateHandler.addListener(mix, type, fn);
     }
 
     tt.undelegate = function(mix, type) {
-
+        if (!mix || typeof type !== "string") {
+            return;
+        }
+        delegateHandler.removeListener(mix, type);
     }
 
 })(this, document);

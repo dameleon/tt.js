@@ -1,4 +1,4 @@
-(function(global, document) {
+(function(global, document, isArray, isNodeList) {
 	'use strict';
 
 	var NS = "tt",
@@ -20,8 +20,16 @@
             return mix;
         } else if (typeof mix === "function") {
             loaded ? mix() : queue.push(mix);
+        } else if ((isArray(mix) || isNodeList(mix)) &&
+                   mix.length > 0 &&
+                   mix[0].nodeType === 1) {
+
+            return new TT()._registNode(mix);
         }
 	}
+
+    tt.isArray = isArray;
+    tt.isNodeList = isNodeList;
 
     tt.addMethod = function(name, fn) {
         if (tt.prototype[name] !== undefined ||
@@ -85,15 +93,15 @@
         this.nodeList = [];
         this.length = 0;
 
-        if (querySelectorRe.test(mix)) { // "#hoge#fuga", "#hoge.fuga", "#hoge[attr='fuga']", "#hoge > .fuga", and more
+        if (querySelectorRe.test(mix)) {    // "#hoge#fuga", "#hoge.fuga", "#hoge[attr='fuga']", "#hoge > .fuga", and more
             method = "mixSelectorAll";
-        } else if (mix[0] === '#') {       // id
+        } else if (mix[0] === '#') {        // id
             method = "getElementById";
             mix = mix.substr(1, mix.length);
-        } else if (mix[0] === '.') {      // className
+        } else if (mix[0] === '.') {        // className
             method = "getElementsByClassName";
             mix = mix.substr(1, mix.length);
-        } else if (mix.length > 0) {                             // tagName
+        } else if (mix.length > 0) {        // tagName
             method = "getElementsByTagName";
         }
 
@@ -155,14 +163,14 @@
             ((tt.env.android && tt.env.versionCode < 3000) ||
              (tt.env.ios && tt.env.versionCode < 5000) ||
              (tt.env.opera)) ?
-                _addClassByClassNameStr :
+                _addClassByClassName :
                 _addClassByClassList,
         removeClass:
             ((tt.env.android && tt.env.versionCode < 3000) ||
              (tt.env.ios && tt.env.versionCode < 5000) ||
              (tt.env.opera)) ?
-                _removeClassByClassList :
-                _removeClassByClassNameStr,
+                _removeClassByClassName :
+                _removeClassByClassList,
         toggleClass: function(className, strict) {
             var self = this;
 
@@ -230,7 +238,7 @@
         return this;
     }
 
-    function _addClassByClassNameStr(className) {
+    function _addClassByClassName(className) {
         this.each(function(node) {
             var currentName = node.className.split(" ");
 
@@ -247,7 +255,7 @@
         return this;
     }
 
-    function _removeClassByClassNameStr(className) {
+    function _removeClassByClassName(className) {
         this.each(function(node) {
             node.className = node.className.replace(className ,"");
         });
@@ -256,4 +264,14 @@
 
     global[NS] = global[NS] || tt;
 
-})(this,document);
+})(
+    this,
+    document,
+    Array.isArray ||
+    function(target) {
+        return Object.prototype.toString.call(target) === "[object Array]";
+    },
+    function(target) {
+        return Object.prototype.toString.call(target) === "[object NodeList]";
+    }
+);
