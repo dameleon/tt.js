@@ -4,16 +4,55 @@
 <script type="text/javascript" src="js/tt.js"></script>
 <script type="text/javascript">
 tt(function() {
-    var t1 = tt("html"),
-        t2 = tt("h1");
-
-    t1.toggleClass("hogehoge");
-    t2.addClass("fugafuga");
+    tt(".class_grandson").css({display: "none"});
 });
 </script>
 <title>t2.js sample</title>
 </head>
 <body>
-<h1>Hello world!</h1>
+
+<div id="id_element">hogehoge</div>
+
+<div class="class_root">
+    <div class="class_child">
+        <div class="class_grandson">hogehoge</div>
+        <div class="class_grandson">hogehoge</div>
+        <div class="class_grandson">hogehoge</div>
+        <div class="class_grandson">hogehoge</div>
+        <div class="class_grandson">hogehoge</div>
+        <div class="class_grandson">hogehoge</div>
+        <div class="class_grandson">hogehoge</div>
+        <div class="class_grandson">hogehoge</div>
+        <div class="class_grandson">hogehoge</div>
+        <div class="class_grandson">hogehoge</div>
+    </div>
+</div>
+
+
+<!--
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
+<script src="http://zeptojs.com/zepto.min.js"></script>
+<script src="http://cdn.jqmobi.com/1.1/jq.mobi.min.js"></script>
+<script src="http://jsrun.it/damele0n/kXAJ/js"></script>
+
+<div id="id_element">hogehoge</div>
+
+<div class="class_root">
+    <div class="class_child">
+        <div class="class_grandson">hogehoge</div>
+        <div class="class_grandson">hogehoge</div>
+        <div class="class_grandson">hogehoge</div>
+        <div class="class_grandson">hogehoge</div>
+        <div class="class_grandson">hogehoge</div>
+        <div class="class_grandson">hogehoge</div>
+        <div class="class_grandson">hogehoge</div>
+        <div class="class_grandson">hogehoge</div>
+        <div class="class_grandson">hogehoge</div>
+        <div class="class_grandson">hogehoge</div>
+    </div>
+</div>
+-->
+
+
 </body>
 </html>

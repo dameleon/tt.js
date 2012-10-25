@@ -119,11 +119,12 @@
         parent = parent || document;
         target =
             querySelectorRe.test(mix) ? parent["querySelectorAll"](mix) :
-            mix[0] === "#" ?            parent["getElementById"](mix) :
-            mix[0] === "." ?            parent["getElementsByClassName"](mix) :
+            mix[0] === "#" ?            parent["getElementById"](mix.substring(1, mix.length)) :
+            mix[0] === "." ?            parent["getElementsByClassName"](mix.substring(1, mix.length)) :
             typeof mix === "string" ?   parent["getElementsByTagName"](mix) :
-            (mix.nodeName || isNodeList(mix) || isArray(mix)) ? mix :
+            (mix.nodeType || isNodeList(mix) || isArray(mix)) ? mix :
             null;
+
         if (target !== null) {
             if (target.nodeName) {
                 this[0] = target;
@@ -260,9 +261,9 @@
         css: function() {
             var prop, val,
                 self = this,
-                args = [].slice.call(arguments);
+                args = arguments;
 
-            if (args.length) {
+            if (!args.length) {
                 return this;
             }
 
@@ -274,6 +275,7 @@
                 break;
             case "string":
                 if (args[1]) {
+                    args = [].slice.call(args);
                     while ((prop = args.pop()) && (val = args.pop())) {
                         _setStyle(prop, cal);
                     }
