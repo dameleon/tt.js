@@ -24,28 +24,52 @@
                    mix.length > 0 &&
                    mix[0].nodeType === 1) {
 
-            return new TT()._registNode(mix);
+            return (new TT())._registNode(mix);
         }
 	}
 
     tt.isArray = isArray;
     tt.isNodeList = isNodeList;
 
-    tt.addMethod = function(name, fn) {
-        if (tt.prototype[name] !== undefined ||
+    tt.plugin = function(name, fn) {
+        if (TT.prototype[name] !== undefined ||
             typeof name !== "string" ||
             typeof fn !== "function") {
+
             return;
         }
-        tt.prototype[name] = fn;
+        TT.prototype[name] = fn;
     }
 
     tt.each = function(arr, fn) {
         var i = 0, iz = arr.length;
 
         for (; i < iz; ++i) {
-            fn(arr[i]);
+            fn(arr[i], i);
         }
+    }
+
+    tt.match = function(arr, fn) {
+        var i = 0, iz = arr.length;
+
+        for (; i < iz; ++i) {
+            if (fn(arr[i], i)) {
+                return arr[i];
+            }
+        }
+        return null;
+    }
+
+    tt.then = function(arr, fn, target) {
+        var i = 0, iz = arr.length;
+
+        target = target || true;
+        for (; i < iz; ++i) {
+            if (fn(arr[i], i) === target) {
+                return true;
+            }
+        }
+        return false;
     }
 
     tt.env = (function(navigator) {
@@ -90,28 +114,18 @@
     })(global.navigator);
 
     function TT(mix, parent) {
-        var method, target;
+        var target;
 
         this.nodeList = [];
         this.length = 0;
-
-        if (querySelectorRe.test(mix)) {    // "#hoge#fuga", "#hoge.fuga", "#hoge[attr='fuga']", "#hoge > .fuga", and more
-            method = "querySelectorAll";
-        } else if (mix[0] === '#') {        // id
-            method = "getElementById";
-            mix = mix.substr(1, mix.length);
-        } else if (mix[0] === '.') {        // className
-            method = "getElementsByClassName";
-            mix = mix.substr(1, mix.length);
-        } else if (mix.length > 0) {        // tagName
-            method = "getElementsByTagName";
-        }
-
-        if (method !== undefined) {
-            target = (parent || document)[method](mix);
-            target !== null && this._registNode(target);
-        }
-
+        parent = parent || document;
+        target =
+            querySelectorRe.test(mix) ? parent["querySelectorAll"](mix) :
+            mix[0] === "#" ?            parent["getElementById"](mix) :
+            mix[0] === "." ?            parent["getElementsByClassName"](mix) :
+            mix.length > 0 ?            parent["getElementsByTagName"](mix) :
+            null;
+        (target !== null) && this._registNode(target);
         return this;
     }
 
@@ -181,7 +195,7 @@
 
             function _strictToggle() {
                 self.each(function(node) {
-                    var tt = new tt(node);
+                    var tt = tt(node);
 
                     node.className.seach(className) ?
                         tt.removeClass(className) :
@@ -231,6 +245,50 @@
             });
             return this;
         },
+
+        /**
+         *
+         * zz.css("property");
+         * zz.css("property", "value", [.., "prop", "val"]);
+         * zz.css({
+         *      "property_01": "value",
+         *      "property_02": "value"
+         * });
+         */
+        css: function() {
+            var prop, val,
+                self = this,
+                args = [].slice.call(arguments);
+
+            if (args.length) {
+                return this;
+            }
+
+            switch (typeof args[0]) {
+            case "object":
+                tt.each(Object.keys(args[0]), function(prop) {
+                    _setStyle(prop, args[0][prop]);
+                });
+                break;
+            case "string":
+                if (args[1]) {
+                    while ((prop = args.pop()) && (val = args.pop())) {
+                        _setStyle(prop, cal);
+                    }
+                } else {
+                    return document.getComputedStyle(this.nodeList[0]).getPropertyValue(args[0]);
+                }
+                break;
+            }
+            return this;
+
+            function _setStyle(property, value) {
+                self.each(function(node) {
+                    node["style"][property] = value;
+                });
+            }
+        },
+
     };
 
     TT.prototype.bind = TT.prototype.on;

@@ -15,7 +15,7 @@
             }
         },
         dispatcher: function(type, ev) {
-            zz.each(this.listeners[type], function(listener) {
+            zz.match(this.listeners[type], function(listener) {
                 var match = zz(listener["node"]).match(function(node) {
                     var res = node.compareDocumentPosition(ev.target);
 
@@ -27,8 +27,9 @@
 
                 if (match) {
                     listener["fn"](ev, match);
-                    break;
+                    return true;
                 }
+                return false;
             });
         },
         addListener: function(node, type, fn) {
@@ -53,15 +54,15 @@
             if (listeners === undefined || listeners.length === 0) {
                 return;
             }
-            zz.each(listeners, function(listner, index) {
+            zz.match(listeners, function(listner, index) {
                 if (listener["node"] !== node || listener["fn"] !== fn) {
-                    return;
+                    return false;
                 }
                 listeners.splice(index, 1);
                 if (listeners.length === 0) {
                     document.removeEventListener(type, self);
                 }
-                break;
+                return true;
             });
         }
     };
