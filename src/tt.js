@@ -14,17 +14,16 @@
     }, false);
 
 	function tt(mix, parent) {
-        if (typeof mix === "string" || mix.nodeType === 1) {
+        if (typeof mix === "string" ||
+            mix.nodeType === 1 ||
+            isNodeList(mix) ||
+            isArray(mix) && (mix.length > 0 && mix[0].nodeType === 1)) {
+
             return new TT(mix, parent);
         } else if (mix instanceof TT) {
             return mix;
         } else if (typeof mix === "function") {
             loaded ? mix() : queue.push(mix);
-        } else if ((isArray(mix) || isNodeList(mix)) &&
-                   mix.length > 0 &&
-                   mix[0].nodeType === 1) {
-
-            return (new TT())._registNode(mix);
         }
 	}
 
@@ -114,50 +113,53 @@
     })(global.navigator);
 
     function TT(mix, parent) {
-        var target;
+        var target, i, iz;
 
-        this.nodeList = [];
         this.length = 0;
         parent = parent || document;
         target =
             querySelectorRe.test(mix) ? parent["querySelectorAll"](mix) :
             mix[0] === "#" ?            parent["getElementById"](mix) :
             mix[0] === "." ?            parent["getElementsByClassName"](mix) :
-            mix.length > 0 ?            parent["getElementsByTagName"](mix) :
+            typeof mix === "string" ?   parent["getElementsByTagName"](mix) :
+            (mix.nodeName || isNodeList(mix) || isArray(mix)) ? mix :
             null;
-        (target !== null) && this._registNode(target);
+        if (target !== null) {
+            if (target.nodeName) {
+                this[0] = target;
+                this.length = 1;
+            } else {
+                for (i = 0, iz = target.length; i < iz; ++i) {
+                    this[i] = target[i];
+                }
+                this.length = iz;
+            }
+        }
         return this;
     }
 
     TT.prototype = {
         constractor: TT,
-        _registNode: function(node) {
-            if (node.nodeType) {
-                this.nodeList[0] = node;
-                this.length = 1;
-            } else {
-                for (var i = 0, iz = node.length; i < iz; ++i) {
-                    this.nodeList[i] = node[i];
-                }
-                this.length = iz;
-            }
-            return this;
-        },
         get: function(num) {
-            return this.nodeList[num || 0];
+            return this[num || 0];
         },
         toArray: function() {
-            return this.nodeList;
+            var arr = [];
+
+            this.each(function(node, index) {
+                arr[index] = node;
+            });
+            return arr;
         },
         each: function(fn) {
             for (var i = 0; i < this.length; ++i) {
-                fn(this.nodeList[i], i);
+                fn(this[i], i);
             }
             return this;
         },
         match: function() {
             for (var i = 0; i < this.length; ++i) {
-                if (fn(this.nodeList[i], i)) {
+                if (fn(this[i], i)) {
                     return this[i];
                 }
             }
@@ -204,7 +206,7 @@
             }
 
             function _simpleToggle() {
-                if (self.nodeList[0].className.search(className)) {
+                if (self[0].className.search(className) >= 0) {
                     self.removeClass(className);
                 } else {
                     self.addClass(className);
@@ -276,7 +278,7 @@
                         _setStyle(prop, cal);
                     }
                 } else {
-                    return document.getComputedStyle(this.nodeList[0]).getPropertyValue(args[0]);
+                    return document.getComputedStyle(this[0]).getPropertyValue(args[0]);
                 }
                 break;
             }
