@@ -112,6 +112,46 @@
         }
     })(global.navigator);
 
+    tt.query2object = function (hash) {
+        var result = {};
+        if (!hash) {
+            return {};
+        }
+        var pair = hash.split('&');
+        for (var i = 0, l = pair.length; i < l; ++i) {
+            var k_v = pair[i].split('=');
+            result[k_v[0]] = k_v[1];
+        }
+        return result;
+    };
+
+    tt.extend = function (/* args... */) {
+        var args = Array.prototype.slice.call(arguments);
+        var result = {};
+        for (var i = 0, l = args.length; i < l; ++i) {
+            var arg = args[i];
+            if (!arg || 'object' !== typeof arg) {
+                continue;
+            }
+            var keys = Object.keys(arg);
+            for (var k = 0, j = keys.length; k < j; ++k) {
+                var key = keys[k];
+                result[key] = arg[key];
+            }
+        }
+        return result;
+    };
+
+    tt.param = function (obj) {
+        var keys = Object.keys(obj);
+        var results = [];
+        for (var i = 0, l = keys.length; i < l; ++i) {
+            var key = keys[i];
+            results.push(encodeURIComponent(key) + '=' + encodeURIComponent(obj[key]));
+        }
+        return results.join('&');
+    };
+
     function TT(mix, parent) {
         var target, i, iz;
 
@@ -291,6 +331,70 @@
                     node["style"][property] = value;
                 });
             }
+        },
+
+        data: function () {
+            var elem = this[0];
+            var attrs = this[0].attributes;
+            var result = {};
+            for (var i = 0, l = attrs.length; i < l; ++i) {
+                var attr = attrs[i].name;
+                if (!attr.indexOf('data-')) {
+                    result[attr.replace(/^data-/, '')] = elem.getAttribute(attr);
+                }
+            }
+            return result;
+        },
+
+        show: function () {
+            return tt(this).css('display', 'block');
+        },
+
+        hide: function () {
+            return tt(this).css('display', 'none');
+        },
+
+        trigger: function (event, type, bubbles, cancelable) {
+                var elem = this[0];
+                tt.prototype.trigger_event(elem, event, type, bubbles, cancelable);
+                return this;
+        },
+
+        trigger_event: function (elem, event, type, bubbles, cancelable) {
+            if (!elem) {
+                return;
+            }
+            if (!event) {
+                throw new Error('require event name');
+            }
+            if ('string' !== typeof type) {
+                type = event;
+                event = type === 'click' ? 'MouseEvents' : 'Event';
+            }
+            var env = document.createEvent(event);
+            env.initEvent(type, bubbles || true, cancelable || true);
+            elem.dispatchEvent(env);
+        },
+
+        replace: function (elem) {
+            var target = this[0];
+            if (!target) {
+                return;
+            }
+            if (typeof elem === 'string') {
+                target.insertAdjacentHTML('AfterEnd', elem);
+            } else {
+                target.parentNode.insertBefore(elem, target);
+            }
+            return tt(target).remove();
+        },
+
+        offset: function () {
+            var offset = this[0].getBoundingClientRect()
+            return {
+                left: offset.left + window.pageXOffset,
+                top: offset.top + window.pageYOffset
+            };
         },
 
     };
