@@ -14,17 +14,27 @@
     }, false);
 
 	function tt(mix, parent) {
-        if (typeof mix === "string" ||
-            mix.nodeType === 1 ||
-            isNodeList(mix) ||
-            isArray(mix) && (mix.length > 0 && mix[0].nodeType === 1)) {
+        var target = null;
 
-            return new TT(mix, parent);
+        if (typeof mix === "string") {
+            parent = parent || document;
+            target = querySelectorRe.test(mix) ?
+                        parent.querySelectorAll(mix) :
+                     mix[0] === "#" ?
+                        parent.getElementById(mix.substring(1, mix.length)) :
+                     mix[0] === "." ?
+                        parent.getElementsByClassName(mix.substring(1, mix.length)) :
+                        parent.getElementsByTagName(mix);
+        } else if (mix.nodeType === 1 || isNodeList(mix)) {
+            target = mix;
         } else if (mix instanceof TT) {
             return mix;
         } else if (typeof mix === "function") {
             loaded ? mix() : queue.push(mix);
+            return;
         }
+
+        return new TT(target);
 	}
 
     tt.isArray = isArray;
@@ -112,188 +122,190 @@
         }
     })(global.navigator);
 
-    function TT(mix, parent) {
-        var target, i, iz;
+    function TT(node) {
+        var i = 0, iz;
 
         this.length = 0;
-        parent = parent || document;
-        target =
-            querySelectorRe.test(mix) ? parent["querySelectorAll"](mix) :
-            mix[0] === "#" ?            parent["getElementById"](mix.substring(1, mix.length)) :
-            mix[0] === "." ?            parent["getElementsByClassName"](mix.substring(1, mix.length)) :
-            typeof mix === "string" ?   parent["getElementsByTagName"](mix) :
-            (mix.nodeType || isNodeList(mix) || isArray(mix)) ? mix :
-            null;
-
-        if (target !== null) {
-            if (target.nodeName) {
-                this[0] = target;
+        if (node) {
+            if (node.nodeType) {
+                this[0] = node;
                 this.length = 1;
             } else {
-                for (i = 0, iz = target.length; i < iz; ++i) {
-                    this[i] = target[i];
+                iz = this.length = node.length;
+                for (; i < iz; ++i) {
+                    this[i] = node[i];
                 }
-                this.length = iz;
             }
         }
         return this;
     }
 
-    TT.prototype = {
-        constractor: TT,
-        get: function(num) {
-            return this[num || 0];
-        },
-        toArray: function() {
-            var arr = [];
+    TT.prototype.get = function(num) {
+        return this[num || 0];
+    }
 
-            this.each(function(node, index) {
-                arr[index] = node;
-            });
-            return arr;
-        },
-        each: function(fn) {
-            for (var i = 0; i < this.length; ++i) {
-                fn(this[i], i);
+    TT.prototype.toArray = function() {
+        var arr = [];
+
+        this.each(function(node, index) {
+            arr[index] = node;
+        });
+        return arr;
+    }
+
+    TT.prototype.each = function(fn) {
+        for (var i = 0; i < this.length; ++i) {
+            fn(this[i], i);
+        }
+        return this;
+    }
+
+    TT.prototype.match = function() {
+        for (var i = 0; i < this.length; ++i) {
+            if (fn(this[i], i)) {
+                return this[i];
             }
-            return this;
-        },
-        match: function() {
-            for (var i = 0; i < this.length; ++i) {
-                if (fn(this[i], i)) {
-                    return this[i];
-                }
-            }
-            return null;
-        },
-        on: function(type, mix, capture) {
-            this.each(function(node) {
-                node.addEventListener(type, mix, capture);
-            }, true);
-            return this;
-        },
-        off: function(type, mix) {
-            this.each(function(node) {
-                node.removeEventListener(type, mix);
-            }, true);
-            return this;
-        },
-        addClass:
+        }
+        return null;
+    }
+
+    TT.prototype.on = function(type, mix, capture) {
+        this.each(function(node) {
+            node.addEventListener(type, mix, capture);
+        }, true);
+        return this;
+    }
+
+    TT.prototype.off = function(type, mix) {
+        this.each(function(node) {
+            node.removeEventListener(type, mix);
+        }, true);
+        return this;
+    }
+
+    TT.prototype.addClass =
             ((tt.env.android && tt.env.versionCode < 3000) ||
              (tt.env.ios && tt.env.versionCode < 5000) ||
              (tt.env.opera)) ?
                 _addClassByClassName :
-                _addClassByClassList,
-        removeClass:
+                _addClassByClassList;
+
+    TT.prototype.removeClass =
             ((tt.env.android && tt.env.versionCode < 3000) ||
              (tt.env.ios && tt.env.versionCode < 5000) ||
              (tt.env.opera)) ?
                 _removeClassByClassName :
-                _removeClassByClassList,
-        toggleClass: function(className, strict) {
-            var self = this;
+                _removeClassByClassList;
 
-            strict ? _strictToggle() : _simpleToggle();
-            return this;
+    TT.prototype.toggleClass = function(className, strict) {
+        var self = this;
 
-            function _strictToggle() {
-                self.each(function(node) {
-                    var tt = tt(node);
+        strict ? _strictToggle() : _simpleToggle();
+        return this;
 
-                    node.className.seach(className) ?
-                        tt.removeClass(className) :
-                        tt.addClass(className);
-                });
+        function _strictToggle() {
+            self.each(function(node) {
+                var ttObj = tt(node);
+
+                node.className.search(className) >= 0 ?
+                    ttObj.removeClass(className) :
+                    ttObj.addClass(className);
+            });
+        }
+
+        function _simpleToggle() {
+            if (self[0].className.search(className) >= 0) {
+                self.removeClass(className);
+            } else {
+                self.addClass(className);
             }
+        }
+    }
 
-            function _simpleToggle() {
-                if (self[0].className.search(className) >= 0) {
-                    self.removeClass(className);
-                } else {
-                    self.addClass(className);
+    TT.prototype.attr = function(key, value) {
+        value = value || "";
+        this.each(function(node) {
+            node.setAttribute(key, value);
+        });
+        return this;
+    }
+
+    TT.prototype.html = function(mix) {
+        if (mix && mix.nodeType === 1) {
+            return this.add(mix);
+        }
+        this.each(function(node) {
+            node.innerHTML = mix;
+        });
+        return this;
+    }
+
+    TT.prototype.add = function(child) {
+        this.each(function(node) {
+            node.appendChild(child);
+        });
+        return this;
+    }
+
+    TT.prototype.remove = function() {
+        this.each(function(node) {
+            node.parentNode.removeChild(node);
+        });
+        return this;
+    }
+
+    TT.prototype.clear = function() {
+        this.each(function(node) {
+            node.innerHTML = "";
+        });
+        return this;
+    }
+
+    TT.prototype.css = function(mix, value) {
+        var prop, val,
+            self = this,
+            css = "";
+
+        if (typeof mix === "object") {
+            for (prop in mix) {
+                if (mix[prop] === "") {
+                    _removeProperty(prop);
+                    return;
                 }
+                _setStyle(prop, mix[prop]);
+                //css += prop + ":" + mix[prop] + ";";
             }
-        },
-        attr: function(key, value) {
-            value = value || "";
-            this.each(function(node) {
-                node.setAttribute(key, value);
-            });
-            return this;
-        },
-        html: function(mix) {
-            if (mix && mix.nodeType === 1) {
-                return this.add(mix);
+            //_setCss(css);
+        } else {
+            if (value) {
+                _setStyle(mix, value);
+                // css += mix + ":" + value + ";";
+                // _setCss(css);
+            } else if (value === "") {
+                _removeProperty(mix);
+            } else {
+                return global.getComputedStyle(this[0]).getPropertyValue(mix);
             }
-            this.each(function(node) {
-                node.innerHTML = mix;
+        }
+
+        function _removeProperty(prop) {
+            self.each(function(node) {
+                node.style.removeProperty(prop);
             });
-            return this;
-        },
-        add: function(child) {
-            this.each(function(node) {
-                node.appendChild(child);
+        }
+
+        function _setStyle(prop, val) {
+            self.each(function(node) {
+                node.style[prop] = val;
             });
-            return this;
-        },
-        remove: function() {
-            this.each(function(node) {
-                node.parentNode.removeChild(node);
+        }
+
+        function _setCss(css) {
+            self.each(function(node) {
+                node.style.cssText = css;
             });
-            return this;
-        },
-        clear: function() {
-            this.each(function(node) {
-                node.innerHTML = "";
-            });
-            return this;
-        },
-
-        /**
-         *
-         * zz.css("property");
-         * zz.css("property", "value", [.., "prop", "val"]);
-         * zz.css({
-         *      "property_01": "value",
-         *      "property_02": "value"
-         * });
-         */
-        css: function() {
-            var prop, val,
-                self = this,
-                args = arguments;
-
-            if (!args.length) {
-                return this;
-            }
-
-            switch (typeof args[0]) {
-            case "object":
-                tt.each(Object.keys(args[0]), function(prop) {
-                    _setStyle(prop, args[0][prop]);
-                });
-                break;
-            case "string":
-                if (args[1]) {
-                    args = [].slice.call(args);
-                    while ((prop = args.pop()) && (val = args.pop())) {
-                        _setStyle(prop, cal);
-                    }
-                } else {
-                    return document.getComputedStyle(this[0]).getPropertyValue(args[0]);
-                }
-                break;
-            }
-            return this;
-
-            function _setStyle(property, value) {
-                self.each(function(node) {
-                    node["style"][property] = value;
-                });
-            }
-        },
-
-    };
+        }
+    }
 
     TT.prototype.bind = TT.prototype.on;
     TT.prototype.unbind = TT.prototype.off;
@@ -330,7 +342,6 @@
     }
 
     global[NS] = global[NS] || tt;
-
 })(
     this,
     document,
