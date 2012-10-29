@@ -6,6 +6,9 @@
         loaded = false,
         queue = [];
 
+    // Object.keys - MDN https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/Object/keys#Compatiblity
+    Object.keys || (Object.keys = function(){var e=Object.prototype.hasOwnProperty,f=!{toString:null}.propertyIsEnumerable("toString"),c="toString toLocaleString valueOf hasOwnProperty isPrototypeOf propertyIsEnumerable constructor".split(" "),g=c.length;return function(b){if("object"!==typeof b&&"function"!==typeof b||null===b)throw new TypeError("Object.keys called on non-object");var d=[],a;for(a in b)e.call(b,a)&&d.push(a);if(f)for(a=0;a<g;a++)e.call(b,c[a])&&d.push(c[a]);return d}}());
+
     document.addEventListener("DOMContentLoaded", function() {
         loaded = true;
         for (var i = 0, iz = queue.length; i < iz; ++i) {
@@ -81,6 +84,71 @@
         return false;
     }
 
+    tt.query2object = function (hash) {
+        if (!hash) {
+            return {};
+        }
+        var result = {},
+            pair = hash.split('&'),
+            i = 0, iz = pair.length;
+
+        for (; i < iz; ++i) {
+            var k_v = pair[i].split('=');
+            result[k_v[0]] = k_v[1];
+        }
+        return result;
+    };
+
+    tt.extend = function (/* args... */) {
+        var arg, args = [].slice.call(arguments),
+            result = {},
+            i = 0, iz = args.length,
+            k = 0, kz, key, keys;
+
+        for (; i < iz; ++i) {
+            arg = args[i];
+            if (!arg || typeof arg !== "object") {
+                continue;
+            }
+            keys = Object.keys(arg);
+            kz = keys.length;
+            for (; k < kz; ++k) {
+                key = keys[k];
+                result[key] = arg[key];
+            }
+        }
+        return result;
+    };
+
+    tt.param = function (obj) {
+        var key, keys = Object.keys(obj),
+            i = 0, iz = keys.length,
+            results = [];
+
+        for (;i < iz; ++i) {
+            key = keys[i];
+            results.push(encodeURIComponent(key) + '=' + encodeURIComponent(obj[key]));
+        }
+        return results.join('&');
+    };
+
+    tt.triggerEvent = function (node, event, type, bubbles, cancelable) {
+        if (!node) {
+            return;
+        }
+        if (!event) {
+            throw new Error('require event name');
+        }
+        if ('string' !== typeof type) {
+            type = event;
+            event = type === 'click' ? 'MouseEvents' : 'Event';
+        }
+        var ev = document.createEvent(event);
+
+        ev.initEvent(type, bubbles || true, cancelable || true);
+        node.dispatchEvent(ev);
+    }
+
     tt.env = (function(navigator) {
         var res = {},
             ua = navigator.userAgent.toLowerCase();
@@ -122,6 +190,7 @@
         }
     })(global.navigator);
 
+
     function TT(node) {
         var i = 0, iz;
 
@@ -140,172 +209,219 @@
         return this;
     }
 
-    TT.prototype.get = function(num) {
-        return this[num || 0];
-    }
+    TT.prototype = {
+        constructor: TT,
+        get: function(num) {
+            return this[num || 0];
+        },
+        toArray: function() {
+            var arr = [];
 
-    TT.prototype.toArray = function() {
-        var arr = [];
-
-        this.each(function(node, index) {
-            arr[index] = node;
-        });
-        return arr;
-    }
-
-    TT.prototype.each = function(fn) {
-        for (var i = 0; i < this.length; ++i) {
-            fn(this[i], i);
-        }
-        return this;
-    }
-
-    TT.prototype.match = function() {
-        for (var i = 0; i < this.length; ++i) {
-            if (fn(this[i], i)) {
-                return this[i];
+            this.each(function(node, index) {
+                arr[index] = node;
+            });
+            return arr;
+        },
+        each: function(fn) {
+            for (var i = 0; i < this.length; ++i) {
+                fn(this[i], i);
             }
-        }
-        return null;
-    }
-
-    TT.prototype.on = function(type, mix, capture) {
-        this.each(function(node) {
-            node.addEventListener(type, mix, capture);
-        }, true);
-        return this;
-    }
-
-    TT.prototype.off = function(type, mix) {
-        this.each(function(node) {
-            node.removeEventListener(type, mix);
-        }, true);
-        return this;
-    }
-
-    TT.prototype.addClass =
+            return this;
+        },
+        match: function() {
+            for (var i = 0; i < this.length; ++i) {
+                if (fn(this[i], i)) {
+                    return this[i];
+                }
+            }
+            return null;
+        },
+        on: function(type, mix, capture) {
+            this.each(function(node) {
+                node.addEventListener(type, mix, capture);
+            }, true);
+            return this;
+        },
+        off: function(type, mix) {
+            this.each(function(node) {
+                node.removeEventListener(type, mix);
+            }, true);
+            return this;
+        },
+        addClass:
             ((tt.env.android && tt.env.versionCode < 3000) ||
              (tt.env.ios && tt.env.versionCode < 5000) ||
              (tt.env.opera)) ?
                 _addClassByClassName :
-                _addClassByClassList;
-
-    TT.prototype.removeClass =
+                _addClassByClassList,
+        removeClass:
             ((tt.env.android && tt.env.versionCode < 3000) ||
              (tt.env.ios && tt.env.versionCode < 5000) ||
              (tt.env.opera)) ?
                 _removeClassByClassName :
-                _removeClassByClassList;
+                _removeClassByClassList,
+        toggleClass: function(className, strict) {
+            var self = this;
 
-    TT.prototype.toggleClass = function(className, strict) {
-        var self = this;
+            strict ? _strictToggle() : _simpleToggle();
+            return this;
 
-        strict ? _strictToggle() : _simpleToggle();
-        return this;
+            function _strictToggle() {
+                self.each(function(node) {
+                    var ttObj = tt(node);
 
-        function _strictToggle() {
-            self.each(function(node) {
-                var ttObj = tt(node);
-
-                node.className.search(className) >= 0 ?
+                    node.className.search(className) >= 0 ?
                     ttObj.removeClass(className) :
                     ttObj.addClass(className);
-            });
-        }
-
-        function _simpleToggle() {
-            if (self[0].className.search(className) >= 0) {
-                self.removeClass(className);
-            } else {
-                self.addClass(className);
+                });
             }
-        }
-    }
 
-    TT.prototype.attr = function(key, value) {
-        value = value || "";
-        this.each(function(node) {
-            node.setAttribute(key, value);
-        });
-        return this;
-    }
-
-    TT.prototype.html = function(mix) {
-        if (mix && mix.nodeType === 1) {
-            return this.add(mix);
-        }
-        this.each(function(node) {
-            node.innerHTML = mix;
-        });
-        return this;
-    }
-
-    TT.prototype.add = function(child) {
-        this.each(function(node) {
-            node.appendChild(child);
-        });
-        return this;
-    }
-
-    TT.prototype.remove = function() {
-        this.each(function(node) {
-            node.parentNode.removeChild(node);
-        });
-        return this;
-    }
-
-    TT.prototype.clear = function() {
-        this.each(function(node) {
-            node.innerHTML = "";
-        });
-        return this;
-    }
-
-    TT.prototype.css = function(mix, value) {
-        var prop, val,
+            function _simpleToggle() {
+                if (self[0].className.search(className) >= 0) {
+                    self.removeClass(className);
+                } else {
+                    self.addClass(className);
+                }
+            }
+        },
+        attr: function(key, value) {
+            value = value || "";
+            this.each(function(node) {
+                node.setAttribute(key, value);
+            });
+            return this;
+        },
+        html: function(mix) {
+            if (mix && mix.nodeType === 1) {
+                return this.add(mix);
+            }
+            this.each(function(node) {
+                node.innerHTML = mix;
+            });
+            return this;
+        },
+        add: function(child) {
+            this.each(function(node) {
+                node.appendChild(child);
+            });
+            return this;
+        },
+        remove: function() {
+            this.each(function(node) {
+                node.parentNode.removeChild(node);
+            });
+            return this;
+        },
+        clear: function() {
+            this.each(function(node) {
+                node.innerHTML = "";
+            });
+            return this;
+        },
+        css: function(mix, value) {
+            var prop, val,
             self = this,
             css = "";
 
-        if (typeof mix === "object") {
-            for (prop in mix) {
-                if (mix[prop] === "") {
-                    _removeProperty(prop);
-                    return;
+            if (typeof mix === "object") {
+                for (prop in mix) {
+                    if (mix[prop] === "") {
+                        _removeProperty(prop);
+                        return;
+                    }
+                    _setStyle(prop, mix[prop]);
                 }
-                _setStyle(prop, mix[prop]);
-                //css += prop + ":" + mix[prop] + ";";
-            }
-            //_setCss(css);
-        } else {
-            if (value) {
-                _setStyle(mix, value);
-                // css += mix + ":" + value + ";";
-                // _setCss(css);
-            } else if (value === "") {
-                _removeProperty(mix);
             } else {
-                return global.getComputedStyle(this[0]).getPropertyValue(mix);
+                if (value) {
+                    _setStyle(mix, value);
+                } else if (value === "") {
+                    _removeProperty(mix);
+                } else {
+                    return global.getComputedStyle(this[0]).getPropertyValue(mix);
+                }
             }
-        }
 
-        function _removeProperty(prop) {
-            self.each(function(node) {
-                node.style.removeProperty(prop);
-            });
-        }
+            function _removeProperty(prop) {
+                self.each(function(node) {
+                    node.style.removeProperty(prop);
+                });
+            }
 
-        function _setStyle(prop, val) {
-            self.each(function(node) {
-                node.style[prop] = val;
-            });
-        }
+            function _setStyle(prop, val) {
+                self.each(function(node) {
+                    node.style[prop] = val;
+                });
+            }
+        },
 
-        function _setCss(css) {
-            self.each(function(node) {
-                node.style.cssText = css;
+        /***
+         * <div data-hoge="fuga"></div>
+         *
+         * tt(mix).data();
+         * @return {hoge: "fuga"}
+         *
+         * tt(mix).data("hoge");
+         * @return "fuga"
+         *
+         * tt(mix).data("hoge", "fugafuga");
+         * @effect <div data-hoge="fugafuga"></div>
+         * @return this
+         *
+         * tt(mix).data("hoge", "");
+         * @effect <div></div>
+         * @return this
+         *
+         * tt(mix).data({ "hoge": "fugafuga", "piyo": "zonu" });
+         * @effect <div data-hoge="fugafuga" data-piyo="zonu"></div>
+         * @return this
+         */
+        data: function () {
+            var elem = this[0];
+            var attrs = this[0].attributes;
+            var result = {};
+            for (var i = 0, l = attrs.length; i < l; ++i) {
+                var attr = attrs[i].name;
+                if (!attr.indexOf('data-')) {
+                    result[attr.replace(/^data-/, '')] = elem.getAttribute(attr);
+                }
+            }
+            return result;
+        },
+        show: function () {
+            return this.css("display", "block");
+        },
+        hide: function () {
+            return this.css('display', 'none');
+        },
+        trigger: function (event, type, bubbles, cancelable) {
+            this.each(function(node) {
+                tt.triggerEvent(node, event, type, bubbles, cancelable);
             });
+            return this;
+        },
+        replace: function (mix) {
+            this.each(mix.nodeType ? _insertByNode : _insertByText);
+            return this;
+
+            function _insertByText(target) {
+                target.insertAdjacentHTML("AfterEnd", mix);
+                tt(target).remove();
+            }
+
+            function _insertByNode(target) {
+                target.parentNode.insertBedore(node, target);
+                tt(target).remove();
+            }
+        },
+        offset: function () {
+            var offset = this[0].getBoundingClientRect();
+
+            return {
+                left: offset.left + window.pageXOffset,
+                top: offset.top + window.pageYOffset
+            };
         }
-    }
+    };
 
     TT.prototype.bind = TT.prototype.on;
     TT.prototype.unbind = TT.prototype.off;
