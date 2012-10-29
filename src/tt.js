@@ -173,7 +173,9 @@
         return res;
 
         function _getVersionCode(version) {
-            if (!version) return null;
+            if (!version) {
+                return null;
+            }
             var res, digit = 4, diff = 0;
 
             version = version.replace(/\D/g, "");
@@ -291,12 +293,13 @@
             });
             return this;
         },
-        html: function(mix) {
+        html: function(mix, pos) {
             if (mix && mix.nodeType === 1) {
                 return this.add(mix);
             }
+            pos = pos || "beforeend";
             this.each(function(node) {
-                node.innerHTML = mix;
+                node.insertAdjacentHTML(pos, mix);
             });
             return this;
         },
@@ -400,18 +403,15 @@
             return this;
         },
         replace: function (mix) {
-            this.each(mix.nodeType ? _insertByNode : _insertByText);
+            if (mix && mix.nodeType) {
+                this.each(function(node) {
+                    node.parentNode.insertBefore(mix, target);
+                });
+            } else {
+                this.html(mix, "afterend");
+            }
+            this.remove();
             return this;
-
-            function _insertByText(target) {
-                target.insertAdjacentHTML("AfterEnd", mix);
-                tt(target).remove();
-            }
-
-            function _insertByNode(target) {
-                target.parentNode.insertBedore(node, target);
-                tt(target).remove();
-            }
         },
         offset: function () {
             var offset = this[0].getBoundingClientRect();
