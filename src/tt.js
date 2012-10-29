@@ -233,7 +233,7 @@
 
             for (; i < iz; ++i) {
                 if (fn(this.nodes[i], i)) {
-                    return this[i];
+                    return this.nodes[i];
                 }
             }
             return null;
