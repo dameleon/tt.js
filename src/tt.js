@@ -226,13 +226,17 @@
             return arr;
         },
         each: function(fn) {
-            for (var i = 0; i < this.length; ++i) {
+            var i = 0, iz = this.length;
+
+            for (; i < iz; ++i) {
                 fn(this.nodes[i], i);
             }
             return this;
         },
         match: function() {
-            for (var i = 0; i < this.length; ++i) {
+            var i = 0, iz = this.length;
+
+            for (; i < iz; ++i) {
                 if (fn(this.nodes[i], i)) {
                     return this[i];
                 }
