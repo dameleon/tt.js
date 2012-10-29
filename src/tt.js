@@ -2,7 +2,7 @@
 	'use strict';
 
 	var NS = "tt",
-        querySelectorRe = /^.+[\#\.\s\[>]/,
+        querySelectorRe = /^.+[\#\.\s\[>:]/,
         loaded = false,
         queue = [];
 
@@ -197,6 +197,7 @@
         var i = 0, iz;
 
         this.nodes = [];
+        this.stash = {};
         this.length = 0;
         if (node) {
             if (node.nodeType) {
@@ -289,6 +290,10 @@
         attr: function(key, value) {
             value = value || "";
             this.each(function(node) {
+                if (value === "") {
+                    node.removeAttribute(key);
+                    return;
+                }
                 node.setAttribute(key, value);
             });
             return this;
@@ -380,21 +385,100 @@
          * @return this
          */
         data: function() {
-            var elem = this.nodes[0];
-            var attrs = this.nodes[0].attributes;
-            var result = {};
-            for (var i = 0, l = attrs.length; i < l; ++i) {
-                var attr = attrs[i].name;
-                if (!attr.indexOf('data-')) {
-                    result[attr.replace(/^data-/, '')] = elem.getAttribute(attr);
+            var self = this,
+                args = arguments,
+                data = {},
+                inCompatible = ((tt.env.android && tt.env.versionCode < 3000) || (tt.env.ios && tt.env.versionCode < 5000) || (tt.env.opera));
+
+            switch (arg.length) {
+            case 0:
+                return inCompatible ?
+                            _getAttrByAttributes() :
+                            _getAttrByDataSet();
+            case 1:
+                if (typeof args[0] === "object") {
+                    inCompatible ?
+                        _setAttrByAttributes(args[0]) :
+                        _setAttrByDataSet(args[0]);
+                    return this;
+                } else {
+                    return inCompatible ?
+                                _getAttrByAttributes(args[0]) :
+                                _getAttrByDataSet(args[0]);
+                }
+            case 2:
+                data[args[0]] = args[1];
+                inCompatible ?
+                    _setAttrByAttributes(data) :
+                    _setAttrByDataSet(data);
+                return this;
+            }
+
+            function _getAttrByDataSet(name) {
+                return name ? self.nodes[0].dataset[name] : self.nodes[0].dataset;
+            }
+
+            function _getAttrByAttributes(name) {
+                var res = {},
+                    node = self.nodes[0],
+                    attr, attrs = node.attributes,
+                    dataName = "data-",
+                    i = 0, iz = attrs.length;
+
+                name && (dataName += name);
+                for (; i < iz; ++i) {
+                    attr = attrs[i].name;
+                    if (!attr.indexOf(dataName)) {
+                        res[attr.substr(6, attr.length)] = node.getAttribute(attr);
+                    }
+                }
+                return name ? res[name] : res;
+            }
+
+            function _setAttrByDataSet(obj) {
+                var name;
+
+                for (name in obj) {
+                    self.each(function(node) {
+                        var value = obj[name];
+
+                        if (value === "") {
+                            delete node.dataset[name];
+                            return;
+                        }
+                        node.dataset[name] = value;
+                    });
                 }
             }
-            return result;
+
+            function _setAttrByAttributes(obj) {
+                var name, value;
+
+                for (name in obj) {
+                    self.attr("data-" + name, obj[name]);
+                }
+            }
         },
-        show: function() {
-            return this.css("display", "block");
+        show: function(value) {
+            var computedStyle = this.css("display"),
+                stashedStyle = this.stash["display"];
+
+            if (stashedStyle) {
+                delete this.stash["display"];
+            }
+            if (computedStyle !== "none") {
+                return this;
+            }
+            return this.css("display", value || stashedStyle || "block");
         },
         hide: function() {
+            var computedStyle = this.css("display");
+
+            if (computedStyle !== "none") {
+                this.stash["display"] = computedStyle;
+            } else {
+                return this;
+            }
             return this.css('display', 'none');
         },
         trigger: function(event, type, bubbles, cancelable) {

@@ -4,10 +4,22 @@
 <script type="text/javascript" src="js/tt.js"></script>
 <script type="text/javascript">
 tt(function() {
-    tt(".class_grandson").css({display: "none"});
+    //tt(".class_grandson").css({display: "none"});
     tt("#id_element").toggleClass("mogemoge", true);
 });
 </script>
+<style>
+#id_element {
+    display:inline;
+}
+.class_grandson {
+    display: inline;
+}
+
+.class_child > div {
+    display: block;
+}
+</style>
 <title>t2.js sample</title>
 </head>
 <body>
