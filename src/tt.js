@@ -196,15 +196,16 @@
     function TT(node) {
         var i = 0, iz;
 
+        this.nodes = [];
         this.length = 0;
         if (node) {
             if (node.nodeType) {
-                this[0] = node;
+                this.nodes[0] = node;
                 this.length = 1;
             } else {
                 iz = this.length = node.length;
                 for (; i < iz; ++i) {
-                    this[i] = node[i];
+                    this.nodes[i] = node[i];
                 }
             }
         }
@@ -226,13 +227,13 @@
         },
         each: function(fn) {
             for (var i = 0; i < this.length; ++i) {
-                fn(this[i], i);
+                fn(this.nodes[i], i);
             }
             return this;
         },
         match: function() {
             for (var i = 0; i < this.length; ++i) {
-                if (fn(this[i], i)) {
+                if (fn(this.nodes[i], i)) {
                     return this[i];
                 }
             }
@@ -279,7 +280,7 @@
             }
 
             function _simpleToggle() {
-                if (self[0].className.search(className) >= 0) {
+                if (self.nodes[0].className.search(className) >= 0) {
                     self.removeClass(className);
                 } else {
                     self.addClass(className);
@@ -341,7 +342,7 @@
                 } else if (value === "") {
                     _removeProperty(mix);
                 } else {
-                    return global.getComputedStyle(this[0]).getPropertyValue(mix);
+                    return global.getComputedStyle(this.nodes[0]).getPropertyValue(mix);
                 }
             }
 
@@ -380,8 +381,8 @@
          * @return this
          */
         data: function () {
-            var elem = this[0];
-            var attrs = this[0].attributes;
+            var elem = this.nodes[0];
+            var attrs = this.nodes[0].attributes;
             var result = {};
             for (var i = 0, l = attrs.length; i < l; ++i) {
                 var attr = attrs[i].name;
@@ -415,7 +416,7 @@
             return this;
         },
         offset: function () {
-            var offset = this[0].getBoundingClientRect();
+            var offset = this.nodes[0].getBoundingClientRect();
 
             return {
                 left: offset.left + window.pageXOffset,
