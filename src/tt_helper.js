@@ -1,4 +1,4 @@
-(function(global, document, fastEach) {
+(function(global, document) {
 	'use strict';
 
     if (!global.tt) {

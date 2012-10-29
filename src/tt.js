@@ -84,7 +84,7 @@
         return false;
     }
 
-    tt.query2object = function (hash) {
+    tt.query2object = function(hash) {
         if (!hash) {
             return {};
         }
@@ -99,7 +99,7 @@
         return result;
     };
 
-    tt.extend = function (/* args... */) {
+    tt.extend = function(/* args... */) {
         var arg, args = [].slice.call(arguments),
             result = {},
             i = 0, iz = args.length,
@@ -120,7 +120,7 @@
         return result;
     };
 
-    tt.param = function (obj) {
+    tt.param = function(obj) {
         var key, keys = Object.keys(obj),
             i = 0, iz = keys.length,
             results = [];
@@ -132,7 +132,7 @@
         return results.join('&');
     };
 
-    tt.triggerEvent = function (node, event, type, bubbles, cancelable) {
+    tt.triggerEvent = function(node, event, type, bubbles, cancelable) {
         if (!node) {
             return;
         }
@@ -215,15 +215,10 @@
     TT.prototype = {
         constructor: TT,
         get: function(num) {
-            return this[num || 0];
+            return this.nodes[num || 0];
         },
         toArray: function() {
-            var arr = [];
-
-            this.each(function(node, index) {
-                arr[index] = node;
-            });
-            return arr;
+            return this.nodes;
         },
         each: function(fn) {
             var i = 0, iz = this.length;
@@ -329,8 +324,8 @@
         },
         css: function(mix, value) {
             var prop, val,
-            self = this,
-            css = "";
+                self = this,
+                css = "";
 
             if (typeof mix === "object") {
                 for (prop in mix) {
@@ -384,7 +379,7 @@
          * @effect <div data-hoge="fugafuga" data-piyo="zonu"></div>
          * @return this
          */
-        data: function () {
+        data: function() {
             var elem = this.nodes[0];
             var attrs = this.nodes[0].attributes;
             var result = {};
@@ -396,19 +391,19 @@
             }
             return result;
         },
-        show: function () {
+        show: function() {
             return this.css("display", "block");
         },
-        hide: function () {
+        hide: function() {
             return this.css('display', 'none');
         },
-        trigger: function (event, type, bubbles, cancelable) {
+        trigger: function(event, type, bubbles, cancelable) {
             this.each(function(node) {
                 tt.triggerEvent(node, event, type, bubbles, cancelable);
             });
             return this;
         },
-        replace: function (mix) {
+        replace: function(mix) {
             if (mix && mix.nodeType) {
                 this.each(function(node) {
                     node.parentNode.insertBefore(mix, target);
@@ -419,7 +414,7 @@
             this.remove();
             return this;
         },
-        offset: function () {
+        offset: function() {
             var offset = this.nodes[0].getBoundingClientRect();
 
             return {
