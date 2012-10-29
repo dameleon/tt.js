@@ -299,6 +299,7 @@
             }
             pos = pos || "beforeend";
             this.each(function(node) {
+                node.innerHTML = "";
                 node.insertAdjacentHTML(pos, mix);
             });
             return this;
