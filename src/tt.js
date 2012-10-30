@@ -2,7 +2,7 @@
 	'use strict';
 
 	var NS = "tt",
-        querySelectorRe = /^.+[\#\.\s\[>:]/,
+        querySelectorRe = /^(.+[\#\.\s\[>:]|[\[:])/,
         loaded = false,
         queue = [];
 

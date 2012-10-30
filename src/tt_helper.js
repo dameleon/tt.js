@@ -8,7 +8,7 @@
     var delegateHandler = {
         listeners: {},
         handleEvent: function(ev) {
-            var listener = this.listeners[ev.type];
+            var listener = this.listeners[ev.type],
 
             if (listener !== undefined && listener.length > 0) {
                 this.dispatcher(type, ev);
