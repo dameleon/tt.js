@@ -46,7 +46,8 @@
     tt.plugin = function(name, fn) {
         if (TT.prototype[name] !== undefined ||
             typeof name !== "string" ||
-            typeof fn !== "function") {
+            typeof fn !== "function" ||
+            name.length === 0) {
 
             return;
         }
@@ -147,9 +148,19 @@
 
         ev.initEvent(type, bubbles || true, cancelable || true);
         node.dispatchEvent(ev);
-    }
+    };
 
-    tt.env = (function(navigator) {
+    tt.cssPrefix = function(value, prefix) {
+        var res = [];
+
+        prefix = prefix || ["webkit", "moz", "o", "ms"];
+        tt.each(function(str, index) {
+            res[index] = "-" + str + "-" + value;
+        });
+        return res;
+    };
+
+    tt.createEnvironment = function(navigator) {
         var res = {},
             ua = navigator.userAgent.toLowerCase();
 
@@ -190,7 +201,9 @@
             }
             return res;
         }
-    })(global.navigator);
+    }
+
+    tt.env = tt.createEnvironment(global.navigator);
 
 
     function TT(node) {
@@ -215,8 +228,16 @@
 
     TT.prototype = {
         constructor: TT,
-        get: function(num) {
-            return this.nodes[num || 0];
+
+        /**
+         * ## Sample
+         * <div id="sample"></div>
+         *
+         * tt("#sample").get();
+         * @return HTMLDivElement
+         */
+        get: function(index) {
+            return this.nodes[index || 0];
         },
         toArray: function() {
             return this.nodes;
@@ -287,6 +308,23 @@
                 }
             }
         },
+
+        /**
+         *
+         * ## sample
+         * <div hoge="fuga"></div>
+         *
+         * tt("div").attr("hoge");
+         * @return "fuga"
+         *
+         * tt("div").attr("hoge", "piyo");
+         * @effect <div hoge="piyo"></div>
+         * @return this
+         *
+         * tt("div").attr("hoge", "");
+         * @effect <div></div>
+         * @return this
+         */
         attr: function(key, value) {
             value = value || "";
             this.each(function(node) {
@@ -327,6 +365,14 @@
             });
             return this;
         },
+
+
+        /**
+         *
+         *
+         *
+         *
+         */
         css: function(mix, value) {
             var prop, val,
                 self = this,
