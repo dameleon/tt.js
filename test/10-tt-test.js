@@ -1,7 +1,7 @@
 buster.testCase("tt.js test", {
     "setUp": function() {
-        this.div;
-        this.nodeList = document.querySelectorAll();
+        this.div = document.getElementById("id-hoge");
+        this.nodeList = document.querySelectorAll(".class-hoge-fuga");
     },
     "Basic test": {
         "tt function": function() {
@@ -13,7 +13,6 @@ buster.testCase("tt.js test", {
             assert.isQbject(ttObj);
         },
         "tt loaded function": function() {
-            // 非同期テストの書き方が分からない
             var spy = sinon.spy();
 
             tt(spy);
@@ -25,14 +24,14 @@ buster.testCase("tt.js test", {
             assert.equals(tt("#id-hoge").length, 1);
         },
         "class named search": function() {
-            assert.equals(tt(".class-hoge").length, 5);
+            assert.equals(tt(".class-hoge-fuga").length, 5);
         },
         "tag named search": function() {
-            assert.equals(tt("div").length, 6);
+            assert.equals(tt("div").length, 7);
         },
         "use querySelectorAll search": function() {
-            assert.equals(tt("div[data-attr=fuga]").length, 1);
-            assert.equals(tt("#id-hoge > div:first-child").length, 1);
+            assert.equals(tt("div[data-attr=piyo]").length, 1);
+            assert.equals(tt(".class-hoge > div:first-child").length, 1);
         }
     },
     "tt methods test": {
@@ -161,7 +160,7 @@ buster.testCase("tt.js test", {
                 assert.equals(prefixed, "-" + testPrefix[index] + "-" + value);
             });
         },
-        "createEnvironment test": function() {
+        "createEnvData test": function() {
             assert.isFunction(tt.createEnvironment);
 
             var res = {};
@@ -195,7 +194,7 @@ buster.testCase("tt.js test", {
                 var values = testUA[key];
 
                 values.forEach(function(data) {
-                    res = tt.createEnvironment({userAgent: data[1]});
+                    res = tt.createEnvData({userAgent: data[1]});
                     assert(res[key]);
                     assert.equals(data[0] ? parseInt(data[0]) : null, res.versionCode);
                 });

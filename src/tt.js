@@ -36,24 +36,57 @@
             loaded ? mix() : queue.push(mix);
             return;
         }
-
         return new TT(target);
 	}
 
-    tt.isArray = isArray;
-    tt.isNodeList = isNodeList;
-
+    /**
+     *
+     * tt("pluginName", function() {
+     *      // do something
+     *      @return this; // if you want continue prototype chain, must always return "this"
+     * });
+     *
+     * tt("", {});
+     * @throw Error:
+     */
     tt.plugin = function(name, fn) {
         if (TT.prototype[name] !== undefined ||
             typeof name !== "string" ||
             typeof fn !== "function" ||
             name.length === 0) {
 
-            return;
+            throw new Error("arguments error");
         }
         TT.prototype[name] = fn;
     }
 
+    /**
+     *
+     * tt.isArray([]);
+     * @return true
+     *
+     * tt.isArray(document.querySelectorAll(".hoge"));
+     * @return false
+     */
+    tt.isArray = isArray;
+
+    /**
+     *
+     * tt.isArray(document.querySelectorAll(".hoge"));
+     * @return true
+     *
+     * tt.isNodeList([]);
+     * @return false
+     */
+    tt.isNodeList = isNodeList;
+
+    /**
+     *
+     * tt.each([1, 2, 3], function(value,   // @arg mix:    array value
+     *                             index) { // @arg Number: array index
+     *      // do something
+     * });
+     */
     tt.each = function(arr, fn) {
         var i = 0, iz = arr.length;
 
@@ -62,6 +95,17 @@
         }
     }
 
+    /**
+     *
+     * tt.match([1, 2, 3], function(value,   // @arg mix:    array value
+     *                              index) { // @arg Number: array index
+     *      if (value === 3) {
+     *          return true;
+     *      }
+     *      return false;
+     * });
+     * @return Number: 3
+     */
     tt.match = function(arr, fn) {
         var i = 0, iz = arr.length;
 
@@ -73,34 +117,14 @@
         return null;
     }
 
-    tt.then = function(arr, fn, target) {
-        var i = 0, iz = arr.length;
-
-        target = target || true;
-        for (; i < iz; ++i) {
-            if (fn(arr[i], i) === target) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    tt.query2object = function(hash) {
-        if (!hash) {
-            return {};
-        }
-        var result = {},
-            pair = hash.split('&'),
-            i = 0, iz = pair.length;
-
-        for (; i < iz; ++i) {
-            var k_v = pair[i].split('=');
-            result[k_v[0]] = k_v[1];
-        }
-        return result;
-    };
-
-    tt.extend = function(/* args... */) {
+    /**
+     * var obj01 = { 0: "hoge", 1: "fuga" };
+     * var obj02 = { 1: "piyo", 2: "foo" };
+     *
+     * tt.extend(obj01, obj02);
+     * @return { 0: "hoge", 1: "piyo", 2: "foo" }
+     */
+    tt.extend = function() {
         var arg, args = [].slice.call(arguments),
             result = {},
             i = 0, iz = args.length,
@@ -121,6 +145,34 @@
         return result;
     };
 
+    /**
+     * pull request from kyo-ago (twitter@kyo_ago)
+     *
+     * tt.query2object("hoge=huga&foo=bar");
+     * @reutrn Object: { 'hoge' : 'huga', 'foo' : 'bar' }
+     */
+    tt.query2object = function(hash) {
+        if (!hash) {
+            return {};
+        }
+        var result = {},
+            pair = hash.split('&'),
+            i = 0, iz = pair.length;
+
+        for (; i < iz; ++i) {
+            var k_v = pair[i].split('=');
+
+            result[k_v[0]] = k_v[1];
+        }
+        return result;
+    };
+
+    /**
+     * pull request from kyo-ago (twitter@kyo_ago)
+     *
+     * tt.param({"hoge": "huga", "foo&bar": "kiyo&piyo"});
+     * @reutrn String: "hoge=huga&foo%26bar=kiyo%26piyo"
+     */
     tt.param = function(obj) {
         var key, keys = Object.keys(obj),
             i = 0, iz = keys.length,
@@ -133,6 +185,12 @@
         return results.join('&');
     };
 
+    /**
+     * pull request from kyo-ago (twitter@kyo_ago)
+     *
+     * tt.triggerEvent(HTMLElement, "Event", "originalEvent", false, true);
+     * @effect firing "originalEvent" to HTMLElement
+     */
     tt.triggerEvent = function(node, event, type, bubbles, cancelable) {
         if (!node) {
             return;
@@ -150,6 +208,11 @@
         node.dispatchEvent(ev);
     };
 
+    /**
+     *
+     * tt.cssPrefix("box");
+     * @return ["-webkit-box", "-moz-box", "-o-box", "-ms-box"];
+     */
     tt.cssPrefix = function(value, prefix) {
         var res = [];
 
@@ -160,7 +223,12 @@
         return res;
     };
 
-    tt.createEnvironment = function(navigator) {
+    /**
+     *
+     * tt(navigator);
+     * @return {android: bool, ios: bool .., }
+     */
+    tt.createEnvData = function(navigator) {
         var res = {},
             ua = navigator.userAgent.toLowerCase();
 
@@ -203,7 +271,11 @@
         }
     }
 
-    tt.env = tt.createEnvironment(global.navigator);
+    /**
+     *
+     * createEnvData() result object
+     */
+    tt.env = tt.createEnvData(global.navigator);
 
 
     function TT(node) {
@@ -230,18 +302,39 @@
         constructor: TT,
 
         /**
-         * ## Sample
-         * <div id="sample"></div>
+         * <div id="first" class="hoge"></div>
+         * <div id="second" class="hoge"></div>
          *
-         * tt("#sample").get();
-         * @return HTMLDivElement
+         * tt(".hoge").get();
+         * @return HTMLDivElement: div#first
+         *
+         * tt(".hoge").get(1);
+         * @return HTMLDivElement: div#second
          */
         get: function(index) {
             return this.nodes[index || 0];
         },
+
+        /**
+         * <div class="hoge"></div>
+         * <div class="hoge"></div>
+         *
+         *  tt(".hoge").toArray();
+         *  @return Array: [HTMLDivElement, HTMLDivElement] (nodeList like array)
+         */
         toArray: function() {
             return this.nodes;
         },
+
+        /**
+         * <div class="hoge"></div>
+         *
+         * tt(".hoge").each(function(node,    // HTMLElement: search result element
+         *                           index) { // Number:      array index
+         *      // do something
+         * });
+         * @return Object: ttObject
+         */
         each: function(fn) {
             var i = 0, iz = this.length;
 
@@ -250,6 +343,19 @@
             }
             return this;
         },
+
+        /**
+         * <div class="hoge"></div>
+         *
+         * tt(".hoge").match(function(node,    // HTMLElement: search result element
+         *                            index) { // Number:      array index
+         *      if (node === something) {
+         *          return true;
+         *      }
+         *      return false;
+         * });
+         * @return HTMLElement: something to match element
+         */
         match: function() {
             var i = 0, iz = this.length;
 
@@ -260,30 +366,71 @@
             }
             return null;
         },
+
+        /**
+         * <div class="hoge"></div>
+         *
+         * tt(".hoge").on("click", function(event) {}, useCapture);
+         * @return Object: ttObject
+         */
         on: function(type, mix, capture) {
             this.each(function(node) {
                 node.addEventListener(type, mix, capture);
             }, true);
             return this;
         },
+
+        /**
+         * <div class="hoge"></div>
+         *
+         * tt(".hoge").off("click", eventFunction);
+         * @return Object: ttObject
+         */
         off: function(type, mix) {
             this.each(function(node) {
                 node.removeEventListener(type, mix);
             }, true);
             return this;
         },
+
+        /**
+         * <div class="hoge"></div>
+         *
+         * tt(".hoge").addClass("fuga");
+         * @effect <div class="hoge fuga"></div>
+         * @return Object: ttObject
+         */
         addClass:
             ((tt.env.android && tt.env.versionCode < 3000) ||
              (tt.env.ios && tt.env.versionCode < 5000) ||
              (tt.env.opera)) ?
                 _addClassByClassName :
                 _addClassByClassList,
+
+        /**
+         * <div class="hoge fuga"></div>
+         *
+         * tt(".hoge").removeClass("fuga");
+         * @effect <div class="hoge"></div>
+         * @return Object: ttObject
+         */
         removeClass:
             ((tt.env.android && tt.env.versionCode < 3000) ||
              (tt.env.ios && tt.env.versionCode < 5000) ||
              (tt.env.opera)) ?
                 _removeClassByClassName :
                 _removeClassByClassList,
+
+        /**
+         * <div class="hoge"></div>
+         *
+         * tt(".hoge").toggleClass("hoge");
+         * @effect <div class=""></div>
+         * @return Object: ttObject
+         *
+         * tt(".hoge").toggleClass("fuga");
+         * @effect <div class="hoge fuga"></div>
+         */
         toggleClass: function(className, strict) {
             var self = this;
 
@@ -336,42 +483,106 @@
             });
             return this;
         },
-        html: function(mix, pos) {
-            if (mix && mix.nodeType === 1) {
-                return this.add(mix);
+
+        /**
+         *
+         * <div class="hoge">anything</div>
+         *
+         * tt(".hoge").html("something");
+         * @effect <div class="hoge">something</div>
+         *
+         * tt(".hoge").html("something", "afterend");
+         * @effect <div class="hoge">anything</div>something
+         *
+         * tt(".hoge").html(HTMLDivElement);
+         * @effect <div class="hoge"><div></div></div>
+         * @see    ttObject.add
+         */
+        html: function(mix) {
+            if (mix && mix.nodeType) {
+                this.each(function(node) {
+                    _clearNode(node);
+                    node.appendChild(mix);
+                });
+                return this;
             }
-            pos = pos || "beforeend";
+
             this.each(function(node) {
-                node.innerHTML = "";
-                node.insertAdjacentHTML(pos, mix);
+                _clearNode(node);
+                node.insertAdjacentHTML("beforeend", mix);
+            });
+            return this;
+
+            function _clearNode(node) {
+                while (node.firstChild) {
+                    node.removeChild(node.firstChild);
+                }
+            }
+        },
+
+        /**
+         *
+         * <div class="hoge"></div>
+         *
+         * tt(".hoge").add(HTMLDivElement);
+         * @effect <div class="hoge"><div></div></div>
+         */
+        add: function(mix) {
+            if (typeof mix === "string") {
+                this.each(function(node) {
+                    node.insertAdjacentHTML("beforeend", mix);
+                });
+                return this;
+            }
+
+            this.each(function(node) {
+                node.appendmix(mix);
             });
             return this;
         },
-        add: function(child) {
-            this.each(function(node) {
-                node.appendChild(child);
-            });
-            return this;
-        },
+
+        /**
+         *
+         * <div class="hoge"><div class="fuga"></div></div>
+         *
+         * tt(".fuga").remove();
+         * @effect <div class="hoge"></div>
+         */
         remove: function() {
             this.each(function(node) {
                 node.parentNode.removeChild(node);
             });
             return this;
         },
+
+        /**
+         *
+         * <div class="hoge">something</div>
+         *
+         * tt(".fuga").clear();
+         * @effect <div class="hoge"></div>
+         */
         clear: function() {
             this.each(function(node) {
-                node.innerHTML = "";
+                while (node.firstChild) {
+                    node.removeChild(node.firstChild);
+                }
             });
             return this;
         },
 
-
         /**
          *
+         * <div class="hoge" style="display:block;"></div>
          *
+         * tt(".hoge").css("display");
+         * @return String: "none" CSS value
          *
+         * tt(".hoge").css("display", "none");
+         * @effect <div class="hoge" style="display:none;"></div>
          *
+         * tt(".hoge").css({ "display": "none", "visibility": "hidden" [, "CSS property": "CSS value"] });
+         * @effect <div class="hoge" style="display:none;visibility:hidden;"></div>
          */
         css: function(mix, value) {
             var prop, val,
@@ -413,48 +624,48 @@
          * <div data-hoge="fuga"></div>
          *
          * tt(mix).data();
-         * @return {hoge: "fuga"}
+         * @return Object: {hoge: "fuga"} dataset attributes object
          *
          * tt(mix).data("hoge");
-         * @return "fuga"
+         * @return String: "fuga"
          *
          * tt(mix).data("hoge", "fugafuga");
          * @effect <div data-hoge="fugafuga"></div>
-         * @return this
+         * @return Object: ttObject
          *
          * tt(mix).data("hoge", "");
          * @effect <div></div>
-         * @return this
+         * @return Object: ttObject
          *
          * tt(mix).data({ "hoge": "fugafuga", "piyo": "zonu" });
          * @effect <div data-hoge="fugafuga" data-piyo="zonu"></div>
-         * @return this
+         * @return Object: ttObject
          */
         data: function() {
             var self = this,
                 args = arguments,
                 data = {},
-                inCompatible = ((tt.env.android && tt.env.versionCode < 3000) || (tt.env.ios && tt.env.versionCode < 5000) || (tt.env.opera));
+                useCompatible = ((tt.env.android && tt.env.versionCode < 3000) || (tt.env.ios && tt.env.versionCode < 5000) || (tt.env.opera));
 
             switch (arg.length) {
             case 0:
-                return inCompatible ?
+                return useCompatible ?
                             _getAttrByAttributes() :
                             _getAttrByDataSet();
             case 1:
                 if (typeof args[0] === "object") {
-                    inCompatible ?
+                    useCompatible ?
                         _setAttrByAttributes(args[0]) :
                         _setAttrByDataSet(args[0]);
                     return this;
                 } else {
-                    return inCompatible ?
+                    return useCompatible ?
                                 _getAttrByAttributes(args[0]) :
                                 _getAttrByDataSet(args[0]);
                 }
             case 2:
                 data[args[0]] = args[1];
-                inCompatible ?
+                useCompatible ?
                     _setAttrByAttributes(data) :
                     _setAttrByDataSet(data);
                 return this;
@@ -505,6 +716,14 @@
                 }
             }
         },
+
+        /**
+         * <div class="hoge" style="display:none;"></div>
+         *
+         * tt(".hoge").show();
+         * @effect <div class="hoge" style="display:block;"></div>
+         * @return Object: ttObject
+         */
         show: function(value) {
             var computedStyle = this.css("display"),
                 stashedStyle = this.stash["display"];
@@ -517,6 +736,14 @@
             }
             return this.css("display", value || stashedStyle || "block");
         },
+
+        /**
+         * <div class="hoge"></div>
+         *
+         * tt(".hoge").hide();
+         * @effect <div class="hoge" style="display:none;"></div>
+         * @return Object: ttObject
+         */
         hide: function() {
             var computedStyle = this.css("display");
 
@@ -527,35 +754,91 @@
             }
             return this.css('display', 'none');
         },
+
+        /**
+         * <div class="hoge"></div>
+         *
+         * tt(".hoge").trigger("Event", "ontrigger", false, true);
+         * @return Object: ttObject
+         */
         trigger: function(event, type, bubbles, cancelable) {
             this.each(function(node) {
                 tt.triggerEvent(node, event, type, bubbles, cancelable);
             });
             return this;
         },
-        replace: function(mix) {
-            if (mix && mix.nodeType) {
-                this.each(function(node) {
-                    node.parentNode.insertBefore(mix, target);
-                });
-            } else {
-                this.html(mix, "afterend");
-            }
-            this.remove();
-            return this;
-        },
-        offset: function() {
-            var offset = this.nodes[0].getBoundingClientRect();
 
-            return {
-                left: offset.left + window.pageXOffset,
-                top: offset.top + window.pageYOffset
-            };
+        /**
+         *
+         * <div class="hoge"><div class="fuga"></div></div>
+         *
+         * tt(".fuga").replace("<div class="piyo"></div>");
+         * @effect <div class="hoge"><div class="piyo"></div></div>
+         * @return Object: ttObject
+         *
+         *
+         */
+        replace: function(mix) {
+            var fn = null;
+
+            if (mix && mix.nodeType) {
+                fn = _insertNode;
+            } else if (typeof mix === "string") {
+                fn = _insertHTML;
+            }
+            fn && this.each(fn);
+            return this.remove();
+
+            function _insertNode(node) {
+                node.parentNode.insertBefore(mix, node);
+            }
+
+            function _insertHTML(node) {
+                node.insertAdjacentHTML("beforebegin", mix);
+            }
+        },
+
+        /**
+         *  document.body
+         *  +--------------------------
+         *  |             |
+         *  |            top
+         *  |             v
+         *  | -- left --> +----------+
+         *  |             | div#hoge |
+         *  |             +----------+
+         *  |
+         *
+         * <div id="hoge" class="fuga"></div>
+         * <div class="fuga"></div>
+         *
+         * tt("#hoge").offset();
+         * @return Object: { left: Number, top: Number }
+         *
+         * tt(".fuga").offset();
+         * @return Array: [{ left: Number, top: Number }, { left: Number, top: Number }]
+         */
+        offset: function() {
+            var res = [];
+
+            this.each(function(node, index) {
+                var offset = node.getBoundingClientRect();
+
+                res[index] = {
+                    left: offset.left + window.pageXOffset,
+                    top: offset.top + window.pageYOffset
+                };
+            });
+            return this.length === 1 ? res[0] : res;
         }
     };
 
+    /**
+     * Alias to on, off method
+     */
     TT.prototype.bind = TT.prototype.on;
     TT.prototype.unbind = TT.prototype.off;
+
 
     function _addClassByClassList(className) {
         this.each(function(node) {
