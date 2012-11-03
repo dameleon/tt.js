@@ -10,8 +10,10 @@
     Object.keys || (Object.keys = function(){var e=Object.prototype.hasOwnProperty,f=!{toString:null}.propertyIsEnumerable("toString"),c="toString toLocaleString valueOf hasOwnProperty isPrototypeOf propertyIsEnumerable constructor".split(" "),g=c.length;return function(b){if("object"!==typeof b&&"function"!==typeof b||null===b)throw new TypeError("Object.keys called on non-object");var d=[],a;for(a in b)e.call(b,a)&&d.push(a);if(f)for(a=0;a<g;a++)e.call(b,c[a])&&d.push(c[a]);return d}}());
 
     document.addEventListener("DOMContentLoaded", function() {
+        var i = 0, iz = queue.length;
+
         loaded = true;
-        for (var i = 0, iz = queue.length; i < iz; ++i) {
+        for (; i < iz; ++i) {
             queue[i]();
         }
     }, false);
@@ -28,7 +30,7 @@
                      mix[0] === "." ?
                         parent.getElementsByClassName(mix.substring(1, mix.length)) :
                         parent.getElementsByTagName(mix);
-        } else if (mix.nodeType === 1 || isNodeList(mix)) {
+        } else if (mix && (mix.nodeType === 1 || isNodeList(mix))) {
             target = mix;
         } else if (mix instanceof TT) {
             return mix;
@@ -41,16 +43,16 @@
 
     /**
      *
-     * tt("pluginName", function() {
+     * tt("pluginName", function() { // @arg this Object: ttObject
      *      // do something
-     *      @return this; // if you want continue prototype chain, must always return "this"
+     *      return this; // if you want continue prototype chain, must always return "this"
      * });
      *
      * tt("", {});
-     * @throw Error:
+     * @throw Error: arguments error
      */
     tt.plugin = function(name, fn) {
-        if (TT.prototype[name] !== undefined ||
+        if (!TT.prototype[name] ||
             typeof name !== "string" ||
             typeof fn !== "function" ||
             name.length === 0) {
@@ -356,7 +358,7 @@
          * });
          * @return HTMLElement: something to match element
          */
-        match: function() {
+        match: function(fn) {
             var i = 0, iz = this.length;
 
             for (; i < iz; ++i) {
@@ -420,6 +422,19 @@
              (tt.env.opera)) ?
                 _removeClassByClassName :
                 _removeClassByClassList,
+
+        /**
+         * <div class="hoge"></div>
+         *
+         * tt(".hoge").hasClass("hoge");
+         * @return Bool: true
+         */
+        hasClass:
+            ((tt.env.android && tt.env.versionCode < 3000) ||
+             (tt.env.ios && tt.env.versionCode < 5000) ||
+             (tt.env.opera)) ?
+                _hasClassByClassName :
+                _hasClassByClassList,
 
         /**
          * <div class="hoge"></div>
@@ -786,8 +801,8 @@
             } else if (typeof mix === "string") {
                 fn = _insertHTML;
             }
-            fn && this.each(fn);
-            return this.remove();
+            fn && this.each(fn).remove();
+            return this;
 
             function _insertNode(node) {
                 node.parentNode.insertBefore(mix, node);
@@ -848,13 +863,27 @@
     }
 
     function _addClassByClassName(className) {
-        this.each(function(node) {
-            var currentName = node.className.split(" ");
+        var stashName = this.nodes[0].className,
+            newName = _createName(stashName, className);
 
-            currentName[currentName.length] = className;
-            node.className = currentName.join(" ");
+        this.each(function(node, index) {
+            if (tt(node).hasClass(className)) {
+                return;
+            }
+            if (index && stashName !== node.className) {
+                stashName = node.className;
+                newName = _createName(stashName, className);
+            }
+            node.className = newName;
         });
         return this;
+
+        function _createName(currentName, newName) {
+            var res = currentName.split(" ");
+
+            res[res.length] = newName;
+            return res.join(" ");
+        }
     }
 
     function _removeClassByClassList(className) {
@@ -869,6 +898,26 @@
             node.className = node.className.replace(className ,"");
         });
         return this;
+    }
+
+    function _hasClassByClassList(className) {
+        var res;
+
+        className = className.trim();
+        res = this.match(function(node) {
+            return node.classList.contain(className);
+        });
+        return res ? true : false;
+    }
+
+    function _hasClassByClassName(className) {
+        var res;
+
+        className = className.trim();
+        res = this.match(function(node) {
+            return (" " + node.className + " ").indexOf(" " + className + " ") > -1;
+        });
+        return res ? true : false;
     }
 
     global[NS] = global[NS] || tt;
