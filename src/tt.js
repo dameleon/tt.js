@@ -491,40 +491,37 @@
          * @effect <div hoge="bar" fuga="baz"></div>
          * @return Object: ttObject
          */
-        attr: function() {
-            var self = this,
-                args = arguments;
+        attr: function(mix, value) {
+            var self = this
+                key;
 
-            switch (args.length) {
+            switch (arguments.length) {
             case 1:
-                if (typeof args[0] === "object") {
-                    _setAttr(args[0]);
+                if (typeof mix === "object") {
+                    for (key in mix) {
+                        _setAttr(key, mix[key]);
+                    }
                     break;
                 } else {
-                    return this.nodes[0].getAttribute(args[0]);
+                    return this.nodes[0].getAttribute(mix);
                 }
             case 2:
-                _setAttr({args[0]: args[1]});
+                _setAttr(mix, value);
                 break;
             }
             return this;
 
-            function _setAttr(obj) {
-                var key, value;
-
-                for (key in obj) {
-                    value = obj[key];
-                    if (value === undefined || value === null) {
-                        value = "";
-                    }
-                    self.each(function(node) {
-                        if (value === "") {
-                            node.removeAttribute(key);
-                            return;
-                        }
-                        node.setAttribute(key, value);
-                    });
+            function _setAttr(key, value) {
+                if (value === undefined || value === null) {
+                    value = "";
                 }
+                self.each(function(node) {
+                    if (value === "") {
+                        node.removeAttribute(key);
+                        return;
+                    }
+                    node.setAttribute(key, value);
+                });
             }
         },
 
