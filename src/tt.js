@@ -456,14 +456,14 @@
                 self.each(function(node) {
                     var ttObj = tt(node);
 
-                    node.className.search(className) >= 0 ?
-                    ttObj.removeClass(className) :
-                    ttObj.addClass(className);
+                    ttObj.hasClass(className) ?
+                        ttObj.removeClass(className) :
+                        ttObj.addClass(className);
                 });
             }
 
             function _simpleToggle() {
-                if (self.nodes[0].className.search(className) >= 0) {
+                if (tt(self.nodes[0]).hasClass(className)) {
                     self.removeClass(className);
                 } else {
                     self.addClass(className);
@@ -477,26 +477,55 @@
          * <div hoge="fuga"></div>
          *
          * tt("div").attr("hoge");
-         * @return "fuga"
+         * @return String: "fuga"
          *
          * tt("div").attr("hoge", "piyo");
          * @effect <div hoge="piyo"></div>
-         * @return this
+         * @return Object: ttObject
          *
          * tt("div").attr("hoge", "");
          * @effect <div></div>
-         * @return this
+         * @return Object: ttObject
+         *
+         * tt("div").attr({hoge: "bar", fuga: "baz"});
+         * @effect <div hoge="bar" fuga="baz"></div>
+         * @return Object: ttObject
          */
-        attr: function(key, value) {
-            value = value || "";
-            this.each(function(node) {
-                if (value === "") {
-                    node.removeAttribute(key);
-                    return;
+        attr: function() {
+            var self = this,
+                args = arguments;
+
+            switch (args.length) {
+            case 1:
+                if (typeof args[0] === "object") {
+                    _setAttr(args[0]);
+                    break;
+                } else {
+                    return this.nodes[0].getAttribute(args[0]);
                 }
-                node.setAttribute(key, value);
-            });
+            case 2:
+                _setAttr({args[0]: args[1]});
+                break;
+            }
             return this;
+
+            function _setAttr(obj) {
+                var key, value;
+
+                for (key in obj) {
+                    value = obj[key];
+                    if (value === undefined || value === null) {
+                        value = "";
+                    }
+                    self.each(function(node) {
+                        if (value === "") {
+                            node.removeAttribute(key);
+                            return;
+                        }
+                        node.setAttribute(key, value);
+                    });
+                }
+            }
         },
 
         /**
@@ -551,7 +580,7 @@
             }
 
             this.each(function(node) {
-                node.appendmix(mix);
+                node.appendChild(mix);
             });
             return this;
         },
@@ -591,7 +620,7 @@
          * <div class="hoge" style="display:block;"></div>
          *
          * tt(".hoge").css("display");
-         * @return String: "none" CSS value
+         * @return String: "block" CSS value
          *
          * tt(".hoge").css("display", "none");
          * @effect <div class="hoge" style="display:none;"></div>
@@ -840,8 +869,8 @@
                 var offset = node.getBoundingClientRect();
 
                 res[index] = {
-                    left: offset.left + window.pageXOffset,
-                    top: offset.top + window.pageYOffset
+                    left: offset.left + global.pageXOffset,
+                    top: offset.top + global.pageYOffset
                 };
             });
             return this.length === 1 ? res[0] : res;

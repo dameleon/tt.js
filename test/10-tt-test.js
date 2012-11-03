@@ -81,7 +81,7 @@ buster.testCase("tt.js test", {
             res = tt.match(arr, function() {
                 return false;
             });
-            assert.isNull(res);
+assert.isNull(res);
         },
         "then test": function() {
             assert.isFunction(tt.then);
