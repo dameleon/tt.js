@@ -225,6 +225,52 @@
         return res;
     };
 
+    tt.cssCamelizer = function(str) {
+        if (typeof str !== "string") {
+            throw new Error("arugment type error");
+        }
+
+        var res = "";
+
+        if (str[0] === "-") {
+            str = str.substr(1, str.length);
+        }
+        tt.each(str.split("-"), function(value, index) {
+            var first;
+
+            if (!index) {
+                res += value;
+                return;
+            }
+            first = value[0].toUpperCase();
+            res += first + value.substr(1, value.length);
+        });
+        return res;
+    };
+
+    tt.cssHyphenizer = function(str) {
+        if (typeof str !== "string") {
+            throw new Error("arugment type error");
+        }
+
+        var prefix = ["webkit", "moz", "o", "ms"],
+            upperRe = /[A-Z]/g,
+            upperStr = str.match(upperRe),
+            res = "";
+
+        tt.each(str.split(upperRe), function(value, index) {
+            if (prefix.indexOf(value) > -1) {
+                res += "-" + value;
+                return;
+            } else if (!index) {
+                res += value;
+                return;
+            }
+            res += ("-" + upperStr.shift().toLowerCase() + value);
+        });
+        return res;
+    };
+
     /**
      *
      * tt(navigator);
@@ -636,11 +682,11 @@
                         _removeProperty(prop);
                         return;
                     }
-                    _setStyle(prop, mix[prop]);
+                    _setStyle(tt.cssCamelizer(prop), mix[prop]);
                 }
             } else {
                 if (value) {
-                    _setStyle(mix, value);
+                    _setStyle(tt.cssCamelizer(mix), value);
                 } else if (value === "") {
                     _removeProperty(mix);
                 } else {
