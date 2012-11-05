@@ -1,4 +1,4 @@
-(function(global, document, isArray, isNodeList) {
+;(function(global, document, isArray, isNodeList) {
 	'use strict';
 
 	var NS = "tt",
@@ -52,12 +52,12 @@
      * @throw Error: arguments error
      */
     tt.plugin = function(name, fn) {
-        if (!TT.prototype[name] ||
+        if (TT.prototype[name] ||
             typeof name !== "string" ||
             typeof fn !== "function" ||
             name.length === 0) {
 
-            throw new Error("arguments error");
+            throw new TypeError("arguments error");
         }
         TT.prototype[name] = fn;
     }
@@ -117,7 +117,7 @@
             }
         }
         return null;
-    }
+    };
 
     /**
      * var obj01 = { 0: "hoge", 1: "fuga" };
@@ -127,24 +127,21 @@
      * @return { 0: "hoge", 1: "piyo", 2: "foo" }
      */
     tt.extend = function() {
-        var arg, args = [].slice.call(arguments),
-            result = {},
+        var arg, args = arguments,
             i = 0, iz = args.length,
-            k = 0, kz, key, keys;
+            res = {};
 
         for (; i < iz; ++i) {
             arg = args[i];
             if (!arg || typeof arg !== "object") {
                 continue;
             }
-            keys = Object.keys(arg);
-            kz = keys.length;
-            for (; k < kz; ++k) {
-                key = keys[k];
-                result[key] = arg[key];
-            }
+            tt.each(Object.keys(arg), function(key, index) {
+                res[key] = arg[key];
+            });
         }
-        return result;
+
+        return res;
     };
 
     /**
@@ -208,6 +205,7 @@
 
         ev.initEvent(type, bubbles || true, cancelable || true);
         node.dispatchEvent(ev);
+        console.log(ev);
     };
 
     /**
@@ -219,7 +217,7 @@
         var res = [];
 
         prefix = prefix || ["webkit", "moz", "o", "ms"];
-        tt.each(function(str, index) {
+        tt.each(prefix, function(str, index) {
             res[index] = "-" + str + "-" + value;
         });
         return res;
@@ -387,7 +385,7 @@
             var i = 0, iz = this.length;
 
             for (; i < iz; ++i) {
-                fn(this.nodes[i], i);
+                fn.call(this.nodes[i], i);
             }
             return this;
         },
@@ -408,7 +406,7 @@
             var i = 0, iz = this.length;
 
             for (; i < iz; ++i) {
-                if (fn(this.nodes[i], i)) {
+                if (fn.call(this.nodes[i], i)) {
                     return this.nodes[i];
                 }
             }
@@ -422,8 +420,8 @@
          * @return Object: ttObject
          */
         on: function(type, mix, capture) {
-            this.each(function(node) {
-                node.addEventListener(type, mix, capture);
+            this.each(function() {
+                this.addEventListener(type, mix, capture);
             }, true);
             return this;
         },
@@ -435,8 +433,8 @@
          * @return Object: ttObject
          */
         off: function(type, mix) {
-            this.each(function(node) {
-                node.removeEventListener(type, mix);
+            this.each(function() {
+                this.removeEventListener(type, mix);
             }, true);
             return this;
         },
@@ -499,8 +497,8 @@
             return this;
 
             function _strictToggle() {
-                self.each(function(node) {
-                    var ttObj = tt(node);
+                self.each(function() {
+                    var ttObj = tt(this);
 
                     ttObj.hasClass(className) ?
                         ttObj.removeClass(className) :
@@ -538,8 +536,7 @@
          * @return Object: ttObject
          */
         attr: function(mix, value) {
-            var self = this
-                key;
+            var self = this, key;
 
             switch (arguments.length) {
             case 1:
@@ -561,18 +558,17 @@
                 if (value === undefined || value === null) {
                     value = "";
                 }
-                self.each(function(node) {
+                self.each(function() {
                     if (value === "") {
-                        node.removeAttribute(key);
+                        this.removeAttribute(key);
                         return;
                     }
-                    node.setAttribute(key, value);
+                    this.setAttribute(key, value);
                 });
             }
         },
 
         /**
-         *
          * <div class="hoge">anything</div>
          *
          * tt(".hoge").html("something");
@@ -587,16 +583,16 @@
          */
         html: function(mix) {
             if (mix && mix.nodeType) {
-                this.each(function(node) {
-                    _clearNode(node);
-                    node.appendChild(mix);
+                this.each(function() {
+                    _clearNode(this);
+                    this.appendChild(mix);
                 });
                 return this;
             }
 
-            this.each(function(node) {
-                _clearNode(node);
-                node.insertAdjacentHTML("beforeend", mix);
+            this.each(function() {
+                _clearNode(this);
+                this.insertAdjacentHTML("beforeend", mix);
             });
             return this;
 
@@ -608,7 +604,6 @@
         },
 
         /**
-         *
          * <div class="hoge"></div>
          *
          * tt(".hoge").add(HTMLDivElement);
@@ -616,50 +611,47 @@
          */
         add: function(mix) {
             if (typeof mix === "string") {
-                this.each(function(node) {
-                    node.insertAdjacentHTML("beforeend", mix);
+                this.each(function() {
+                    this.insertAdjacentHTML("beforeend", mix);
                 });
                 return this;
             }
 
-            this.each(function(node) {
-                node.appendChild(mix);
+            this.each(function() {
+                this.appendChild(mix);
             });
             return this;
         },
 
         /**
-         *
          * <div class="hoge"><div class="fuga"></div></div>
          *
          * tt(".fuga").remove();
          * @effect <div class="hoge"></div>
          */
         remove: function() {
-            this.each(function(node) {
-                node.parentNode.removeChild(node);
+            this.each(function() {
+                this.parentNode.removeChild(this);
             });
             return this;
         },
 
         /**
-         *
          * <div class="hoge">something</div>
          *
          * tt(".fuga").clear();
          * @effect <div class="hoge"></div>
          */
         clear: function() {
-            this.each(function(node) {
-                while (node.firstChild) {
-                    node.removeChild(node.firstChild);
+            this.each(function() {
+                while (this.firstChild) {
+                    this.removeChild(this.firstChild);
                 }
             });
             return this;
         },
 
         /**
-         *
          * <div class="hoge" style="display:block;"></div>
          *
          * tt(".hoge").css("display");
@@ -680,7 +672,7 @@
                 for (prop in mix) {
                     if (mix[prop] === "") {
                         _removeProperty(prop);
-                        return;
+                        continue;
                     }
                     _setStyle(tt.cssCamelizer(prop), mix[prop]);
                 }
@@ -694,20 +686,22 @@
                 }
             }
 
+            return this;
+
             function _removeProperty(prop) {
-                self.each(function(node) {
-                    node.style.removeProperty(prop);
+                self.each(function() {
+                    this.style.removeProperty(prop);
                 });
             }
 
             function _setStyle(prop, val) {
-                self.each(function(node) {
-                    node.style[prop] = val;
+                self.each(function() {
+                    this.style[prop] = val;
                 });
             }
         },
 
-        /***
+        /**
          * <div data-hoge="fuga"></div>
          *
          * tt(mix).data();
@@ -734,7 +728,7 @@
                 data = {},
                 useCompatible = ((tt.env.android && tt.env.versionCode < 3000) || (tt.env.ios && tt.env.versionCode < 5000) || (tt.env.opera));
 
-            switch (arg.length) {
+            switch (args.length) {
             case 0:
                 return useCompatible ?
                             _getAttrByAttributes() :
@@ -783,14 +777,14 @@
                 var name;
 
                 for (name in obj) {
-                    self.each(function(node) {
+                    self.each(function() {
                         var value = obj[name];
 
                         if (value === "") {
-                            delete node.dataset[name];
+                            delete this.dataset[name];
                             return;
                         }
-                        node.dataset[name] = value;
+                        this.dataset[name] = value;
                     });
                 }
             }
@@ -849,8 +843,8 @@
          * @return Object: ttObject
          */
         trigger: function(event, type, bubbles, cancelable) {
-            this.each(function(node) {
-                tt.triggerEvent(node, event, type, bubbles, cancelable);
+            this.each(function() {
+                tt.triggerEvent(this, event, type, bubbles, cancelable);
             });
             return this;
         },
@@ -876,12 +870,12 @@
             fn && this.each(fn).remove();
             return this;
 
-            function _insertNode(node) {
-                node.parentNode.insertBefore(mix, node);
+            function _insertNode() {
+                this.parentNode && this.parentNode.insertBefore(mix, this);
             }
 
-            function _insertHTML(node) {
-                node.insertAdjacentHTML("beforebegin", mix);
+            function _insertHTML() {
+                this.insertAdjacentHTML("beforebegin", mix);
             }
         },
 
@@ -908,8 +902,8 @@
         offset: function() {
             var res = [];
 
-            this.each(function(node, index) {
-                var offset = node.getBoundingClientRect();
+            this.each(function(index) {
+                var offset = this.getBoundingClientRect();
 
                 res[index] = {
                     left: offset.left + global.pageXOffset,
@@ -928,8 +922,8 @@
 
 
     function _addClassByClassList(className) {
-        this.each(function(node) {
-            node.classList.add(className);
+        this.each(function(index) {
+            this.classList.add(className);
         });
         return this;
     }
@@ -938,15 +932,15 @@
         var stashName = this.nodes[0].className,
             newName = _createName(stashName, className);
 
-        this.each(function(node, index) {
-            if (tt(node).hasClass(className)) {
+        this.each(function(index) {
+            if (tt(this).hasClass(className)) {
                 return;
             }
-            if (index && stashName !== node.className) {
-                stashName = node.className;
+            if (index && stashName !== this.className) {
+                stashName = this.className;
                 newName = _createName(stashName, className);
             }
-            node.className = newName;
+            this.className = newName;
         });
         return this;
 
@@ -959,15 +953,15 @@
     }
 
     function _removeClassByClassList(className) {
-        this.each(function(node) {
-            node.classList.remove(className);
+        this.each(function() {
+            this.classList.remove(className);
         });
         return this;
     }
 
     function _removeClassByClassName(className) {
-        this.each(function(node) {
-            node.className = node.className.replace(className ,"");
+        this.each(function() {
+            this.className = this.className.replace(className ,"");
         });
         return this;
     }
@@ -976,8 +970,8 @@
         var res;
 
         className = className.trim();
-        res = this.match(function(node) {
-            return node.classList.contain(className);
+        res = this.match(function() {
+            return this.classList.contains(className);
         });
         return res ? true : false;
     }
@@ -986,8 +980,8 @@
         var res;
 
         className = className.trim();
-        res = this.match(function(node) {
-            return (" " + node.className + " ").indexOf(" " + className + " ") > -1;
+        res = this.match(function() {
+            return (" " + this.className + " ").indexOf(" " + className + " ") > -1;
         });
         return res ? true : false;
     }

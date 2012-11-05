@@ -8,15 +8,15 @@
     var delegateHandler = {
         listeners: {},
         handleEvent: function(ev) {
-            var listener = this.listeners[ev.type],
+            var listener = this.listeners[ev.type];
 
             if (listener !== undefined && listener.length > 0) {
                 this.dispatcher(type, ev);
             }
         },
         dispatcher: function(type, ev) {
-            zz.match(this.listeners[type], function(listener) {
-                var match = zz(listener["node"]).match(function(node) {
+            tt.match(this.listeners[type], function(listener) {
+                var match = tt(listener["node"]).match(function(node) {
                     var res = node.compareDocumentPosition(ev.target);
 
                     if (res === 0 || res & NODE.DOCUMENT_POSITION_CONTAINED_BY) {
@@ -35,9 +35,9 @@
         addListener: function(node, type, fn) {
             var listeners = this.listeners[type],
                 listener = {
-                node: node,
-                fn: fn
-            };
+                    node: node,
+                    fn: fn
+                };
 
             if (listeners === undefined) {
                 listeners = [];
@@ -54,7 +54,7 @@
             if (listeners === undefined || listeners.length === 0) {
                 return;
             }
-            zz.match(listeners, function(listner, index) {
+            tt.match(listeners, function(listner, index) {
                 if (listener["node"] !== node || listener["fn"] !== fn) {
                     return false;
                 }

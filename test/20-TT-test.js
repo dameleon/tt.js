@@ -28,27 +28,27 @@ buster.testCase("tt.js test", {
         var res;
 
         res = this.ttPiyo.toArray();
-        assert.equals(this.isArray(res));
+        assert(this.isArray(res));
         assert.equals(res.length, 5);
     },
     "each test": function() {
         var res = [];
 
-        this.ttPiyo.each(function(node, index) {
-            assert.equals(node.nodeType, 1);
+        this.ttPiyo.each(function(index) {
+            assert.equals(this.nodeType, 1);
             assert.isNumber(index);
-            res.push(node);
+            res.push(this);
         });
         assert.equals(res.length, this.piyo.length);
     },
     "match": function() {
         var self = this, res;
 
-        res = this.ttPiyo.match(function(node, index) {
-            assert.equals(node.nodeType, 1);
+        res = this.ttPiyo.match(function(index) {
+            assert.equals(this.nodeType, 1);
             assert.isNumber(index);
 
-            var attr = node.getAttribute("data-role");
+            var attr = this.getAttribute("data-role");
 
             if (attr === self.role.piyo) {
                 return true;
@@ -58,6 +58,7 @@ buster.testCase("tt.js test", {
         assert.equals(res.nodeType, 1);
         assert.equals(res.getAttribute("data-role"), this.role.piyo);
     },
+    /*
     "on test": function() {
         // 非同期なので後回し
     },
@@ -70,11 +71,12 @@ buster.testCase("tt.js test", {
     "unbind test": function() {
         // this["off test"]とかで呼べないのかな…
     },
+    */
     "addClass test": function() {
         var className = "add-class";
 
         this.ttHoge.addClass(className);
-        assert.contain(this.hoge.className, className);
+        assert(this.hoge.className.match(className));
     },
     "removeClass test": function() {
         var className = "remove-class";
@@ -82,7 +84,7 @@ buster.testCase("tt.js test", {
         this.ttHoge.addClass(className);
 
         this.ttHoge.removeClass(className);
-        refure.contain(this.hoge.className, className);
+        refute(this.hoge.className.indexOf(className) > -1);
     },
     "hasClass test": function() {
         var className = "has-class";
@@ -91,7 +93,7 @@ buster.testCase("tt.js test", {
         assert(this.ttHoge.hasClass(className));
 
         this.ttHoge.removeClass(className);
-        refure(this.ttHoge.hasClass(className));
+        refute(this.ttHoge.hasClass(className));
     },
     "toggleClass test": function() {
         var className = "toggle-class";
@@ -99,11 +101,11 @@ buster.testCase("tt.js test", {
         // setting
         this.ttHoge.removeClass(className);
 
-        this.toggleClass(className);
+        this.ttHoge.toggleClass(className);
         assert(this.ttHoge.hasClass(className));
 
-        this.toggleClass(className);
-        refure(this.ttHoge.hasClass(className));
+        this.ttHoge.toggleClass(className);
+        refute(this.ttHoge.hasClass(className));
     },
     "toggleClass deep test": function() {
         var className = "toggle-class-deep",
@@ -113,25 +115,25 @@ buster.testCase("tt.js test", {
         this.ttPiyo.removeClass(className);
         targetNode.addClass(className);
 
-        this.toggleClass(className, true);
-        refure(targetNode.hasClass(className));
+        this.ttPiyo.toggleClass(className, true);
+        refute(targetNode.hasClass(className));
 
-        this.toggleClass(className, true);
+        this.ttPiyo.toggleClass(className, true);
         assert(targetNode.hasClass(className));
     },
     "attr test": function() {
         assert.equals(this.ttHoge.attr("name"), this.hoge.getAttribute("name"));
 
         this.ttHoge.attr("name", "attr-test-01");
-        assert.equals(this.ttHoge("name"), this.hoge.getAttribute("name"));
+        assert.equals(this.ttHoge.attr("name"), this.hoge.getAttribute("name"));
 
         this.ttHoge.attr("name", "");
-        assert.equals(this.ttHoge("name"), this.hoge.getAttribute("name"));
+        assert.equals(this.ttHoge.attr("name"), this.hoge.getAttribute("name"));
 
         var attrs = { "name": "attr-test-02", "rel": "attr-test-03" };
         for (var key in attrs) {
             this.ttHoge.attr(key, attrs[key]);
-            assert.equals(this.ttHoge(key), this.hoge.getAttribute(key));
+            assert.equals(this.ttHoge.attr(key), this.hoge.getAttribute(key));
         }
     },
     "html test": function() {
@@ -169,7 +171,10 @@ buster.testCase("tt.js test", {
     "remove test": function() {
         var node = document.createElement("div");
 
-        this.hoge.innerHTML = node;
+        node.innerHTML = "mogemoge";
+
+        this.hoge.innerHTML = "";
+        this.hoge.appendChild(node);
 
         tt(node).remove();
         assert.equals(this.hoge.innerHTML, "");
@@ -186,14 +191,16 @@ buster.testCase("tt.js test", {
         assert.equals(this.ttHoge.css("display"), "block");
 
         this.ttHoge.css("display", "inline-block");
-        assert.equals(this.hoge.style.display, "block");
+        assert.equals(this.hoge.style.display, "inline-block");
 
-        this.ttHoge.css({"display": "inline", "backgroundColor", "#000000"});
+        this.ttHoge.css({"display": "inline", "background-color": "#000000"});
         assert.equals(this.hoge.style.display, "inline");
-        assert.equals(this.hoge.style.backgroundColor, "inline");
+        assert.equals(this.hoge.style.backgroundColor, "rgb(0, 0, 0)");
     },
     "data test": function() {
-        assert.equals(this.ttHoge.data(), {"role": this.role.hoge});
+        var data = this.ttHoge.data();
+
+        assert.equals(data.role, this.role.hoge);
 
         assert.equals(this.ttHoge.data("role"), this.role.hoge);
 
@@ -228,24 +235,28 @@ buster.testCase("tt.js test", {
     "trigger test": function() {
         var spy = sinon.spy();
 
-        this.hoge.addEventListener("click", spy, false);
-        this.ttHoge.trigger("MouseEvent", "click", false, true);
+        this.hoge.addEventListener("onhoge", spy, false);
+        this.ttHoge.trigger("Event", "onhoge", false, true);
+
+        assert.calledOnce(spy);
     },
     "replace test": function() {
         var stash = this.hoge.innerHTML + "",
             node01 = document.createElement("div"),
             node02 = document.createElement("div");
 
-        node.innerHTML = "hogehoge";
-        targetNode.innerHTML = "mogemoge";
+        node01.innerHTML = "hogehoge";
+        node02.innerHTML = "mogemoge";
         this.hoge.innerHTML = "";
-        this.hoge.appendChild(node);
+        this.hoge.appendChild(node01);
 
         tt(node01).replace("<div>mogemoge</div>");
         assert.equals(this.hoge.innerHTML, "<div>mogemoge</div>");
 
+        this.hoge.innerHTML = "";
+        this.hoge.appendChild(node02);
         tt(node02).replace(node01);
-        assert.equals(this.hoge.innerHTML, "<div>hogehgoe</div>");
+        assert.equals(this.hoge.innerHTML, "<div>hogehoge</div>");
 
         this.hoge.innerHTML = stash;
     },
