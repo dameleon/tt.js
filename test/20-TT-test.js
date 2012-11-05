@@ -58,20 +58,46 @@ buster.testCase("tt.js test", {
         assert.equals(res.nodeType, 1);
         assert.equals(res.getAttribute("data-role"), this.role.piyo);
     },
-    /*
     "on test": function() {
-        // 非同期なので後回し
-    },
-    "bind test": function() {
-        // this["on test"]とかで呼べないのかな…
+        var spy = sinon.spy();
+
+        this.ttHoge.on("onhoge", spy, false);
+        tt.triggerEvent(this.hoge, "onhoge", false, true);
+
+        assert.calledOnce(spy);
+
+        this.ttHoge.off("onhoge", spy);
     },
     "off test": function() {
-        // 非同期なので後回し
+        var spy = sinon.spy();
+
+        this.ttHoge.on("onhoge", spy, false);
+        this.ttHoge.off("onhoge", spy);
+
+        tt.triggerEvent(this.hoge, "onhoge", false, true);
+
+        refute.calledOnce(spy);
+    },
+    "bind test": function() {
+        var spy = sinon.spy();
+
+        this.ttHoge.bind("onhoge", spy, false);
+        tt.triggerEvent(this.hoge, "onhoge", false, true);
+
+        assert.calledOnce(spy);
+
+        this.ttHoge.unbind("onhoge", spy);
     },
     "unbind test": function() {
-        // this["off test"]とかで呼べないのかな…
+        var spy = sinon.spy();
+
+        this.ttHoge.bind("onhoge", spy, false);
+        this.ttHoge.unbind("onhoge", spy);
+
+        tt.triggerEvent(this.hoge, "onhoge", false, true);
+
+        refute.calledOnce(spy);
     },
-    */
     "addClass test": function() {
         var className = "add-class";
 

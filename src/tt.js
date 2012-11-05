@@ -205,7 +205,6 @@
 
         ev.initEvent(type, bubbles || true, cancelable || true);
         node.dispatchEvent(ev);
-        console.log(ev);
     };
 
     /**
@@ -420,6 +419,7 @@
          * @return Object: ttObject
          */
         on: function(type, mix, capture) {
+            capture = capture || false;
             this.each(function() {
                 this.addEventListener(type, mix, capture);
             }, true);
