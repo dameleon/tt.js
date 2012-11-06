@@ -30,7 +30,10 @@
                      mix[0] === "." ?
                         parent.getElementsByClassName(mix.substring(1, mix.length)) :
                         parent.getElementsByTagName(mix);
-        } else if (mix && (mix.nodeType === 1 || isNodeList(mix))) {
+        } else if (mix && (mix.nodeType === 1 ||
+                           isNodeList(mix) ||
+                           (isArray(mix) && mix[0].nodeType))) {
+
             target = mix;
         } else if (mix instanceof TT) {
             return mix;
@@ -526,6 +529,21 @@
         },
 
         /**
+         * <div class="hoge"><div class="fuga"></div></div>
+         *
+         * tt("hoge").find("fuga");
+         * @return Object: ttObject
+         */
+        find: function(query) {
+            var res = [];
+
+            this.each(function() {
+                res = res.concat(tt(query, this).toArray());
+            });
+            return tt(res);
+        },
+
+        /**
          *
          * ## sample
          * <div hoge="fuga"></div>
@@ -776,8 +794,8 @@
                 name && (dataName += name);
                 for (; i < iz; ++i) {
                     attr = attrs[i].name;
-                    if (!attr.indexOf(dataName)) {
-                        res[attr.substr(6, attr.length)] = node.getAttribute(attr);
+                    if (attr.indexOf(dataName) > -1) {
+                        res[attr.substr(5, attr.length)] = node.getAttribute(attr);
                     }
                 }
                 return name ? res[name] : res;

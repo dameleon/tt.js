@@ -147,6 +147,9 @@ buster.testCase("tt.js test", {
         this.ttPiyo.toggleClass(className, true);
         assert(targetNode.hasClass(className));
     },
+    "find test": function() {
+        assert.equals(this.ttFuga.find(".piyo").length, this.piyo.length);
+    },
     "attr test": function() {
         assert.equals(this.ttHoge.attr("name"), this.hoge.getAttribute("name"));
 
