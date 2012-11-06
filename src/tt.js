@@ -222,6 +222,11 @@
         return res;
     };
 
+    /**
+     *
+     * tt.cssCamelizer("-webkit-tap-highlight-color");
+     * @return String: "webkitTapHighlightColor"
+     */
     tt.cssCamelizer = function(str) {
         if (typeof str !== "string") {
             throw new Error("arugment type error");
@@ -245,6 +250,11 @@
         return res;
     };
 
+    /**
+     *
+     * tt.cssHyphenizer("webkitTapHighlightColor");
+     * @return String: "-webkit-tap-highlight-color"
+     */
     tt.cssHyphenizer = function(str) {
         if (typeof str !== "string") {
             throw new Error("arugment type error");
@@ -271,7 +281,7 @@
     /**
      *
      * tt(navigator);
-     * @return {android: bool, ios: bool .., }
+     * @return Object: {android: bool, ios: bool .., }
      */
     tt.createEnvData = function(navigator) {
         var res = {},

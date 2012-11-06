@@ -11,15 +11,17 @@
             var listener = this.listeners[ev.type];
 
             if (listener !== undefined && listener.length > 0) {
-                this.dispatcher(type, ev);
+                this.dispatcher(ev);
             }
         },
-        dispatcher: function(type, ev) {
-            tt.match(this.listeners[type], function(listener) {
-                var match = tt(listener["node"]).match(function(node) {
-                    var res = node.compareDocumentPosition(ev.target);
+        dispatcher: function(ev) {
+            var type = ev.type;
 
-                    if (res === 0 || res & NODE.DOCUMENT_POSITION_CONTAINED_BY) {
+            tt.match(this.listeners[type], function(listener) {
+                var match = tt(listener["node"]).match(function() {
+                    var res = this.compareDocumentPosition(ev.target);
+
+                    if (res === 0 || (res & Node.DOCUMENT_POSITION_CONTAINED_BY)) {
                         return true;
                     }
                     return false;
@@ -33,19 +35,18 @@
             });
         },
         addListener: function(node, type, fn) {
-            var listeners = this.listeners[type],
-                listener = {
+            var listener = {
                     node: node,
                     fn: fn
                 };
 
-            if (listeners === undefined) {
-                listeners = [];
+            if (this.listeners[type] === undefined) {
+                this.listeners[type] = [];
             }
-            if (listeners.length === 0) {
+            if (this.listeners[type].length === 0) {
                 document.addEventListener(type, this, false);
             }
-            listeners.push(listener);
+            this.listeners[type].push(listener);
         },
         removeListener: function(node, type, fn) {
             var self = this,
