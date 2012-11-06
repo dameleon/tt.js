@@ -32,7 +32,7 @@
                         parent.getElementsByTagName(mix);
         } else if (mix && (mix.nodeType === 1 ||
                            isNodeList(mix) ||
-                           (isArray(mix) && mix[0].nodeType))) {
+                           (isArray(mix) && mix[0] && mix[0].nodeType))) {
 
             target = mix;
         } else if (mix instanceof TT) {
@@ -541,6 +541,33 @@
                 res = res.concat(tt(query, this).toArray());
             });
             return tt(res);
+        },
+
+        /**
+         * <div class="hoge"><div class="fuga"></div></div>
+         *
+         * tt(".hoge").contains(".fuga");
+         * @return Node: <div class="fuga"></div>
+         *
+         * tt(".fuga").contains(".hoge");
+         * @return Null
+         */
+        contains: function(mix) {
+            var res, target = tt(mix);
+
+            res = this.match(function() {
+                var parent = this,
+                    match = target.match(function() {
+                        var pos = parent.compareDocumentPosition(this);
+
+                        return (pos === 0 || (pos & Node.DOCUMENT_POSITION_CONTAINED_BY)) ?
+                                    true :
+                                    false;
+                    });
+
+                return match ? true : false;
+            });
+            return res;
         },
 
         /**

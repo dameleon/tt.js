@@ -150,6 +150,10 @@ buster.testCase("tt.js test", {
     "find test": function() {
         assert.equals(this.ttFuga.find(".piyo").length, this.piyo.length);
     },
+    "contain test": function() {
+        assert.equals(this.ttFuga.contains(".piyo"), this.fuga[0]);
+        refute(this.ttPiyo.contains(".notfound"));
+    },
     "attr test": function() {
         assert.equals(this.ttHoge.attr("name"), this.hoge.getAttribute("name"));
 
