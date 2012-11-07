@@ -92,11 +92,22 @@
      *      // do something
      * });
      */
-    tt.each = function(arr, fn) {
-        var i = 0, iz = arr.length;
+    tt.each = function(mix, fn) {
+        var arr, key,
+            i = 0, iz;
 
-        for (; i < iz; ++i) {
-            fn(arr[i], i);
+        if (isArray(mix)) {
+            iz = mix.length;
+            for (; i < iz; ++i) {
+                fn(mix[i], i);
+            }
+        } else if (typeof mix === "object") {
+            arr = Object.keys(mix);
+            iz = arr.length;
+            for (; i < iz; ++i) {
+                key = arr[i];
+                fn(key, mix[key]);
+            }
         }
     }
 
@@ -111,12 +122,27 @@
      * });
      * @return Number: 3
      */
-    tt.match = function(arr, fn) {
-        var i = 0, iz = arr.length;
+    tt.match = function(mix, fn) {
+        var arr,
+            key, res = {},
+            i = 0, iz;
 
-        for (; i < iz; ++i) {
-            if (fn(arr[i], i)) {
-                return arr[i];
+        if (isArray(mix)) {
+            iz = mix.length;
+            for (; i < iz; ++i) {
+                if (fn(mix[i], i)) {
+                    return mix[i];
+                }
+            }
+        } else if (typeof mix === "object") {
+            arr = Object.keys(mix);
+            iz = arr.length;
+            for (; i < iz; ++i) {
+                key = arr[i];
+                if (fn(key, mix[key], i)) {
+                    res[key] = mix[key];
+                    return res;
+                }
             }
         }
         return null;
@@ -459,12 +485,7 @@
          * @effect <div class="hoge fuga"></div>
          * @return Object: ttObject
          */
-        addClass:
-            ((tt.env.android && tt.env.versionCode < 3000) ||
-             (tt.env.ios && tt.env.versionCode < 5000) ||
-             (tt.env.opera)) ?
-                _addClassByClassName :
-                _addClassByClassList,
+        addClass: _tt_addclass((tt.env.android && tt.env.versionCode < 3000) || (tt.env.ios && tt.env.versionCode < 5000) || (tt.env.opera)),
 
         /**
          * <div class="hoge fuga"></div>
@@ -473,12 +494,7 @@
          * @effect <div class="hoge"></div>
          * @return Object: ttObject
          */
-        removeClass:
-            ((tt.env.android && tt.env.versionCode < 3000) ||
-             (tt.env.ios && tt.env.versionCode < 5000) ||
-             (tt.env.opera)) ?
-                _removeClassByClassName :
-                _removeClassByClassList,
+        removeClass: _tt_removeclass((tt.env.android && tt.env.versionCode < 3000) || (tt.env.ios && tt.env.versionCode < 5000) || (tt.env.opera)),
 
         /**
          * <div class="hoge"></div>
@@ -486,12 +502,7 @@
          * tt(".hoge").hasClass("hoge");
          * @return Bool: true
          */
-        hasClass:
-            ((tt.env.android && tt.env.versionCode < 3000) ||
-             (tt.env.ios && tt.env.versionCode < 5000) ||
-             (tt.env.opera)) ?
-                _hasClassByClassName :
-                _hasClassByClassList,
+        hasClass: _tt_hasclass((tt.env.android && tt.env.versionCode < 3000) || (tt.env.ios && tt.env.versionCode < 5000) || (tt.env.opera)),
 
         /**
          * <div class="hoge"></div>
@@ -596,9 +607,9 @@
             switch (arguments.length) {
             case 1:
                 if (typeof mix === "object") {
-                    for (key in mix) {
+                    tt.each(mix, function() {
                         _setAttr(key, mix[key]);
-                    }
+                    });
                     break;
                 } else {
                     return this.nodes[0].getAttribute(mix);
@@ -724,13 +735,13 @@
                 css = "";
 
             if (typeof mix === "object") {
-                for (prop in mix) {
-                    if (mix[prop] === "") {
-                        _removeProperty(prop);
-                        continue;
+                tt.each(mix, function(key, val) {
+                    if (val === "") {
+                        _removeProperty(key);
+                        return;
                     }
-                    _setStyle(tt.cssCamelizer(prop), mix[prop]);
-                }
+                    _setStyle(tt.cssCamelizer(key), val);
+                });
             } else {
                 if (value) {
                     _setStyle(tt.cssCamelizer(mix), value);
@@ -777,81 +788,7 @@
          * @effect <div data-hoge="fugafuga" data-piyo="zonu"></div>
          * @return Object: ttObject
          */
-        data: function() {
-            var self = this,
-                args = arguments,
-                data = {},
-                useCompatible = ((tt.env.android && tt.env.versionCode < 3000) || (tt.env.ios && tt.env.versionCode < 5000) || (tt.env.opera));
-
-            switch (args.length) {
-            case 0:
-                return useCompatible ?
-                            _getAttrByAttributes() :
-                            _getAttrByDataSet();
-            case 1:
-                if (typeof args[0] === "object") {
-                    useCompatible ?
-                        _setAttrByAttributes(args[0]) :
-                        _setAttrByDataSet(args[0]);
-                    return this;
-                } else {
-                    return useCompatible ?
-                                _getAttrByAttributes(args[0]) :
-                                _getAttrByDataSet(args[0]);
-                }
-            case 2:
-                data[args[0]] = args[1];
-                useCompatible ?
-                    _setAttrByAttributes(data) :
-                    _setAttrByDataSet(data);
-                return this;
-            }
-
-            function _getAttrByDataSet(name) {
-                return name ? self.nodes[0].dataset[name] : self.nodes[0].dataset;
-            }
-
-            function _getAttrByAttributes(name) {
-                var res = {},
-                    node = self.nodes[0],
-                    attr, attrs = node.attributes,
-                    dataName = "data-",
-                    i = 0, iz = attrs.length;
-
-                name && (dataName += name);
-                for (; i < iz; ++i) {
-                    attr = attrs[i].name;
-                    if (attr.indexOf(dataName) > -1) {
-                        res[attr.substr(5, attr.length)] = node.getAttribute(attr);
-                    }
-                }
-                return name ? res[name] : res;
-            }
-
-            function _setAttrByDataSet(obj) {
-                var name;
-
-                for (name in obj) {
-                    self.each(function() {
-                        var value = obj[name];
-
-                        if (value === "") {
-                            delete this.dataset[name];
-                            return;
-                        }
-                        this.dataset[name] = value;
-                    });
-                }
-            }
-
-            function _setAttrByAttributes(obj) {
-                var name, value;
-
-                for (name in obj) {
-                    self.attr("data-" + name, obj[name]);
-                }
-            }
-        },
+        data: _tt_data((tt.env.android && tt.env.versionCode < 3000) || (tt.env.ios && tt.env.versionCode < 5000) || (tt.env.opera)),
 
         /**
          * <div class="hoge" style="display:none;"></div>
@@ -976,69 +913,151 @@
     TT.prototype.unbind = TT.prototype.off;
 
 
-    function _addClassByClassList(className) {
-        this.each(function(index) {
-            this.classList.add(className);
-        });
-        return this;
-    }
+    function _tt_addclass(isCompatible) {
+        var _addClass = isCompatible ? _addClassByClassName : _addClassByClassList;
 
-    function _addClassByClassName(className) {
-        var stashName = this.nodes[0].className,
-            newName = _createName(stashName, className);
+        return function(className) {
+            _addClass.call(this, className);
+            return this;
+        }
 
-        this.each(function(index) {
-            if (tt(this).hasClass(className)) {
-                return;
-            }
-            if (index && stashName !== this.className) {
-                stashName = this.className;
+        function _addClassByClassList(className) {
+            this.each(function() {
+                this.classList.add(className);
+            });
+        }
+
+        function _addClassByClassName(className) {
+            var stashName = this.nodes[0].className,
                 newName = _createName(stashName, className);
+
+            this.each(function(index) {
+                if (tt(this).hasClass(className)) {
+                    return;
+                }
+                if (index && stashName !== this.className) {
+                    stashName = this.className;
+                    newName = _createName(stashName, className);
+                }
+                this.className = newName;
+            });
+
+            function _createName(currentName, newName) {
+                var res = currentName.split(" ");
+
+                res[res.length] = newName;
+                return res.join(" ");
             }
-            this.className = newName;
-        });
-        return this;
-
-        function _createName(currentName, newName) {
-            var res = currentName.split(" ");
-
-            res[res.length] = newName;
-            return res.join(" ");
         }
     }
 
-    function _removeClassByClassList(className) {
-        this.each(function() {
-            this.classList.remove(className);
-        });
-        return this;
+    function _tt_removeclass(isCompatible) {
+        var _removeClass = isCompatible ? _removeClassByClassName : _removeClassByClassList;
+
+        return function(className) {
+            _removeClass.call(this, className);
+            return this;
+        }
+
+        function _removeClassByClassList(className) {
+            this.each(function() {
+                this.classList.remove(className);
+            });
+        }
+
+        function _removeClassByClassName(className) {
+            this.each(function() {
+                this.className = this.className.replace(className, "");
+            });
+        }
     }
 
-    function _removeClassByClassName(className) {
-        this.each(function() {
-            this.className = this.className.replace(className ,"");
-        });
-        return this;
+    function _tt_hasclass(isCompatible) {
+        var _hasClass = isCompatible ? _hasClassByClassName : _hasClassByClassList;
+
+        return function(className) {
+            var res;
+
+            res = _hasClass.call(this, className.trim());
+            return res ? true : false;
+        }
+
+        function _hasClassByClassList(className) {
+            return this.match(function() {
+                return this.classList.contains(className);
+            });
+        }
+
+        function _hasClassByClassName(className) {
+            return this.match(function() {
+                return (" " + this.className + " ").indexOf(" " + className + " ") > -1;
+            });
+        }
     }
 
-    function _hasClassByClassList(className) {
-        var res;
+    function _tt_data(isCompatible) {
+        var _getDataAttr = isCompatible ? _getDataByAttributes : _getDataByDataset,
+            _setDataAttr = isCompatible ? _setDataByAttributes : _setDataByDataset;
 
-        className = className.trim();
-        res = this.match(function() {
-            return this.classList.contains(className);
-        });
-        return res ? true : false;
-    }
+        return function (mix, value) {
+            var self = this,
+                key;
 
-    function _hasClassByClassName(className) {
-        var res;
+            switch (arguments.length) {
+            case 0: return _getDataAttr.call(this);
+            case 1:
+                if (typeof mix === "object") {
+                    tt.each(mix, function(key, val) {
+                        _setDataAttr.call(self, key, val);
+                    });
+                    return this;
+                } else {
+                    return _getDataAttr.call(this, mix);
+                }
+            case 2:
+                _setDataAttr.call(this, mix, value);
+                return this;
+            }
+        }
 
-        className = className.trim();
-        res = this.match(function() {
-            return (" " + this.className + " ").indexOf(" " + className + " ") > -1;
-        });
-        return res ? true : false;
+        function _setDataByDataset(key, val) {
+            this.each(function() {
+                if (val === "") {
+                    delete this.dataset[key];
+                    return;
+                }
+                this.dataset[key] = val;
+            });
+        }
+
+        function _getDataByDataset(key) {
+            return key ? this.nodes[0].dataset[key] : this.nodes[0].dataset;
+        }
+
+        function _setDataByAttributes(key, val) {
+            this.attr("data-" + key, val);
+        }
+
+        function _getDataByAttributes(key) {
+            var res = {},
+                dataName = "data-",
+                node = this.nodes[0],
+                attr, attrs = node.attributes,
+                i = 0, iz = attrs.length;
+
+            if (key) {
+                dataName += key;
+                return this.attr(dataName);
+            }
+            for (; i < iz; ++i) {
+                attr = attrs[i].name;
+                if (attr.indexOf(dataName) > -1) {
+                    key = attr.substr(5, attr.length);
+                    res[key] = attrs[i].value;
+                }
+            }
+            return res;
+        }
     }
 
     global[NS] = global[NS] || tt;
