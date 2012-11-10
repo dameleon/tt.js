@@ -2,7 +2,7 @@
 	'use strict';
 
 	var NS = "tt",
-        querySelectorRe = /^(.+[\#\.\s\[>:]|[\[:])/,
+        querySelectorRe = /^(.+[\#\.\s\[>:,]|[\[:])/,
         loaded = false,
         queue = [];
 
@@ -332,6 +332,9 @@
             null;
         res.version = res.version && res.version[1];
         res.versionCode = _getVersionCode(res.version);
+        res.isCompatible = res.android && res.versionCode < 3000 ||
+                           res.ios && res.versionCode < 5000 ||
+                           res.opera;
 
         return res;
 
@@ -485,7 +488,7 @@
          * @effect <div class="hoge fuga"></div>
          * @return Object: ttObject
          */
-        addClass: _tt_addclass((tt.env.android && tt.env.versionCode < 3000) || (tt.env.ios && tt.env.versionCode < 5000) || (tt.env.opera)),
+        addClass: _tt_addclass(),
 
         /**
          * <div class="hoge fuga"></div>
@@ -494,7 +497,7 @@
          * @effect <div class="hoge"></div>
          * @return Object: ttObject
          */
-        removeClass: _tt_removeclass((tt.env.android && tt.env.versionCode < 3000) || (tt.env.ios && tt.env.versionCode < 5000) || (tt.env.opera)),
+        removeClass: _tt_removeclass(),
 
         /**
          * <div class="hoge"></div>
@@ -502,7 +505,7 @@
          * tt(".hoge").hasClass("hoge");
          * @return Bool: true
          */
-        hasClass: _tt_hasclass((tt.env.android && tt.env.versionCode < 3000) || (tt.env.ios && tt.env.versionCode < 5000) || (tt.env.opera)),
+        hasClass: _tt_hasclass(),
 
         /**
          * <div class="hoge"></div>
@@ -788,7 +791,7 @@
          * @effect <div data-hoge="fugafuga" data-piyo="zonu"></div>
          * @return Object: ttObject
          */
-        data: _tt_data((tt.env.android && tt.env.versionCode < 3000) || (tt.env.ios && tt.env.versionCode < 5000) || (tt.env.opera)),
+        data: _tt_data(),
 
         /**
          * <div class="hoge" style="display:none;"></div>
@@ -951,8 +954,8 @@
         }
     }
 
-    function _tt_removeclass(isCompatible) {
-        var _removeClass = isCompatible ? _removeClassByClassName : _removeClassByClassList;
+    function _tt_removeclass() {
+        var _removeClass = tt.env.isCompatible ? _removeClassByClassName : _removeClassByClassList;
 
         return function(className) {
             _removeClass.call(this, className);
@@ -973,7 +976,7 @@
     }
 
     function _tt_hasclass(isCompatible) {
-        var _hasClass = isCompatible ? _hasClassByClassName : _hasClassByClassList;
+        var _hasClass = tt.env.isCompatible ? _hasClassByClassName : _hasClassByClassList;
 
         return function(className) {
             var res;
@@ -996,8 +999,8 @@
     }
 
     function _tt_data(isCompatible) {
-        var _getDataAttr = isCompatible ? _getDataByAttributes : _getDataByDataset,
-            _setDataAttr = isCompatible ? _setDataByAttributes : _setDataByDataset;
+        var _getDataAttr = tt.env.isCompatible ? _getDataByAttributes : _getDataByDataset,
+            _setDataAttr = tt.env.isCompatible ? _setDataByAttributes : _setDataByDataset;
 
         return function (mix, value) {
             var self = this,
