@@ -132,4 +132,4 @@ Thanks to all who use this library.
 
 ## License
 
-tt.js is is licensed under the terms of the MIT License.
+tt.js is licensed under the terms of the MIT License.
