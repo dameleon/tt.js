@@ -1,10 +1,16 @@
-(function(global, document) {
+/** "tt_helper.js" author: Kei Takahashi(twitter@dameleon, mail:dameleon[at]gmail.com) license: MIT */
+;(function(global, document) {
 	'use strict';
 
     if (!global.tt) {
         return;
     }
 
+    /**
+     * Helper for event listening by delegate type
+     *
+     * @name delegateHandler
+     */
     var delegateHandler = {
         listeners: {},
         handleEvent: function(ev) {
@@ -68,6 +74,16 @@
         }
     };
 
+    /**
+     * Add method delegate to tt
+     *
+     * @name delegate
+     * @memberof tt
+     * @function
+     * @param {HTMLElement|CSSQueryString} mix event target
+     * @param {String} type event type
+     * @param {Function} fn event function
+     */
     tt.delegate = function(mix, type, fn) {
         if (!mix ||
             typeof type !== "string" ||
@@ -77,6 +93,15 @@
         delegateHandler.addListener(mix, type, fn);
     }
 
+    /**
+     * Add method undelegate to tt
+     *
+     * @name undelegate
+     * @memberof tt
+     * @function
+     * @param {HTMLElement|CSSQueryString} mix event target
+     * @param {String} type event type
+     */
     tt.undelegate = function(mix, type) {
         if (!mix || typeof type !== "string") {
             return;

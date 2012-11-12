@@ -1,0 +1,2187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Global</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-jsdoc.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Global</h1>
+
+
+
+
+
+<section>
+
+<header>
+    <h2>
+    tt
+    </h2>
+
+</header>
+
+<article>
+    <div class="container-overview">
+
+
+
+
+            <div class="description">Search HTMLElement based on the QueryString, to generate the object "TT"
+
+Register functions to be executed immediately after the timing or DOMContentLoaded</div>
+
+
+
+<dl class="details">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	<dt class="tag-source">Source:</dt>
+	<dd class="tag-source"><ul class="dummy"><li>tt.js, line 21</li></ul></dd>
+
+
+
+
+
+
+
+</dl>
+
+
+
+            <h3>Examples</h3>
+
+    <pre class="prettyprint"><code>// Search with getElementById
+tt("#id");
+
+// Search with getElementsByClassName
+tt(".className");
+
+// Search with getElementsByTagName
+tt("tagName");
+
+// Search with querySelectorAll
+tt("#id > .className[attr=hoge]");
+
+// Search with className and parent element
+// (Recommended way is to use the querySelectorAll with "#id .className")
+var base = document.getElementById("id");
+tt(".className", base);</code></pre>
+
+    <pre class="prettyprint"><code>// Register functions
+tt(function() {
+    // Be run immediately or later timing, DOMContentLoaded
+});</code></pre>
+
+
+
+    </div>
+
+
+
+
+
+
+
+
+
+
+
+
+        <h3 class="subsection-title">Members</h3>
+
+        <dl>
+
+<dt>
+    <h4 class="name" id="env"><span class="type-signature">&lt;static> </span>env<span class="type-signature"></span></h4>
+
+
+</dt>
+<dd>
+
+    <div class="description">
+        Object that contains the result of generating the tt.createEnvData
+    </div>
+
+
+
+<dl class="details">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	<dt class="tag-source">Source:</dt>
+	<dd class="tag-source"><ul class="dummy"><li>tt.js, line 519</li></ul></dd>
+
+
+
+
+
+	<dt class="tag-see">See:</dt>
+	<dd class="tag-see">
+        <ul>
+            <li><a href="tt.html#createEnvData">tt.createEnvData</a></li>
+        </ul>
+	</dd>
+
+
+
+</dl>
+
+
+
+</dd>
+
+        </dl>
+
+
+
+        <h3 class="subsection-title">Methods</h3>
+
+        <dl>
+
+<dt>
+    <h4 class="name" id="createEnvData"><span class="type-signature">&lt;static> </span>createEnvData<span class="signature">(navigator)</span><span class="type-signature"> &rarr; {Object}</span></h4>
+
+
+</dt>
+<dd>
+
+
+    <div class="description">
+        Create an object of environmental information based on the information of the navigator
+
+Environmental information can be obtained based on the following key
+
+Decision os:         ios, android, windowsPhone
+
+Decision browsers:   mobileSafari, androidBrowser, chrome, firefox, opera, ie, other
+
+version information: (only mobileSafari androidBrowser)
+
+                     version(raw data)
+
+                     versionCode(version number of the 5-digit)
+    </div>
+
+
+
+
+
+
+
+        <h5>Parameters:</h5>
+
+
+<table class="params">
+    <thead>
+	<tr>
+
+		<th>Name</th>
+
+
+		<th>Type</th>
+
+
+
+
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+
+
+        <tr>
+
+                <td class="name"><code>navigator</code></td>
+
+
+            <td class="type">
+
+
+<span class="param-type">window.navigator</span>
+
+
+
+            </td>
+
+
+
+
+
+            <td class="description last"></td>
+        </tr>
+
+
+	</tbody>
+</table>
+
+
+
+<dl class="details">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	<dt class="tag-source">Source:</dt>
+	<dd class="tag-source"><ul class="dummy"><li>tt.js, line 443</li></ul></dd>
+
+
+
+
+
+
+
+</dl>
+
+
+
+
+
+
+
+    <h5>Returns:</h5>
+
+
+<div class="param-desc">
+    object
+</div>
+
+
+
+<dl>
+	<dt>
+		Type
+	</dt>
+	<dd>
+
+<span class="param-type">Object</span>
+
+
+	</dd>
+</dl>
+
+
+
+
+        <h5>Example</h5>
+
+    <pre class="prettyprint"><code>tt.createEnvData(window.navigator);
+// return Object: {android: bool, ios: bool .., }</code></pre>
+
+
+</dd>
+
+
+
+<dt>
+    <h4 class="name" id="cssCamelizer"><span class="type-signature">&lt;static> </span>cssCamelizer<span class="signature">(str)</span><span class="type-signature"> &rarr; {String}</span></h4>
+
+
+</dt>
+<dd>
+
+
+    <div class="description">
+        Returns a camel case string of CSS hyphen Case
+    </div>
+
+
+
+
+
+
+
+        <h5>Parameters:</h5>
+
+
+<table class="params">
+    <thead>
+	<tr>
+
+		<th>Name</th>
+
+
+		<th>Type</th>
+
+
+
+
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+
+
+        <tr>
+
+                <td class="name"><code>str</code></td>
+
+
+            <td class="type">
+
+
+<span class="param-type">String</span>
+
+
+
+            </td>
+
+
+
+
+
+            <td class="description last"></td>
+        </tr>
+
+
+	</tbody>
+</table>
+
+
+
+<dl class="details">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	<dt class="tag-source">Source:</dt>
+	<dd class="tag-source"><ul class="dummy"><li>tt.js, line 373</li></ul></dd>
+
+
+
+
+
+
+
+</dl>
+
+
+
+
+
+
+
+    <h5>Returns:</h5>
+
+
+<div class="param-desc">
+    string
+</div>
+
+
+
+<dl>
+	<dt>
+		Type
+	</dt>
+	<dd>
+
+<span class="param-type">String</span>
+
+
+	</dd>
+</dl>
+
+
+
+
+        <h5>Example</h5>
+
+    <pre class="prettyprint"><code>tt.cssCamelizer("-webkit-tap-highlight-color");
+// return String: "webkitTapHighlightColor"</code></pre>
+
+
+</dd>
+
+
+
+<dt>
+    <h4 class="name" id="cssHyphenizer"><span class="type-signature">&lt;static> </span>cssHyphenizer<span class="signature">(str)</span><span class="type-signature"> &rarr; {String}</span></h4>
+
+
+</dt>
+<dd>
+
+
+    <div class="description">
+        Returns a string CSS hyphen case of Camel Case
+    </div>
+
+
+
+
+
+
+
+        <h5>Parameters:</h5>
+
+
+<table class="params">
+    <thead>
+	<tr>
+
+		<th>Name</th>
+
+
+		<th>Type</th>
+
+
+
+
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+
+
+        <tr>
+
+                <td class="name"><code>str</code></td>
+
+
+            <td class="type">
+
+
+<span class="param-type">String</span>
+
+
+
+            </td>
+
+
+
+
+
+            <td class="description last"></td>
+        </tr>
+
+
+	</tbody>
+</table>
+
+
+
+<dl class="details">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	<dt class="tag-source">Source:</dt>
+	<dd class="tag-source"><ul class="dummy"><li>tt.js, line 408</li></ul></dd>
+
+
+
+
+
+
+
+</dl>
+
+
+
+
+
+
+
+    <h5>Returns:</h5>
+
+
+<div class="param-desc">
+    string
+</div>
+
+
+
+<dl>
+	<dt>
+		Type
+	</dt>
+	<dd>
+
+<span class="param-type">String</span>
+
+
+	</dd>
+</dl>
+
+
+
+
+        <h5>Example</h5>
+
+    <pre class="prettyprint"><code>tt.cssHyphenizer("webkitTapHighlightColor");
+// return String: "-webkit-tap-highlight-color"</code></pre>
+
+
+</dd>
+
+
+
+<dt>
+    <h4 class="name" id="cssPrefix"><span class="type-signature">&lt;static> </span>cssPrefix<span class="signature">(value, prefix)</span><span class="type-signature"> &rarr; {Array}</span></h4>
+
+
+</dt>
+<dd>
+
+
+    <div class="description">
+        Returns an array of the result of adding a prefix for the CSS string
+    </div>
+
+
+
+
+
+
+
+        <h5>Parameters:</h5>
+
+
+<table class="params">
+    <thead>
+	<tr>
+
+		<th>Name</th>
+
+
+		<th>Type</th>
+
+
+
+
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+
+
+        <tr>
+
+                <td class="name"><code>value</code></td>
+
+
+            <td class="type">
+
+
+<span class="param-type">String</span>
+
+
+
+            </td>
+
+
+
+
+
+            <td class="description last"></td>
+        </tr>
+
+
+
+        <tr>
+
+                <td class="name"><code>prefix</code></td>
+
+
+            <td class="type">
+
+
+<span class="param-type">Array</span>
+
+
+
+            </td>
+
+
+
+
+
+            <td class="description last"></td>
+        </tr>
+
+
+	</tbody>
+</table>
+
+
+
+<dl class="details">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	<dt class="tag-source">Source:</dt>
+	<dd class="tag-source"><ul class="dummy"><li>tt.js, line 347</li></ul></dd>
+
+
+
+
+
+
+
+</dl>
+
+
+
+
+
+
+
+    <h5>Returns:</h5>
+
+
+<div class="param-desc">
+    array
+</div>
+
+
+
+<dl>
+	<dt>
+		Type
+	</dt>
+	<dd>
+
+<span class="param-type">Array</span>
+
+
+	</dd>
+</dl>
+
+
+
+
+        <h5>Examples</h5>
+
+    <pre class="prettyprint"><code>tt.cssPrefix("box");
+// return ["-webkit-box", "-moz-box", "-o-box", "-ms-box"]</code></pre>
+
+    <pre class="prettyprint"><code>tt.cssPrefix("box", ["webkit", "khtml"]);
+// return ["-webkit-box", "-khtml-box",]</code></pre>
+
+
+</dd>
+
+
+
+<dt>
+    <h4 class="name" id="each"><span class="type-signature">&lt;static> </span>each<span class="signature">(mix, fn)</span><span class="type-signature"></span></h4>
+
+
+</dt>
+<dd>
+
+
+    <div class="description">
+        Passed to the function the elements of an array or object
+    </div>
+
+
+
+
+
+
+
+        <h5>Parameters:</h5>
+
+
+<table class="params">
+    <thead>
+	<tr>
+
+		<th>Name</th>
+
+
+		<th>Type</th>
+
+
+
+
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+
+
+        <tr>
+
+                <td class="name"><code>mix</code></td>
+
+
+            <td class="type">
+
+
+<span class="param-type">Array</span>
+|
+
+<span class="param-type">Object</span>
+
+
+
+            </td>
+
+
+
+
+
+            <td class="description last"></td>
+        </tr>
+
+
+
+        <tr>
+
+                <td class="name"><code>fn</code></td>
+
+
+            <td class="type">
+
+
+<span class="param-type">Function</span>
+
+
+
+            </td>
+
+
+
+
+
+            <td class="description last"></td>
+        </tr>
+
+
+	</tbody>
+</table>
+
+
+
+<dl class="details">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	<dt class="tag-source">Source:</dt>
+	<dd class="tag-source"><ul class="dummy"><li>tt.js, line 146</li></ul></dd>
+
+
+
+
+
+
+
+</dl>
+
+
+
+
+
+
+
+
+
+        <h5>Example</h5>
+
+    <pre class="prettyprint"><code>tt.each([1, 2, 3], function(value, // The value of the element
+                            key) { // Key name or index of the element
+});</code></pre>
+
+
+</dd>
+
+
+
+<dt>
+    <h4 class="name" id="extend"><span class="type-signature">&lt;static> </span>extend<span class="signature">(object)</span><span class="type-signature"> &rarr; {Object}</span></h4>
+
+
+</dt>
+<dd>
+
+
+    <div class="description">
+        Extend the object
+    </div>
+
+
+
+
+
+
+
+        <h5>Parameters:</h5>
+
+
+<table class="params">
+    <thead>
+	<tr>
+
+		<th>Name</th>
+
+
+		<th>Type</th>
+
+
+
+
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+
+
+        <tr>
+
+                <td class="name"><code>object</code></td>
+
+
+            <td class="type">
+
+
+<span class="param-type">Object</span>
+
+
+
+            </td>
+
+
+
+
+
+            <td class="description last"></td>
+        </tr>
+
+
+	</tbody>
+</table>
+
+
+
+<dl class="details">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	<dt class="tag-source">Source:</dt>
+	<dd class="tag-source"><ul class="dummy"><li>tt.js, line 224</li></ul></dd>
+
+
+
+
+
+
+
+</dl>
+
+
+
+
+
+
+
+    <h5>Returns:</h5>
+
+
+<div class="param-desc">
+    object
+</div>
+
+
+
+<dl>
+	<dt>
+		Type
+	</dt>
+	<dd>
+
+<span class="param-type">Object</span>
+
+
+	</dd>
+</dl>
+
+
+
+
+        <h5>Example</h5>
+
+    <pre class="prettyprint"><code>var obj01 = { 0: "hoge", 1: "fuga" };
+var obj02 = { 1: "piyo", 2: "foo" };
+
+tt.extend(obj01, obj02);
+// return { 0: "hoge", 1: "piyo", 2: "foo" }</code></pre>
+
+
+</dd>
+
+
+
+<dt>
+    <h4 class="name" id="isArray"><span class="type-signature">&lt;static> </span>isArray<span class="signature">(mix)</span><span class="type-signature"> &rarr; {Bool}</span></h4>
+
+
+</dt>
+<dd>
+
+
+    <div class="description">
+        Determination of the Array type
+    </div>
+
+
+
+
+
+
+
+        <h5>Parameters:</h5>
+
+
+<table class="params">
+    <thead>
+	<tr>
+
+		<th>Name</th>
+
+
+		<th>Type</th>
+
+
+
+
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+
+
+        <tr>
+
+                <td class="name"><code>mix</code></td>
+
+
+            <td class="type">
+
+
+<span class="param-type">any type</span>
+
+
+
+            </td>
+
+
+
+
+
+            <td class="description last"></td>
+        </tr>
+
+
+	</tbody>
+</table>
+
+
+
+<dl class="details">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	<dt class="tag-source">Source:</dt>
+	<dd class="tag-source"><ul class="dummy"><li>tt.js, line 110</li></ul></dd>
+
+
+
+
+
+
+
+</dl>
+
+
+
+
+
+
+
+    <h5>Returns:</h5>
+
+
+<div class="param-desc">
+    bool
+</div>
+
+
+
+<dl>
+	<dt>
+		Type
+	</dt>
+	<dd>
+
+<span class="param-type">Bool</span>
+
+
+	</dd>
+</dl>
+
+
+
+
+        <h5>Example</h5>
+
+    <pre class="prettyprint"><code>tt.isArray([]);
+// return true
+
+tt.isArray({});
+// return false</code></pre>
+
+
+</dd>
+
+
+
+<dt>
+    <h4 class="name" id="isNodeList"><span class="type-signature">&lt;static> </span>isNodeList<span class="signature">(mix)</span><span class="type-signature"> &rarr; {Bool}</span></h4>
+
+
+</dt>
+<dd>
+
+
+    <div class="description">
+        Determination of the NodeList
+    </div>
+
+
+
+
+
+
+
+        <h5>Parameters:</h5>
+
+
+<table class="params">
+    <thead>
+	<tr>
+
+		<th>Name</th>
+
+
+		<th>Type</th>
+
+
+
+
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+
+
+        <tr>
+
+                <td class="name"><code>mix</code></td>
+
+
+            <td class="type">
+
+
+<span class="param-type">any type</span>
+
+
+
+            </td>
+
+
+
+
+
+            <td class="description last"></td>
+        </tr>
+
+
+	</tbody>
+</table>
+
+
+
+<dl class="details">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	<dt class="tag-source">Source:</dt>
+	<dd class="tag-source"><ul class="dummy"><li>tt.js, line 127</li></ul></dd>
+
+
+
+
+
+
+
+</dl>
+
+
+
+
+
+
+
+    <h5>Returns:</h5>
+
+
+<div class="param-desc">
+    bool
+</div>
+
+
+
+<dl>
+	<dt>
+		Type
+	</dt>
+	<dd>
+
+<span class="param-type">Bool</span>
+
+
+	</dd>
+</dl>
+
+
+
+
+        <h5>Example</h5>
+
+    <pre class="prettyprint"><code>var elements = document.querySelectorAll(".className");
+
+tt.isNodeList(elements);
+// return true
+
+tt.isNodeList([]);
+// return false</code></pre>
+
+
+</dd>
+
+
+
+<dt>
+    <h4 class="name" id="match"><span class="type-signature">&lt;static> </span>match<span class="signature">(mix, fn)</span><span class="type-signature"> &rarr; {any type}</span></h4>
+
+
+</dt>
+<dd>
+
+
+    <div class="description">
+        Result of passing the elements of an array or object to the function
+which returns the element itself is returned true
+    </div>
+
+
+
+
+
+
+
+        <h5>Parameters:</h5>
+
+
+<table class="params">
+    <thead>
+	<tr>
+
+		<th>Name</th>
+
+
+		<th>Type</th>
+
+
+
+
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+
+
+        <tr>
+
+                <td class="name"><code>mix</code></td>
+
+
+            <td class="type">
+
+
+<span class="param-type">Array</span>
+|
+
+<span class="param-type">Object</span>
+
+
+
+            </td>
+
+
+
+
+
+            <td class="description last"></td>
+        </tr>
+
+
+
+        <tr>
+
+                <td class="name"><code>fn</code></td>
+
+
+            <td class="type">
+
+
+<span class="param-type">Function</span>
+
+
+
+            </td>
+
+
+
+
+
+            <td class="description last"></td>
+        </tr>
+
+
+	</tbody>
+</table>
+
+
+
+<dl class="details">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	<dt class="tag-source">Source:</dt>
+	<dd class="tag-source"><ul class="dummy"><li>tt.js, line 178</li></ul></dd>
+
+
+
+
+
+
+
+</dl>
+
+
+
+
+
+
+
+    <h5>Returns:</h5>
+
+
+<div class="param-desc">
+    One element in the parameter passed
+</div>
+
+
+
+<dl>
+	<dt>
+		Type
+	</dt>
+	<dd>
+
+<span class="param-type">any type</span>
+
+
+	</dd>
+</dl>
+
+
+
+
+        <h5>Example</h5>
+
+    <pre class="prettyprint"><code>tt.match([1, 2, 3], function(value,   // The value of the element
+                             index) { // Key name or index of the element
+     if (value === 3) {
+         return true;
+     }
+     return false;
+});
+// return Number: 3</code></pre>
+
+
+</dd>
+
+
+
+<dt>
+    <h4 class="name" id="param"><span class="type-signature">&lt;static> </span>param<span class="signature">(object)</span><span class="type-signature"> &rarr; {String}</span></h4>
+
+
+</dt>
+<dd>
+
+
+    <div class="description">
+        URL query parameters returned in the form of an object
+
+pull request from kyo-ago (twitter@kyo_ago)
+    </div>
+
+
+
+
+
+
+
+        <h5>Parameters:</h5>
+
+
+<table class="params">
+    <thead>
+	<tr>
+
+		<th>Name</th>
+
+
+		<th>Type</th>
+
+
+
+
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+
+
+        <tr>
+
+                <td class="name"><code>object</code></td>
+
+
+            <td class="type">
+
+
+<span class="param-type">Object</span>
+
+
+
+            </td>
+
+
+
+
+
+            <td class="description last"></td>
+        </tr>
+
+
+	</tbody>
+</table>
+
+
+
+<dl class="details">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	<dt class="tag-source">Source:</dt>
+	<dd class="tag-source"><ul class="dummy"><li>tt.js, line 287</li></ul></dd>
+
+
+
+
+
+
+
+</dl>
+
+
+
+
+
+
+
+    <h5>Returns:</h5>
+
+
+<div class="param-desc">
+    string
+</div>
+
+
+
+<dl>
+	<dt>
+		Type
+	</dt>
+	<dd>
+
+<span class="param-type">String</span>
+
+
+	</dd>
+</dl>
+
+
+
+
+        <h5>Example</h5>
+
+    <pre class="prettyprint"><code>tt.param({"hoge": "huga", "foo&bar": "kiyo&piyo"});
+// reutrn String: "hoge=huga&foo%26bar=kiyo%26piyo"</code></pre>
+
+
+</dd>
+
+
+
+<dt>
+    <h4 class="name" id="plugin"><span class="type-signature">&lt;static> </span>plugin<span class="signature">(name, fn)</span><span class="type-signature"></span></h4>
+
+
+</dt>
+<dd>
+
+
+    <div class="description">
+        To register the property method for "TT object" (It acts like the defineProperty)
+
+It is not possible to override the property existing methods
+    </div>
+
+
+
+
+
+
+
+        <h5>Parameters:</h5>
+
+
+<table class="params">
+    <thead>
+	<tr>
+
+		<th>Name</th>
+
+
+		<th>Type</th>
+
+
+
+
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+
+
+        <tr>
+
+                <td class="name"><code>name</code></td>
+
+
+            <td class="type">
+
+
+<span class="param-type">String</span>
+
+
+
+            </td>
+
+
+
+
+
+            <td class="description last"></td>
+        </tr>
+
+
+
+        <tr>
+
+                <td class="name"><code>fn</code></td>
+
+
+            <td class="type">
+
+
+<span class="param-type">Function</span>
+
+
+
+            </td>
+
+
+
+
+
+            <td class="description last"></td>
+        </tr>
+
+
+	</tbody>
+</table>
+
+
+
+<dl class="details">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	<dt class="tag-source">Source:</dt>
+	<dd class="tag-source"><ul class="dummy"><li>tt.js, line 82</li></ul></dd>
+
+
+
+
+
+
+
+</dl>
+
+
+
+
+
+
+
+
+
+        <h5>Example</h5>
+
+    <pre class="prettyprint"><code>tt("pluginName", function() {
+     // In this function refers to the object itself TT
+     // if you want continue prototype chain, must always return this
+     return this;
+});</code></pre>
+
+
+</dd>
+
+
+
+<dt>
+    <h4 class="name" id="query2object"><span class="type-signature">&lt;static> </span>query2object<span class="signature">(hash)</span><span class="type-signature"> &rarr; {Object}</span></h4>
+
+
+</dt>
+<dd>
+
+
+    <div class="description">
+        Returned in the form of a URL query parameter object
+
+pull request from kyo-ago (twitter@kyo_ago)
+    </div>
+
+
+
+
+
+
+
+        <h5>Parameters:</h5>
+
+
+<table class="params">
+    <thead>
+	<tr>
+
+		<th>Name</th>
+
+
+		<th>Type</th>
+
+
+
+
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+
+
+        <tr>
+
+                <td class="name"><code>hash</code></td>
+
+
+            <td class="type">
+
+
+<span class="param-type">String</span>
+
+
+
+            </td>
+
+
+
+
+
+            <td class="description last"></td>
+        </tr>
+
+
+	</tbody>
+</table>
+
+
+
+<dl class="details">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	<dt class="tag-source">Source:</dt>
+	<dd class="tag-source"><ul class="dummy"><li>tt.js, line 257</li></ul></dd>
+
+
+
+
+
+
+
+</dl>
+
+
+
+
+
+
+
+    <h5>Returns:</h5>
+
+
+<div class="param-desc">
+    object
+</div>
+
+
+
+<dl>
+	<dt>
+		Type
+	</dt>
+	<dd>
+
+<span class="param-type">Object</span>
+
+
+	</dd>
+</dl>
+
+
+
+
+        <h5>Example</h5>
+
+    <pre class="prettyprint"><code>tt.query2object("hoge=huga&foo=bar");
+// return Object: { 'hoge' : 'huga', 'foo' : 'bar' }</code></pre>
+
+
+</dd>
+
+
+
+<dt>
+    <h4 class="name" id="triggerEvent"><span class="type-signature">&lt;static> </span>triggerEvent<span class="signature">(node, event, type, bubbles, cancelable)</span><span class="type-signature"></span></h4>
+
+
+</dt>
+<dd>
+
+
+    <div class="description">
+        Fire an event for the specified element
+
+pull request from kyo-ago (twitter@kyo_ago)
+    </div>
+
+
+
+
+
+
+
+        <h5>Parameters:</h5>
+
+
+<table class="params">
+    <thead>
+	<tr>
+
+		<th>Name</th>
+
+
+		<th>Type</th>
+
+
+
+
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+
+
+        <tr>
+
+                <td class="name"><code>node</code></td>
+
+
+            <td class="type">
+
+
+<span class="param-type">HTMLElement</span>
+
+
+
+            </td>
+
+
+
+
+
+            <td class="description last"></td>
+        </tr>
+
+
+
+        <tr>
+
+                <td class="name"><code>event</code></td>
+
+
+            <td class="type">
+
+
+<span class="param-type">String</span>
+
+
+
+            </td>
+
+
+
+
+
+            <td class="description last"></td>
+        </tr>
+
+
+
+        <tr>
+
+                <td class="name"><code>type</code></td>
+
+
+            <td class="type">
+
+
+<span class="param-type">String</span>
+
+
+
+            </td>
+
+
+
+
+
+            <td class="description last"></td>
+        </tr>
+
+
+
+        <tr>
+
+                <td class="name"><code>bubbles</code></td>
+
+
+            <td class="type">
+
+
+<span class="param-type">Bool</span>
+
+
+
+            </td>
+
+
+
+
+
+            <td class="description last"></td>
+        </tr>
+
+
+
+        <tr>
+
+                <td class="name"><code>cancelable</code></td>
+
+
+            <td class="type">
+
+
+<span class="param-type">Bool</span>
+
+
+
+            </td>
+
+
+
+
+
+            <td class="description last"></td>
+        </tr>
+
+
+	</tbody>
+</table>
+
+
+
+<dl class="details">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	<dt class="tag-source">Source:</dt>
+	<dd class="tag-source"><ul class="dummy"><li>tt.js, line 313</li></ul></dd>
+
+
+
+
+
+
+
+</dl>
+
+
+
+
+
+
+
+
+
+        <h5>Example</h5>
+
+    <pre class="prettyprint"><code>tt.triggerEvent(HTMLElement, "Event", "originalEvent", false, true);
+// firing "originalEvent" to HTMLElement</code></pre>
+
+
+</dd>
+
+        </dl>
+
+
+
+
+
+</article>
+
+</section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Index</a></h2><h3>Classes</h3><ul><li><a href="TT.html">TT</a></li></ul><h3>Global</h3><ul><li><a href="global.html#tt">tt</a></li></ul>
+</nav>
+
+<br clear="both">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3</a> on Mon Nov 12 2012 23:15:47 GMT+0900 (JST)
+</footer>
+
+<script> prettyPrint(); </script>
+</body>
+</html>
