@@ -487,7 +487,8 @@
         res.versionCode = _getVersionCode(res.version);
         res.isCompatible = res.android && res.versionCode < 3000 ||
                            res.ios && res.versionCode < 5000 ||
-                           res.opera;
+                           res.opera ||
+                           res.other && /applewebkit/.test(ua); // fix for Safari6.x
 
         return res;
 
@@ -1278,7 +1279,7 @@
 
         function _removeClassByClassName(className) {
             this.each(function() {
-                this.className = this.className.replace(className, "");
+                this.className = (" " + this.className + " ").replace(" " + className + " ", "");
             });
         }
     }
@@ -1348,6 +1349,9 @@
         }
 
         function _getDataByDataset(key) {
+            if (!this.nodes[0]) {
+                return null;
+            }
             return key ? this.nodes[0].dataset[key] : this.nodes[0].dataset;
         }
 
@@ -1362,7 +1366,9 @@
                 attr, attrs = node.attributes,
                 i = 0, iz = attrs.length;
 
-            if (key) {
+            if (!node) {
+                return null;
+            } else if (key) {
                 dataName += key;
                 return this.attr(dataName);
             }

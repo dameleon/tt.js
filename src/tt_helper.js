@@ -110,3 +110,9 @@
     }
 
 })(this, document);
+
+
+
+function Hoge() {
+	return this;
+}
