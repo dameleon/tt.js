@@ -487,8 +487,7 @@
         res.versionCode = _getVersionCode(res.version);
         res.isCompatible = res.android && res.versionCode < 3000 ||
                            res.ios && res.versionCode < 5000 ||
-                           res.opera ||
-                           res.other && /applewebkit/.test(ua); // fix for Safari6.x
+                           res.opera;
 
         return res;
 
