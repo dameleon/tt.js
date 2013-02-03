@@ -185,6 +185,38 @@ buster.testCase("tt.js test", {
         this.ttHoge.html(node);
         assert.equals(this.hoge.innerHTML, "<div>low</div>");
     },
+    "append test": function() {
+        var node = document.createElement("div"),
+            stash = this.hoge.innerHTML;
+
+        // setting
+        node.innerHTML = "low";
+
+        this.ttHoge.append(node);
+        assert.equals(this.hoge.innerHTML, stash + "<div>low</div>");
+
+        // reset
+        this.hoge.innerHTML = stash;
+
+        this.ttHoge.append("<div>low</div>");
+        assert.equals(this.hoge.innerHTML, stash + "<div>low</div>");
+    },
+    "prepend test": function() {
+        var node = document.createElement("div"),
+            stash = this.hoge.innerHTML;
+
+        // setting
+        node.innerHTML = "low";
+
+        this.ttHoge.prepend(node);
+        assert.equals(this.hoge.innerHTML, "<div>low</div>" + stash);
+
+        // reset
+        this.hoge.innerHTML = stash;
+
+        this.ttHoge.prepend("<div>low</div>");
+        assert.equals(this.hoge.innerHTML, "<div>low</div>" + stash);
+    },
     "add test": function() {
         var node = document.createElement("div"),
             stash = this.hoge.innerHTML;

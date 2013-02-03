@@ -139,7 +139,7 @@ buster.testCase("tt.js test", {
         "cssPrefix test": function() {
             assert.isFunction(tt.cssPrefix);
 
-            var defaultPrefix = ["webkit", "moz", "o", "ms"],
+            var defaultPrefix = ["webkit", "moz", "o", "ms", "khtml"],
                 testPrefix = ["webkit", "moz"],
                 value = "transition", res;
 
@@ -152,6 +152,26 @@ buster.testCase("tt.js test", {
             tt.each(res, function(prefixed, index) {
                 assert.equals(prefixed, "-" + testPrefix[index] + "-" + value);
             });
+        },
+        "cssCamelizer test": function() {
+            var prop = "-webkit-tap-highlight-color";
+
+            assert.equals(tt.cssCamelizer(prop), "webkitTapHighlightColor");
+            assert.exception(function() { tt.cssCamelizer() }, "Error");
+        },
+        "cssHyphenizer test": function() {
+            var prop = "webkitTapHighlightColor";
+
+            assert.equals(tt.cssHyphenizer(prop), "-webkit-tap-highlight-color");
+            assert.exception(function() { tt.cssHyphenizer() }, "Error");
+        },
+        "tag test": function() {
+            var div = tt.tag("div"),
+                ttObj = tt.tag("div", true);
+
+            assert.equals(div.nodeName.toLowerCase(), "div");
+            assert.equals(ttObj.get().nodeName.toLowerCase(), "div");
+            assert.exception(function() { tt.tag() }, "Error");
         },
         "createEnvData test": function() {
             assert.isFunction(tt.createEnvData);

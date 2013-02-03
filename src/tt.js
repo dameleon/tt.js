@@ -1,5 +1,5 @@
-/** "tt.js" -Highspeed SelectorBased Library- author: Kei Takahashi(twitter@dameleon, mail:dameleon[at]gmail.com) license: MIT */
-;(function(global, document, isArray, isNodeList) {
+/** "tt.js" -Highspeed SelectorBased Library- author: Kei Takahashi(twitter@damele0n, mail:dameleon[at]gmail.com) license: MIT */
+;(function(global, document, isArray, isNodeList, undefined) {
 	'use strict';
 
 	var NS = "tt",
@@ -11,10 +11,9 @@
     Object.keys || (Object.keys = function(){var e=Object.prototype.hasOwnProperty,f=!{toString:null}.propertyIsEnumerable("toString"),c="toString toLocaleString valueOf hasOwnProperty isPrototypeOf propertyIsEnumerable constructor".split(" "),g=c.length;return function(b){if("object"!==typeof b&&"function"!==typeof b||null===b)throw new TypeError("Object.keys called on non-object");var d=[],a;for(a in b)e.call(b,a)&&d.push(a);if(f)for(a=0;a<g;a++)e.call(b,c[a])&&d.push(c[a]);return d}}());
 
     document.addEventListener("DOMContentLoaded", function() {
-        var i = 0, iz = queue.length;
-
         loaded = true;
-        for (; i < iz; ++i) {
+
+        for (var i = 0, iz = queue.length; i < iz; ++i) {
             queue[i]();
         }
     }, false);
@@ -223,7 +222,7 @@
     };
 
     /**
-     * Extend the object
+     * Extend object
      *
      * @name extend
      * @memberof tt
@@ -364,7 +363,7 @@
     tt.cssPrefix = function(value, prefix) {
         var res = [];
 
-        prefix = prefix || ["webkit", "moz", "o", "ms"];
+        prefix = prefix || ["webkit", "moz", "o", "ms", "khtml"];
         tt.each(prefix, function(str, index) {
             res[index] = "-" + str + "-" + value;
         });
@@ -394,14 +393,11 @@
             str = str.substr(1, str.length);
         }
         tt.each(str.split("-"), function(value, index) {
-            var first;
-
             if (!index) {
                 res += value;
                 return;
             }
-            first = value[0].toUpperCase();
-            res += first + value.substr(1, value.length);
+            res += value[0].toUpperCase() + value.substr(1, value.length);
         });
         return res;
     };
@@ -423,7 +419,7 @@
             throw new Error("arugment type error");
         }
 
-        var prefix = ["webkit", "moz", "o", "ms"],
+        var prefix = ["webkit", "moz", "o", "ms", "khtml"],
             upperRe = /[A-Z]/g,
             upperStr = str.match(upperRe),
             res = "";
@@ -440,6 +436,31 @@
         });
         return res;
     };
+
+    /**
+     * Create new Element
+     *
+     * @name tag
+     * @memberof tt
+     * @function
+     * @param {String} element tag name string
+     * @param {Bool}  flag of create tt object
+     * @return
+     * @example
+     * tt.tag("div");
+     * // return HTMLDivElement
+     * tt.tag("div", true);
+     * // return Object: HTMLDivElement in tt object
+     */
+    tt.tag = function(name, useTT) {
+        if (typeof name !== "string") {
+            throw new Error("argument type error");
+        }
+
+        var tag = document.createElement(name);
+
+        return useTT ? tt(tag) : tag;
+    }
 
     /**
      * Create an object of environmental information based on the information of the navigator
@@ -744,28 +765,18 @@
          * tt(".hoge").toggleClass("hoge");
          */
         toggleClass: function(className, strict) {
-            var self = this;
-
-            strict ? _strictToggle() : _simpleToggle();
-            return this;
-
-            function _strictToggle() {
-                self.each(function() {
+            if (strict) {
+                this.each(function() {
                     var ttObj = tt(this);
 
-                    ttObj.hasClass(className) ?
-                        ttObj.removeClass(className) :
-                        ttObj.addClass(className);
+                    ttObj.hasClass(className) ? ttObj.removeClass(className) : ttObj.addClass(className);
                 });
+            } else {
+                tt(this.nodes[0]).hasClass(className) ?
+                    this.removeClass(className) :
+                    this.addClass(className);
             }
-
-            function _simpleToggle() {
-                if (tt(self.nodes[0]).hasClass(className)) {
-                    self.removeClass(className);
-                } else {
-                    self.addClass(className);
-                }
-            }
+            return this;
         },
 
         /**
@@ -888,29 +899,35 @@
          * tt(".hoge").html(HTMLElement);
          */
         html: function(mix) {
-            if (mix && mix.nodeType) {
-                this.each(function() {
-                    _clearNode(this);
-                    this.appendChild(mix);
-                });
-                return this;
-            }
-
-            this.each(function() {
-                _clearNode(this);
-                this.insertAdjacentHTML("beforeend", mix);
-            });
-            return this;
-
-            function _clearNode(node) {
-                while (node.firstChild) {
-                    node.removeChild(node.firstChild);
-                }
-            }
+            return this.clear().append(mix);
         },
 
         /**
-         * Add the HTMLElement element that has been registered
+         * append the HTMLElement element that has been registered
+         *
+         * @name append
+         * @memberof TT
+         * @function
+         * @param {HTMLElement|String} mix HTMLElement or String
+         * @return {Object} TT Object
+         * @example
+         * tt(".hoge").append(HTMLDivElement);
+         * tt(".hoge").append("<div>hogehoge</div>");
+         */
+        append: function(mix) {
+            this.each(typeof mix === "string" ?
+                function() {
+                    this.insertAdjacentHTML("beforeend", mix);
+                } :
+                function() {
+                    this.appendChild(mix);
+                }
+            );
+            return this;
+        },
+
+        /**
+         * prepend the HTMLElement element that has been registered
          *
          * @name add
          * @memberof TT
@@ -918,20 +935,18 @@
          * @param {HTMLElement|String} mix HTMLElement or String
          * @return {Object} TT Object
          * @example
-         * tt(".hoge").add(HTMLDivElement);
-         * tt(".hoge").add("<div>hogehoge</div>");
+         * tt(".hoge").append(HTMLDivElement);
+         * tt(".hoge").append("<div>hogehoge</div>");
          */
-        add: function(mix) {
-            if (typeof mix === "string") {
-                this.each(function() {
-                    this.insertAdjacentHTML("beforeend", mix);
-                });
-                return this;
-            }
-
-            this.each(function() {
-                this.appendChild(mix);
-            });
+        prepend: function(mix) {
+            this.each(typeof mix === "string" ?
+                function() {
+                    this.insertAdjacentHTML("afterbegin", mix);
+                } :
+                function() {
+                    this.insertBefore(mix, this.firstChild);
+                }
+            );
             return this;
         },
 
@@ -1198,6 +1213,7 @@
         }
     };
 
+
     /**
      * Alias for on method
      *
@@ -1217,6 +1233,16 @@
      * @see TT.off
      */
     TT.prototype.unbind = TT.prototype.off;
+
+    /**
+     * Alias for append method
+     *
+     * @name add
+     * @memberof TT
+     * @function
+     * @see TT.append
+     */
+    TT.prototype.add = TT.prototype.append;
 
     /**
      * Generate the addClass method that takes into account the compatibility
