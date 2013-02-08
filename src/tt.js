@@ -915,14 +915,16 @@
          * tt(".hoge").append("<div>hogehoge</div>");
          */
         append: function(mix) {
-            this.each(typeof mix === "string" ?
-                function() {
-                    this.insertAdjacentHTML("beforeend", mix);
-                } :
-                function() {
-                    this.appendChild(mix);
-                }
-            );
+            if (typeof mix === "string") {
+                var range;
+
+                range = document.createRange();
+                range.selectNode(document.body);
+                mix = range.createContextualFragment(mix);
+            }
+            this.each(function() {
+                this.appendChild(mix);
+            });
             return this;
         },
 
@@ -939,14 +941,16 @@
          * tt(".hoge").append("<div>hogehoge</div>");
          */
         prepend: function(mix) {
-            this.each(typeof mix === "string" ?
-                function() {
-                    this.insertAdjacentHTML("afterbegin", mix);
-                } :
-                function() {
-                    this.insertBefore(mix, this.firstChild);
-                }
-            );
+            if (typeof mix === "string") {
+                var range;
+
+                range = document.createRange();
+                range.selectNode(document.body);
+                mix = range.createContextualFragment(mix);
+            }
+            this.each(function() {
+                this.insertBefore(mix, this.firstChild);
+            });
             return this;
         },
 
@@ -1417,6 +1421,8 @@
         return Object.prototype.toString.call(target) === "[object Array]";
     },
     function(target) {
-        return Object.prototype.toString.call(target) === "[object NodeList]";
+        var str = Object.prototype.toString.call(target);
+
+        return str === "[object NodeList]" || str === "[object HTMLCollection]";
     }
 );
