@@ -899,7 +899,7 @@
          * tt(".hoge").html(HTMLElement);
          */
         html: function(mix) {
-            return this.clear().append(mix);
+            return this.clear().prepend(mix);
         },
 
         /**
