@@ -905,7 +905,7 @@
                 while (this.firstChild) {
                     this.removeChild(this.firstChild);
                 }
-                this.insertBefore(mix);
+                this.appendChild(mix);
             });
             return this;
         },
