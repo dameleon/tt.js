@@ -896,7 +896,18 @@
          * tt(".hoge").html(HTMLElement);
          */
         html: function(mix) {
-            return this.clear().prepend(mix);
+            //return this.clear().prepend(mix);
+            var range = document.createRange();
+
+            range.selectNode(document.body);
+            mix = range.createContextualFragment(mix);
+            this.each(function() {
+                while (this.firstChild) {
+                    this.removeChild(this.firstChild);
+                }
+                this.insertBefore(mix);
+            });
+            return this;
         },
 
         /**
