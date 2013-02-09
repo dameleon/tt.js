@@ -386,7 +386,6 @@
         if (typeof str !== "string") {
             throw new Error("arugment type error");
         }
-
         var res = "";
 
         if (str[0] === "-") {
@@ -418,7 +417,6 @@
         if (typeof str !== "string") {
             throw new Error("arugment type error");
         }
-
         var prefix = ["webkit", "moz", "o", "ms", "khtml"],
             upperRe = /[A-Z]/g,
             upperStr = str.match(upperRe),
@@ -444,22 +442,21 @@
      * @memberof tt
      * @function
      * @param {String} element tag name string
-     * @param {Bool}  flag of create tt object
+     * @param {Bool}   if is true, return raw element
      * @return
      * @example
      * tt.tag("div");
-     * // return HTMLDivElement
-     * tt.tag("div", true);
      * // return Object: HTMLDivElement in tt object
+     * tt.tag("div", true);
+     * // return HTMLElement: div element
      */
-    tt.tag = function(name, useTT) {
+    tt.tag = function(name, raw) {
         if (typeof name !== "string") {
             throw new Error("argument type error");
         }
-
         var tag = document.createElement(name);
 
-        return useTT ? tt(tag) : tag;
+        return raw ? tag : tt(tag) ;
     }
 
     /**
@@ -919,7 +916,7 @@
                 var range;
 
                 range = document.createRange();
-                range.selectNode(document.body);
+                range.selectNodeContents(document.body);
                 mix = range.createContextualFragment(mix);
             }
             this.each(function() {
@@ -945,7 +942,7 @@
                 var range;
 
                 range = document.createRange();
-                range.selectNode(document.body);
+                range.selectNodeContents(document.body);
                 mix = range.createContextualFragment(mix);
             }
             this.each(function() {

@@ -177,6 +177,7 @@ buster.testCase("tt.js test", {
         node.innerHTML = "low";
 
         this.ttHoge.html("<div>low</div>");
+        console.log(this.hoge.innerHTML);
         assert.equals(this.hoge.innerHTML, "<div>low</div>");
 
         // reset

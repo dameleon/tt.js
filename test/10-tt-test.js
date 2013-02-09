@@ -166,11 +166,11 @@ buster.testCase("tt.js test", {
             assert.exception(function() { tt.cssHyphenizer() }, "Error");
         },
         "tag test": function() {
-            var div = tt.tag("div"),
-                ttObj = tt.tag("div", true);
+            var ttObj = tt.tag("div"),
+                div = tt.tag("div", true);
 
-            assert.equals(div.nodeName.toLowerCase(), "div");
             assert.equals(ttObj.get().nodeName.toLowerCase(), "div");
+            assert.equals(div.nodeName.toLowerCase(), "div");
             assert.exception(function() { tt.tag() }, "Error");
         },
         "createEnvData test": function() {
