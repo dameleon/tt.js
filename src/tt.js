@@ -64,12 +64,16 @@
                         parent.getElementById(mix.substring(1, mix.length)) :
                      mix[0] === "." ?
                         parent.getElementsByClassName(mix.substring(1, mix.length)) :
+                     mix === 'body' ?
+                        document.body ?
                         parent.getElementsByTagName(mix);
         } else if (mix && (mix.nodeType === 1 ||
                            isNodeList(mix) ||
                            (isArray(mix) && mix[0] && mix[0].nodeType))) {
 
             target = mix;
+        } else if (mix === document || mix === document.body) {
+            target = document.body;
         } else if (mix instanceof TT) {
             return mix;
         } else if (typeof mix === "function") {
@@ -896,7 +900,6 @@
          * tt(".hoge").html(HTMLElement);
          */
         html: function(mix) {
-            //return this.clear().prepend(mix);
             var range = document.createRange();
 
             range.selectNode(document.body);
