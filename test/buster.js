@@ -5,13 +5,12 @@ config["ttjsTests"] = {
     env: "browser",
     rootPath: "../",
     sources: [
-        "src/tt.js",
-        "src/tt_helper.js"
+        "src/tt.js"
     ],
     resources: [
         {
             "path": "/",
-            "file": "test/fixtures/test.html"
+            "file": "test/fixtures/index.html"
         }
     ],
     tests: [

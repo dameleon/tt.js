@@ -1,17 +1,16 @@
+// プラグイン名変えたら色々と書きなおす必要がありますよっと
 buster.testCase("tt.js test", {
     "setUp": function() {
-        this.div = document.getElementById("hoge");
-        this.nodeList = document.getElementsByClassName("piyo");
     },
     "Basic test": {
         "tt function": function() {
             assert.isFunction(tt);
         },
         "tt object": function() {
-            var ttObj = tt("");
+            var tts = tt("");
 
-            assert.equals(typeof ttObj, "object");
-            assert.equals(ttObj.constructor.name, "TT");
+            assert.equals(typeof tts, "object");
+            assert.equals(tts.constructor.name, "TT");
         },
         "tt loaded function": function() {
             var spy = sinon.spy();
@@ -22,39 +21,45 @@ buster.testCase("tt.js test", {
     },
     "DOM Search test": {
         "ID named search": function() {
-            assert.equals(tt("#hoge").length, 1);
+            assert.equals(tt("#fixture-id").length, 1);
         },
         "class named search": function() {
-            assert.equals(tt(".piyo").length, 5);
+            assert.equals(tt(".fixture-class").length, 5);
         },
         "tag named search": function() {
-            assert.equals(tt("div").length, 7);
+            assert.equals(tt("div").length, 6);
         },
         "use querySelectorAll search": function() {
-            assert.equals(tt("div[data-role=foo]").length, 1);
-            assert.equals(tt(".fuga > div:first-child").length, 1);
+            assert.equals(tt('[data-role="fixture-data"]').length, 5);
+            assert.equals(tt('[data-role=fixture-data]').length, 5);
         }
     },
     "tt methods test": {
         "isArray test": function() {
             assert.isFunction(tt.isArray);
-
-            var arr = [];
-
-            assert(tt.isArray(arr));
+            assert(tt.isArray([]));
         },
         "isNodeList test": function() {
             assert.isFunction(tt.isNodeList);
-            assert(tt.isNodeList(this.nodeList));
+            assert(tt.isNodeList(document.getElementsByTagName('html')));
         },
-        "plugin test": function() {
-            assert.isFunction(tt.plugin);
-            tt.plugin("testPlugin", function() { return this; });
-            assert.isFunction(tt("").testPlugin);
-            assert.exception(function() {
-                tt.plugin("", {});
-            });
-        },
+		"type test": function() {
+			assert.isFunction(tt.type);
+
+			assert.equals(tt.type(null), 'null');
+			assert.equals(tt.type(undefined), 'undefined');
+			assert.equals(tt.type(window), 'window');
+			assert.equals(tt.type(document), 'document');
+			assert.equals(tt.type(document.body), 'node');
+			assert.equals(tt.type([]), 'array');
+			assert.equals(tt.type(document.getElementsByTagName('html')), 'nodelist');
+			assert.equals(tt.type({}), 'object');
+			assert.equals(tt.type(tt()), 'object');
+			assert.equals(tt.type(new Date), 'date');
+			assert.equals(tt.type(new RegExp('')), 'regexp');
+			assert.equals(tt.type(1234), 'number');
+			assert.equals(tt.type('1234'), 'string');
+		},
         "each test": function() {
             assert.isFunction(tt.each);
 
@@ -87,6 +92,43 @@ buster.testCase("tt.js test", {
             });
             assert.isNull(res);
         },
+		"extend test": function() {
+			assert.isFunction(tt.extend);
+			var	a = {
+					'hoge': 1,
+					'fuga': 2,
+					'piyo': 3
+				},
+				b = {
+					'fuga': 'a',
+					'piyo': 'b'
+				},
+				c;
+
+			c = tt.extend(a, b);
+			assert.equals(a, c, {
+				'hoge': 1,
+				'fuga': 'a',
+				'piyo': 'b'
+			});
+
+			var d = {
+				'hoge': {
+					'fuga': false
+				}
+			},
+			e = {
+				'hoge': {
+					'fuga': true
+				}
+			}
+			tt.extend(d, e);
+			assert.equals(d, {
+				'hoge': {
+					'fuga': true
+				}
+			});
+		},
         "query2object test": function() {
             assert.isFunction(tt.query2object);
 
@@ -95,19 +137,6 @@ buster.testCase("tt.js test", {
                 'hoge' : 'huga',
                 'foo' : 'bar'
             });
-        },
-        "extend test": function() {
-            assert.isFunction(tt.extend);
-
-            var hoge = {'key' : 'val'};
-            var huga = {'prop' : 'value'};
-            var foo = {'foo' : 'bar'};
-
-            var res = tt.extend(hoge, huga, foo);
-
-            assert.equals(res.key, hoge.key);
-            assert.equals(res.prop, huga.prop);
-            assert.equals(res.foo, foo.foo);
         },
         "param test": function() {
             assert.isFunction(tt.param);
@@ -123,17 +152,16 @@ buster.testCase("tt.js test", {
 
             var spy = sinon.spy();
 
-            tt(this.div).bind('click', spy, false);
-            tt(this.div).trigger('click');
+            tt(document.body).bind('click', spy, false);
+            tt(document.body).trigger('click');
 
             assert.calledOnce(spy);
 
             refute.exception(function () {
-                tt('hoge').trigger('huga');
+                tt('').trigger('');
             });
-            var self = this;
             assert.exception(function () {
-                tt(self.div).trigger();
+                tt(document.body).trigger();
             }, 'Error');
         },
         "cssPrefix test": function() {

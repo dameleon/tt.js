@@ -1,338 +1,300 @@
 buster.testCase("tt.js test", {
     "setUp": function() {
-        this.hoge = document.getElementById("hoge");
-        this.fuga = document.querySelectorAll(".fuga");
-        this.piyo = document.querySelectorAll(".piyo");
-        this.ttHoge = tt("#hoge");
-        this.ttFuga = tt(".fuga");
-        this.ttPiyo = tt(".piyo");
-        this.role = {
-            "hoge": "foo",
-            "fuga": "bar",
-            "piyo": "baz"
-        };
-        this.isArray = Array.isArray || function(target) {
-            return Object.prototype.toString.call(target) === "[object Array]";
-        };
+		this.fixtures = {
+			'id': document.getElementById('fixture-id'),
+			'klass': document.getElementsByClassName('fixture-class'),
+			'data': document.querySelectorAll('[data-role="fixture-data"]')
+		};
+		this.tts = {
+			'id': tt('#fixture-id'),
+			'klass': tt('.fixture-class'),
+			'data': tt('[data-role="fixture-data"]')
+		};
     },
     "get test": function() {
         var res;
 
-        res = this.ttPiyo.get();
-        assert.equals(res.nodeType, 1);
-
-        res = this.ttPiyo.get(2);
-        assert.equals(res.getAttribute("data-role"), this.role.piyo);
+		assert.equals(this.tts.id.get(), this.fixtures.id);
+		assert.equals(this.tts.klass.get(2), this.fixtures.klass[2]);
     },
     "toArray test": function() {
-        var res;
+        var res = this.tts.klass.toArray();
 
-        res = this.ttPiyo.toArray();
-        assert(this.isArray(res));
-        assert.equals(res.length, 5);
+		assert.equals(tt.type(res), 'array');
+		assert.equals(res.length, 5);
     },
     "each test": function() {
         var res = [];
 
-        this.ttPiyo.each(function(index) {
+        this.tts.klass.each(function(index) {
             assert.equals(this.nodeType, 1);
             assert.isNumber(index);
             res.push(this);
         });
-        assert.equals(res.length, this.piyo.length);
+        assert.equals(res.length, this.fixtures.klass.length);
     },
     "match": function() {
         var self = this, res;
 
-        res = this.ttPiyo.match(function(index) {
+        res = this.tts.klass.match(function(index) {
             assert.equals(this.nodeType, 1);
             assert.isNumber(index);
-
-            var attr = this.getAttribute("data-role");
-
-            if (attr === self.role.piyo) {
-                return true;
-            }
-            return false;
+			return index === 2 ? true : false;
         });
         assert.equals(res.nodeType, 1);
-        assert.equals(res.getAttribute("data-role"), this.role.piyo);
+        assert.equals(res, this.fixtures.klass[2]);
     },
     "on test": function() {
         var spy = sinon.spy();
 
-        this.ttHoge.on("onhoge", spy, false);
-        tt.triggerEvent(this.hoge, "onhoge", false, true);
+        this.tts.id.on("onhoge", spy, false);
+        tt.triggerEvent(this.fixtures.id, "onhoge", false, true);
 
         assert.calledOnce(spy);
 
-        this.ttHoge.off("onhoge", spy);
+        this.tts.id.off("onhoge", spy);
     },
     "off test": function() {
         var spy = sinon.spy();
 
-        this.ttHoge.on("onhoge", spy, false);
-        this.ttHoge.off("onhoge", spy);
+        this.tts.id.on("onhoge", spy, false);
+        this.tts.id.off("onhoge", spy);
 
-        tt.triggerEvent(this.hoge, "onhoge", false, true);
+        tt.triggerEvent(this.fixtures.id, "onhoge", false, true);
 
         refute.calledOnce(spy);
     },
     "bind test": function() {
         var spy = sinon.spy();
 
-        this.ttHoge.bind("onhoge", spy, false);
-        tt.triggerEvent(this.hoge, "onhoge", false, true);
+        this.tts.id.bind("onhoge", spy, false);
+        tt.triggerEvent(this.fixtures.id, "onhoge", false, true);
 
         assert.calledOnce(spy);
 
-        this.ttHoge.unbind("onhoge", spy);
+        this.tts.id.unbind("onhoge", spy);
     },
     "unbind test": function() {
         var spy = sinon.spy();
 
-        this.ttHoge.bind("onhoge", spy, false);
-        this.ttHoge.unbind("onhoge", spy);
+        this.tts.id.bind("onhoge", spy, false);
+        this.tts.id.unbind("onhoge", spy);
 
-        tt.triggerEvent(this.hoge, "onhoge", false, true);
+        tt.triggerEvent(this.fixtures.id, "onhoge", false, true);
 
         refute.calledOnce(spy);
     },
+	// delegate, undelegate
     "addClass test": function() {
-        var className = "add-class";
+        var className = "added";
 
-        this.ttHoge.addClass(className);
-        assert(this.hoge.className.match(className));
+        this.tts.id.addClass(className);
+        assert(this.fixtures.id.className.match(className));
     },
     "removeClass test": function() {
-        var className = "remove-class";
+        var className = "added";
 
-        this.ttHoge.addClass(className);
+        this.tts.id.addClass(className);
+        assert(this.fixtures.id.className.match(className));
 
-        this.ttHoge.removeClass(className);
-        refute(this.hoge.className.indexOf(className) > -1);
+        this.tts.id.removeClass(className);
+        refute(this.fixtures.id.className.indexOf(className) > -1);
     },
     "hasClass test": function() {
-        var className = "has-class";
+        var className = "added";
 
-        this.ttHoge.addClass(className);
-        assert(this.ttHoge.hasClass(className));
+        this.tts.id.addClass(className);
+        assert(this.tts.id.hasClass(className));
 
-        this.ttHoge.removeClass(className);
-        refute(this.ttHoge.hasClass(className));
+        this.tts.id.removeClass(className);
+        refute(this.tts.id.hasClass(className));
     },
     "toggleClass test": function() {
-        var className = "toggle-class";
+        var className = "added";
 
-        // setting
-        this.ttHoge.removeClass(className);
+        this.tts.id.removeClass(className);
 
-        this.ttHoge.toggleClass(className);
-        assert(this.ttHoge.hasClass(className));
+        this.tts.id.toggleClass(className);
+        assert(this.tts.id.hasClass(className));
 
-        this.ttHoge.toggleClass(className);
-        refute(this.ttHoge.hasClass(className));
+        this.tts.id.toggleClass(className);
+        refute(this.tts.id.hasClass(className));
     },
     "toggleClass deep test": function() {
-        var className = "toggle-class-deep",
-            targetNode = tt(this.piyo[2]);
+        var className = "added",
+            target = tt(this.fixtures.klass[2]);
 
-        // setting
-        this.ttPiyo.removeClass(className);
-        targetNode.addClass(className);
+        this.tts.klass.removeClass(className);
+        target.addClass(className);
 
-        this.ttPiyo.toggleClass(className, true);
-        refute(targetNode.hasClass(className));
+        this.tts.klass.toggleClass(className, true);
+        refute(target.hasClass(className));
 
-        this.ttPiyo.toggleClass(className, true);
-        assert(targetNode.hasClass(className));
+        this.tts.klass.toggleClass(className, true);
+        assert(target.hasClass(className));
     },
     "find test": function() {
-        assert.equals(this.ttFuga.find(".piyo").length, this.piyo.length);
+		assert.equals(tt(document.body).find('.fixture-class').length, 5);
     },
     "contain test": function() {
-        assert.equals(this.ttFuga.contains(".piyo"), this.fuga[0]);
-        refute(this.ttPiyo.contains(".notfound"));
+		assert.equals(tt(document.body).find('.fixture-class').length, 5);
+        refute(tt(document.body).contains(".notfound"));
     },
     "attr test": function() {
-        assert.equals(this.ttHoge.attr("name"), this.hoge.getAttribute("name"));
+        assert.equals(this.tts.id.attr("name"), this.fixtures.id.getAttribute("name"));
 
-        this.ttHoge.attr("name", "attr-test-01");
-        assert.equals(this.ttHoge.attr("name"), this.hoge.getAttribute("name"));
+        this.tts.id.attr("name", "attr-test-01");
+        assert.equals(this.tts.id.attr("name"), this.fixtures.id.getAttribute("name"));
 
-        this.ttHoge.attr("name", "");
-        assert.equals(this.ttHoge.attr("name"), this.hoge.getAttribute("name"));
+        this.tts.id.attr("name", "");
+        assert.equals(this.tts.id.attr("name"), this.fixtures.id.getAttribute("name"));
 
         var attrs = { "name": "attr-test-02", "rel": "attr-test-03" };
         for (var key in attrs) {
-            this.ttHoge.attr(key, attrs[key]);
-            assert.equals(this.ttHoge.attr(key), this.hoge.getAttribute(key));
+            this.tts.id.attr(key, attrs[key]);
+            assert.equals(this.tts.id.attr(key), this.fixtures.id.getAttribute(key));
         }
     },
     "html test": function() {
-        var node = document.createElement("div"),
-            stash = this.hoge.innerHTML;
+        var stash = this.fixtures.id.innerHTML;
 
-        // setting
-        node.innerHTML = "low";
-
-        this.ttHoge.html("<div>low</div>");
-        console.log(this.hoge.innerHTML);
-        assert.equals(this.hoge.innerHTML, "<div>low</div>");
+		this.tts.id.html('<span>appended node</span>');
+		assert.equals(this.fixtures.id.innerHTML, '<span>appended node</span>');
+		assert.equals(this.tts.id.html(), '<span>appended node</span>');
 
         // reset
-        this.hoge.innerHTML = stash;
-
-        this.ttHoge.html(node);
-        assert.equals(this.hoge.innerHTML, "<div>low</div>");
+        this.fixtures.id.innerHTML = stash;
     },
     "append test": function() {
         var node = document.createElement("div"),
-            stash = this.hoge.innerHTML;
+            stash = this.fixtures.id.innerHTML;
 
         // setting
-        node.innerHTML = "low";
+        node.innerHTML = "added node";
 
-        this.ttHoge.append(node);
-        assert.equals(this.hoge.innerHTML, stash + "<div>low</div>");
+        this.tts.id.append(node);
+        assert.equals(this.fixtures.id.innerHTML, stash + "<div>added node</div>");
 
         // reset
-        this.hoge.innerHTML = stash;
-
-        this.ttHoge.append("<div>low</div>");
-        assert.equals(this.hoge.innerHTML, stash + "<div>low</div>");
+        this.fixtures.id.innerHTML = stash;
     },
     "prepend test": function() {
         var node = document.createElement("div"),
-            stash = this.hoge.innerHTML;
+            stash = this.fixtures.id.innerHTML;
 
         // setting
-        node.innerHTML = "low";
+        node.innerHTML = "added node";
 
-        this.ttHoge.prepend(node);
-        assert.equals(this.hoge.innerHTML, "<div>low</div>" + stash);
-
-        // reset
-        this.hoge.innerHTML = stash;
-
-        this.ttHoge.prepend("<div>low</div>");
-        assert.equals(this.hoge.innerHTML, "<div>low</div>" + stash);
-    },
-    "add test": function() {
-        var node = document.createElement("div"),
-            stash = this.hoge.innerHTML;
-
-        // setting
-        node.innerHTML = "low";
-
-        this.ttHoge.add(node);
-        assert.equals(this.hoge.innerHTML, stash + "<div>low</div>");
+        this.tts.id.prepend(node);
+        assert.equals(this.fixtures.id.innerHTML, "<div>added node</div>" + stash);
 
         // reset
-        this.hoge.innerHTML = stash;
-
-        this.ttHoge.add("<div>low</div>");
-        assert.equals(this.hoge.innerHTML, stash + "<div>low</div>");
+        this.fixtures.id.innerHTML = stash;
     },
     "remove test": function() {
         var node = document.createElement("div");
 
-        node.innerHTML = "mogemoge";
+        node.innerHTML = "added node";
 
-        this.hoge.innerHTML = "";
-        this.hoge.appendChild(node);
+        this.fixtures.id.innerHTML = "";
+        this.fixtures.id.appendChild(node);
 
         tt(node).remove();
-        assert.equals(this.hoge.innerHTML, "");
+        assert.equals(this.fixtures.id.innerHTML, "");
     },
     "clear test": function() {
         var node = document.createElement("div");
 
-        this.hoge.innerHTML = node;
+        this.fixtures.id.innerHTML = node;
 
-        this.ttHoge.clear();
-        assert.equals(this.hoge.innerHTML, "");
+        this.tts.id.clear();
+        assert.equals(this.fixtures.id.innerHTML, "");
     },
     "css test": function() {
-        assert.equals(this.ttHoge.css("display"), "block");
+        assert.equals(this.tts.id.css("display"), "block");
 
-        this.ttHoge.css("display", "inline-block");
-        assert.equals(this.hoge.style.display, "inline-block");
+        this.tts.id.css("display", "inline-block");
+        assert.equals(this.fixtures.id.style.display, "inline-block");
 
-        this.ttHoge.css({"display": "inline", "background-color": "#000000"});
-        assert.equals(this.hoge.style.display, "inline");
-        assert.equals(this.hoge.style.backgroundColor, "rgb(0, 0, 0)");
+        this.tts.id.css({"display": "inline", "background-color": "#000000"});
+        assert.equals(this.fixtures.id.style.display, "inline");
+        assert.equals(this.fixtures.id.style.backgroundColor, "rgb(0, 0, 0)");
     },
     "data test": function() {
-        var data = this.ttHoge.data();
+        var data = this.tts.klass.data();
 
-        assert.equals(data.role, this.role.hoge);
+        assert.equals(data.role, 'fixture-data');
+		assert.equals(this.tts.klass.data('role'), 'fixture-data');
 
-        assert.equals(this.ttHoge.data("role"), this.role.hoge);
+		// modified
+		this.tts.klass.data('role', 'modified-data');
+		assert.equals(this.tts.klass.data('role'), 'modified-data');
 
-        this.ttHoge.data("role", "data-test-01")
-        assert.equals(this.hoge.getAttribute("data-role"), "data-test-01");
+		// multi modified
+		this.tts.klass.data({
+			'role': 'modified-data-multi',
+			'tmp': 'new-data'
+		});
+		assert.equals(this.tts.klass.data('role'), 'modified-data-multi');
+		assert.equals(this.tts.klass.data('tmp'), 'new-data');
 
         // reset
-        this.hoge.setAttribute("data-role", this.role.hoge);
-
-        this.ttHoge.data({"role": "data-test-02", "title": "data-test-title"});
-        assert.equals(this.hoge.getAttribute("data-role"), "data-test-02");
-        assert.equals(this.hoge.getAttribute("data-title"), "data-test-title");
+        this.tts.klass.data('role', 'fixture-data');
+        this.tts.klass.data('tmp', '');
     },
     "show test": function() {
-        this.hoge.style.display = "none";
+        this.fixtures.id.style.display = "none";
 
-        this.ttHoge.show();
-        assert.equals(this.hoge.style.display, "block");
+        this.tts.id.show();
+        assert.equals(this.fixtures.id.style.display, "block");
     },
     "hide test": function() {
-        this.hoge.style.display = "block";
+        this.fixtures.id.style.display = "block";
 
-        this.ttHoge.hide();
-        assert.equals(this.hoge.style.display, "none");
+        this.tts.id.hide();
+        assert.equals(this.fixtures.id.style.display, "none");
     },
     "hide show test": function() {
-        this.hoge.style.display = "inline-block";
+        this.fixtures.id.style.display = "inline-block";
 
-        this.ttHoge.hide().show();
-        assert.equals(this.hoge.style.display, "inline-block");
+        this.tts.id.hide().show();
+        assert.equals(this.fixtures.id.style.display, "inline-block");
     },
     "trigger test": function() {
         var spy = sinon.spy();
 
-        this.hoge.addEventListener("onhoge", spy, false);
-        this.ttHoge.trigger("Event", "onhoge", false, true);
+        this.fixtures.id.addEventListener("onhoge", spy, false);
+        this.tts.id.trigger("Event", "onhoge", false, true);
 
         assert.calledOnce(spy);
     },
     "replace test": function() {
-        var stash = this.hoge.innerHTML + "",
+        var stash = this.fixtures.id.innerHTML + "",
             node01 = document.createElement("div"),
             node02 = document.createElement("div");
 
         node01.innerHTML = "hogehoge";
         node02.innerHTML = "mogemoge";
-        this.hoge.innerHTML = "";
-        this.hoge.appendChild(node01);
+        this.fixtures.id.innerHTML = "";
+        this.fixtures.id.appendChild(node01);
 
         tt(node01).replace("<div>mogemoge</div>");
-        assert.equals(this.hoge.innerHTML, "<div>mogemoge</div>");
+        assert.equals(this.fixtures.id.innerHTML, "<div>mogemoge</div>");
 
-        this.hoge.innerHTML = "";
-        this.hoge.appendChild(node02);
+        this.fixtures.id.innerHTML = "";
+        this.fixtures.id.appendChild(node02);
         tt(node02).replace(node01);
-        assert.equals(this.hoge.innerHTML, "<div>hogehoge</div>");
+        assert.equals(this.fixtures.id.innerHTML, "<div>hogehoge</div>");
 
-        this.hoge.innerHTML = stash;
+        this.fixtures.id.innerHTML = stash;
     },
     "offset test": function() {
-        var rect = this.hoge.getBoundingClientRect(),
+        var rect = this.fixtures.id.getBoundingClientRect(),
             offset = {
                 left: rect.left + window.pageXOffset,
                 top: rect.top + window.pageYOffset
             };
 
-        assert.equals(this.ttHoge.offset(), offset);
+        assert.equals(this.tts.id.offset(), offset);
     }
 });
