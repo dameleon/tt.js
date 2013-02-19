@@ -654,7 +654,7 @@
 					while (this.firstChild) {
 						this.removeChild(this.firstChild);
 					}
-					this.insertAdjacentHTML(mix, 'beforeend');
+					this.insertAdjacentHTML('afterbegin', mix);
 				});
 			}
 			return this;
