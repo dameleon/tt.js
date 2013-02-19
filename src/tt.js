@@ -48,10 +48,10 @@
 				target = mix;
 			} else if (mix === document || mix === document.body) {
 				target = [document.body];
-			} else if (mix instanceof TT) {
-				return mix;
 			} else if (typeof mix === 'function') {
 				loaded ? mix() : loadQueue.push(mix);
+			} else if (mix instanceof TT) {
+				return mix;
 			} else {
 				throw new Error('arguments type error');
 			}
@@ -527,8 +527,9 @@
 			}
 
 			function _removeClassByClassName(className) {
+				className = ' ' + className + ' ';
 				this.each(function() {
-					this.className = (' ' + this.className + ' ').replace(' ' + className + ' ', '');
+					this.className = (' ' + this.className + ' ').replace(className, '');
 				});
 			}
 		})(),
@@ -645,6 +646,19 @@
 			if (mix === undefined || mix === null) {
 				return this[0].innerHTML;
 			}
+
+			if (mix.nodeType) {
+				this.clear().append(mix);
+			} else {
+				this.each(function() {
+					while (this.firstChild) {
+						this.removeChild(this.firstChild);
+					}
+					this.insertAdjacentHTML(mix, 'beforeend');
+				});
+			}
+			return this;
+			/*
 			var range = document.createRange();
 
 			range.selectNode(document.body);
@@ -656,6 +670,7 @@
 				this.appendChild(mix);
 			});
 			return this;
+			*/
 		},
 
 		append: function(mix) {
