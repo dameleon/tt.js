@@ -31,15 +31,13 @@
 		if (typeof mix === 'string') {
 			selector = mix;
 			parent = parent || document;
-			if (querySelectorRe.test(mix)) {
-				target = parent.querySelectorAll(mix);
-			} else if (mix[0] === '#') {
-				target = [parent.getElementById(mix.substring(1, mix.length))];
-			} else if (mix[0] === '.') {
-				target = parent.getElementsByClassName(mix.substring(1, mix.length));
-			} else {
-				target = parent.getElementsByTagName(mix);
-			}
+			target = querySelectorRe.test(mix) ?
+						parent.querySelectorAll(mix) :
+					 mix[0] === '#' ?
+						[parent.getElementById(mix.substring(1, mix.length))] :
+					 mix[0] === '.' ?
+						parent.getElementsByClassName(mix.substring(1, mix.length)) :
+					    parent.getElementsByTagName(mix);
 		} else if (mix) {
 			if (mix.nodeType === 1) {
 				target = [mix];
@@ -658,44 +656,20 @@
 				});
 			}
 			return this;
-			/*
-			var range = document.createRange();
-
-			range.selectNode(document.body);
-			mix = range.createContextualFragment(mix);
-			this.each(function() {
-				while (this.firstChild) {
-					this.removeChild(this.firstChild);
-				}
-				this.appendChild(mix);
-			});
-			return this;
-			*/
 		},
 
 		append: function(mix) {
-			if (typeof mix === "string") {
-				var range = document.createRange();
-
-				range.selectNode(document.body);
-				mix = range.createContextualFragment(mix);
-			}
-			this.each(function() {
-				this.appendChild(mix);
-			});
+			this.each((typeof mix === 'string') ?
+				function() { this.insertAdjacentHTML('beforeend', mix); } :
+				function() { this.appendChild(mix); });
 			return this;
 		},
 
 		prepend: function(mix) {
-			if (typeof mix === "string") {
-				var range = document.createRange();
-
-				range.selectNode(document.body);
-				mix = range.createContextualFragment(mix);
-			}
-			this.each(function() {
-				this.insertBefore(mix, this.firstChild);
-			});
+			this.each((typeof mix === 'string') ?
+				function() { this.insertAdjacentHTML('afterbegin', mix); } :
+				function() { this.insertBefore(mix, this.firstChild); }
+			);
 			return this;
 		},
 
@@ -716,23 +690,11 @@
 		},
 
 		replace: function(mix) {
-			var fn = null;
-
-			if (mix && mix.nodeType) {
-				fn = _insertNode;
-			} else if (typeof mix === "string") {
-				fn = _insertHTML;
-			}
-			fn && this.each(fn).remove();
+			this.each((typeof mix === 'string') ?
+				function() { this.insertAdjacentHTML('beforebegin', mix); } :
+				function() { this.parentNode.insertBefore(mix, this); });
+			this.remove();
 			return this;
-
-			function _insertNode() {
-				this.parentNode && this.parentNode.insertBefore(mix, this);
-			}
-
-			function _insertHTML() {
-				this.insertAdjacentHTML("beforebegin", mix);
-			}
 		},
 
 		css: function(mix, value) {
