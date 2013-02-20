@@ -1,27 +1,27 @@
 buster.testCase("tt.js test", {
     "setUp": function() {
-		this.fixtures = {
-			'id': document.getElementById('fixture-id'),
-			'klass': document.getElementsByClassName('fixture-class'),
-			'data': document.querySelectorAll('[data-role="fixture-data"]')
-		};
-		this.tts = {
-			'id': tt('#fixture-id'),
-			'klass': tt('.fixture-class'),
-			'data': tt('[data-role="fixture-data"]')
-		};
+        this.fixtures = {
+            'id': document.getElementById('fixture-id'),
+            'klass': document.getElementsByClassName('fixture-class'),
+            'data': document.querySelectorAll('[data-role="fixture-data"]')
+        };
+        this.tts = {
+            'id': tt('#fixture-id'),
+            'klass': tt('.fixture-class'),
+            'data': tt('[data-role="fixture-data"]')
+        };
     },
     "get test": function() {
         var res;
 
-		assert.equals(this.tts.id.get(), this.fixtures.id);
-		assert.equals(this.tts.klass.get(2), this.fixtures.klass[2]);
+        assert.equals(this.tts.id.get(), this.fixtures.id);
+        assert.equals(this.tts.klass.get(2), this.fixtures.klass[2]);
     },
     "toArray test": function() {
         var res = this.tts.klass.toArray();
 
-		assert.equals(tt.type(res), 'array');
-		assert.equals(res.length, 5);
+        assert.equals(tt.type(res), 'array');
+        assert.equals(res.length, 5);
     },
     "each test": function() {
         var res = [];
@@ -39,7 +39,7 @@ buster.testCase("tt.js test", {
         res = this.tts.klass.match(function(index) {
             assert.equals(this.nodeType, 1);
             assert.isNumber(index);
-			return index === 2 ? true : false;
+            return index === 2 ? true : false;
         });
         assert.equals(res.nodeType, 1);
         assert.equals(res, this.fixtures.klass[2]);
@@ -84,7 +84,7 @@ buster.testCase("tt.js test", {
 
         refute.calledOnce(spy);
     },
-	// delegate, undelegate
+    // delegate, undelegate
     "addClass test": function() {
         var className = "added";
 
@@ -134,10 +134,10 @@ buster.testCase("tt.js test", {
         assert(target.hasClass(className));
     },
     "find test": function() {
-		assert.equals(tt(document.body).find('.fixture-class').length, 5);
+        assert.equals(tt(document.body).find('.fixture-class').length, 5);
     },
     "contain test": function() {
-		assert.equals(tt(document.body).find('.fixture-class').length, 5);
+        assert.equals(tt(document.body).find('.fixture-class').length, 5);
         refute(tt(document.body).contains(".notfound"));
     },
     "attr test": function() {
@@ -158,9 +158,9 @@ buster.testCase("tt.js test", {
     "html test": function() {
         var stash = this.fixtures.id.innerHTML;
 
-		this.tts.id.html('<span>appended node</span>');
-		assert.equals(this.fixtures.id.innerHTML, '<span>appended node</span>');
-		assert.equals(this.tts.id.html(), '<span>appended node</span>');
+        this.tts.id.html('<span>appended node</span>');
+        assert.equals(this.fixtures.id.innerHTML, '<span>appended node</span>');
+        assert.equals(this.tts.id.html(), '<span>appended node</span>');
 
         // reset
         this.fixtures.id.innerHTML = stash;
@@ -224,19 +224,19 @@ buster.testCase("tt.js test", {
         var data = this.tts.klass.data();
 
         assert.equals(data.role, 'fixture-data');
-		assert.equals(this.tts.klass.data('role'), 'fixture-data');
+        assert.equals(this.tts.klass.data('role'), 'fixture-data');
 
-		// modified
-		this.tts.klass.data('role', 'modified-data');
-		assert.equals(this.tts.klass.data('role'), 'modified-data');
+        // modified
+        this.tts.klass.data('role', 'modified-data');
+        assert.equals(this.tts.klass.data('role'), 'modified-data');
 
-		// multi modified
-		this.tts.klass.data({
-			'role': 'modified-data-multi',
-			'tmp': 'new-data'
-		});
-		assert.equals(this.tts.klass.data('role'), 'modified-data-multi');
-		assert.equals(this.tts.klass.data('tmp'), 'new-data');
+        // multi modified
+        this.tts.klass.data({
+            'role': 'modified-data-multi',
+            'tmp': 'new-data'
+        });
+        assert.equals(this.tts.klass.data('role'), 'modified-data-multi');
+        assert.equals(this.tts.klass.data('tmp'), 'new-data');
 
         // reset
         this.tts.klass.data('role', 'fixture-data');

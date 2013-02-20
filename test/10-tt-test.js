@@ -43,23 +43,23 @@ buster.testCase("tt.js test", {
             assert.isFunction(tt.isNodeList);
             assert(tt.isNodeList(document.getElementsByTagName('html')));
         },
-		"type test": function() {
-			assert.isFunction(tt.type);
+        "type test": function() {
+            assert.isFunction(tt.type);
 
-			assert.equals(tt.type(null), 'null');
-			assert.equals(tt.type(undefined), 'undefined');
-			assert.equals(tt.type(window), 'window');
-			assert.equals(tt.type(document), 'document');
-			assert.equals(tt.type(document.body), 'node');
-			assert.equals(tt.type([]), 'array');
-			assert.equals(tt.type(document.getElementsByTagName('html')), 'nodelist');
-			assert.equals(tt.type({}), 'object');
-			assert.equals(tt.type(tt()), 'object');
-			assert.equals(tt.type(new Date), 'date');
-			assert.equals(tt.type(new RegExp('')), 'regexp');
-			assert.equals(tt.type(1234), 'number');
-			assert.equals(tt.type('1234'), 'string');
-		},
+            assert.equals(tt.type(null), 'null');
+            assert.equals(tt.type(undefined), 'undefined');
+            assert.equals(tt.type(window), 'window');
+            assert.equals(tt.type(document), 'document');
+            assert.equals(tt.type(document.body), 'node');
+            assert.equals(tt.type([]), 'array');
+            assert.equals(tt.type(document.getElementsByTagName('html')), 'nodelist');
+            assert.equals(tt.type({}), 'object');
+            assert.equals(tt.type(tt()), 'object');
+            assert.equals(tt.type(new Date), 'date');
+            assert.equals(tt.type(new RegExp('')), 'regexp');
+            assert.equals(tt.type(1234), 'number');
+            assert.equals(tt.type('1234'), 'string');
+        },
         "each test": function() {
             assert.isFunction(tt.each);
 
@@ -92,43 +92,43 @@ buster.testCase("tt.js test", {
             });
             assert.isNull(res);
         },
-		"extend test": function() {
-			assert.isFunction(tt.extend);
-			var	a = {
-					'hoge': 1,
-					'fuga': 2,
-					'piyo': 3
-				},
-				b = {
-					'fuga': 'a',
-					'piyo': 'b'
-				},
-				c;
+        "extend test": function() {
+            assert.isFunction(tt.extend);
+            var a = {
+                    'hoge': 1,
+                    'fuga': 2,
+                    'piyo': 3
+                },
+                b = {
+                    'fuga': 'a',
+                    'piyo': 'b'
+                },
+                c;
 
-			c = tt.extend(a, b);
-			assert.equals(a, c, {
-				'hoge': 1,
-				'fuga': 'a',
-				'piyo': 'b'
-			});
+            c = tt.extend(a, b);
+            assert.equals(a, c, {
+                'hoge': 1,
+                'fuga': 'a',
+                'piyo': 'b'
+            });
 
-			var d = {
-				'hoge': {
-					'fuga': false
-				}
-			},
-			e = {
-				'hoge': {
-					'fuga': true
-				}
-			}
-			tt.extend(d, e);
-			assert.equals(d, {
-				'hoge': {
-					'fuga': true
-				}
-			});
-		},
+            var d = {
+                'hoge': {
+                    'fuga': false
+                }
+            },
+            e = {
+                'hoge': {
+                    'fuga': true
+                }
+            }
+            tt.extend(d, e);
+            assert.equals(d, {
+                'hoge': {
+                    'fuga': true
+                }
+            });
+        },
         "query2object test": function() {
             assert.isFunction(tt.query2object);
 
