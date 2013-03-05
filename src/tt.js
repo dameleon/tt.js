@@ -10,10 +10,14 @@
 
     // for old android compatiblity
     // Object.keys - MDN https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/Object/keys#Compatiblity
-    Object.keys||(Object.keys=function(){var e=Object.prototype.hasOwnProperty,f=!{toString:null}.propertyIsEnumerable("toString"),c="toString toLocaleString valueOf hasOwnProperty isPrototypeOf propertyIsEnumerable constructor".split(" "),g=c.length;return function(b){if("object"!==typeof b&&"function"!==typeof b||null===b)throw new TypeError("Object.keys called on non-object");var d=[],a;for(a in b)e.call(b,a)&&d.push(a);if(f)for(a=0;a<g;a++)e.call(b,c[a])&&d.push(c[a]);return d}}());
+    if (!Object.keys) {
+        Object.keys=function(){var e=Object.prototype.hasOwnProperty,f=!{toString:null}.propertyIsEnumerable("toString"),c="toString toLocaleString valueOf hasOwnProperty isPrototypeOf propertyIsEnumerable constructor".split(" "),g=c.length;return function(b){if("object"!==typeof b&&"function"!==typeof b||null===b){throw new TypeError("Object.keys called on non-object");}var d=[],a;for(a in b){e.call(b,a);d.push(a);}if(f){for(a=0;a<g;a++){e.call(b,c[a]);d.push(c[a]);}return d;}};}();
+    }
 
     // String.prototype.trim = MDN https://developer.mozilla.org/en/docs/JavaScript/Reference/Global_Objects/String/trim#Compatibility
-    String.prototype.trim||(String.prototype.trim=function(){return this.replace(/^\s+|\s+$/g,'')}());
+    if (!String.prototype.trim) {
+        String.prototype.trim=function(){return this.replace(/^\s+|\s+$/g,'');};
+    }
 
     // call load callback queue
     document.addEventListener('DOMContentLoaded', function() {
@@ -47,7 +51,11 @@
             } else if (mix === document || mix === document.body) {
                 target = [document.body];
             } else if (typeof mix === 'function') {
-                loaded ? mix() : loadQueue.push(mix);
+                if (loaded) {
+                    mix();
+                } else {
+                    loadQueue.push(mix);
+                }
             } else if (mix instanceof TT) {
                 return mix;
             } else {
@@ -69,8 +77,8 @@
                   target === window     ? 'window' :
                   target === document   ? 'document' :
                   target.nodeType       ? 'node' :
-                  tt.isArray(target)    ? 'array' :
-                  tt.isNodeList(target) ? 'nodelist' : '';
+                  isArray(target)    ? 'array' :
+                  isNodeList(target) ? 'nodelist' : '';
 
         if (!res) {
             res = typeof target;
@@ -81,12 +89,12 @@
         }
         if (!matches) {
             return res;
-        } else if (Array.isArray(matches)) {
+        } else if (isArray(matches)) {
             for (var i = 0, iz = matches.length; i < iz; ++i) {
                 if (matches[i] === res) {
                     return true;
                 }
-                return false
+                return false;
             }
         } else {
             return matches === res;
@@ -155,17 +163,19 @@
             if (tt.type(arg) !== 'object') {
                 continue;
             }
-            tt.each(Object.keys(arg), function(key, index) {
-                if (deep &&
-                    tt.type(target[key], 'object') &&
-                    tt.type(arg[key], 'object')) {
-                        tt.extend(target[key], arg[key]);
-                } else {
-                    target[key] = arg[key];
-                }
-            });
+            tt.each(Object.keys(arg), _extend);
         }
         return target;
+
+        function _extend(key, index) {
+            if (deep &&
+                tt.type(target[key], 'object') &&
+                tt.type(arg[key], 'object')) {
+                    tt.extend(target[key], arg[key]);
+            } else {
+                target[key] = arg[key];
+            }
+        }
     };
 
 
@@ -210,7 +220,10 @@
         }
         var ev = document.createEvent(event);
 
-        ev.initEvent(type, bubbles || true, cancelable || true);
+        ev.initEvent(
+                type,
+                (bubbles === 'undefined') ? false : bubbles,
+                (cancelable === 'undefined') ? false : cancelable);
         node.dispatchEvent(ev);
     };
 
@@ -272,11 +285,11 @@
         var tag = document.createElement(name);
 
         return raw ? tag : tt(tag) ;
-    }
+    };
 
     tt.createEnvData = function(nav) {
         var res = {},
-            ua = (nav || navigator).userAgent.toLowerCase();
+            ua = (nav || window.navigator).userAgent.toLowerCase();
 
         res.android = /android/.test(ua);
         res.ios = /ip(hone|od|ad)/.test(ua);
@@ -425,7 +438,7 @@
                         var match = tt(listener.target).match(function() {
                             var res = this.compareDocumentPosition(eventTarget);
 
-                            if (res === 0 || res & Node.DOCUMENT_POSITION_CONTAINED_BY) {
+                            if (res === 0 || res & window.Node.DOCUMENT_POSITION_CONTAINED_BY) {
                                 return true;
                             }
                             return false;
@@ -441,7 +454,7 @@
                             }
                             return true;
                         }
-                        return false
+                        return false;
                     });
                 };
                 this.bind(type, delegate.handler);
@@ -478,7 +491,7 @@
             return function(className) {
                 _addClass.call(this, className);
                 return this;
-            }
+            };
 
             function _addClassByClassList(className) {
                 this.each(function() {
@@ -516,7 +529,7 @@
             return function(className) {
                 _removeClass.call(this, className);
                 return this;
-            }
+            };
 
             function _removeClassByClassList(className) {
                 this.each(function() {
@@ -540,7 +553,7 @@
 
                 res = _hasClass.call(this, className.trim());
                 return res ? true : false;
-            }
+            };
 
             function _hasClassByClassList(className) {
                 return this.match(function() {
@@ -558,26 +571,24 @@
         toggleClass: function(className, strict) {
             var self = this;
 
-            strict ? _strictToggle() : _simpleToggle();
-            return this;
-
-            function _strictToggle() {
+            if (strict) {
                 self.each(function() {
                     var ttObj = tt(this);
 
-                    ttObj.hasClass(className) ?
-                        ttObj.removeClass(className) :
+                    if (ttObj.hasClass(className)) {
+                        ttObj.removeClass(className);
+                    } else {
                         ttObj.addClass(className);
+                    }
                 });
-            }
-
-            function _simpleToggle() {
+            } else {
                 if (tt(self[0]).hasClass(className)) {
                     self.removeClass(className);
                 } else {
                     self.addClass(className);
                 }
             }
+            return this;
         },
 
         find: function(query) {
@@ -597,7 +608,7 @@
                     match = target.match(function() {
                         var pos = parent.compareDocumentPosition(this);
 
-                        return (pos === 0 || (pos & Node.DOCUMENT_POSITION_CONTAINED_BY)) ?
+                        return (pos === 0 || (pos & window.Node.DOCUMENT_POSITION_CONTAINED_BY)) ?
                                     true :
                                     false;
                     });
@@ -616,10 +627,10 @@
                     tt.each(mix, function() {
                         _setAttr(key, mix[key]);
                     });
-                    break;
                 } else {
                     return this[0].getAttribute(mix);
                 }
+                break;
             case 2:
                 _setAttr(mix, value);
                 break;
@@ -753,12 +764,12 @@
                     } else {
                         return _getDataAttr.call(this, mix);
                     }
+                    break;
                 case 2:
                     _setDataAttr.call(this, mix, value);
                     return this;
-
                 }
-            }
+            };
 
             function _setDataByDataset(key, val) {
                 this.each(function() {
@@ -849,8 +860,8 @@
     window[IDENT] = window[IDENT] || tt;
 })(
     this,
-    document,
-    Array.isArray||(Array.isArray=function(a){return Object.prototype.toString.call(a)==="[object Array]"}),
-    function(a) {var b=Object.prototype.toString.call(a);return b==='[object NodeList]'||b==='[object HTMLCollection]'}
+    this.document,
+    Array.isArray||(Array.isArray=function(a){return Object.prototype.toString.call(a)==="[object Array]";}),
+    function(a) {var b=Object.prototype.toString.call(a);return b==='[object NodeList]'||b==='[object HTMLCollection]';}
 );
 
