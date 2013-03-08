@@ -1,12 +1,13 @@
 /** "tt.js" -Highspeed SelectorBased Library- author: Kei Takahashi(twitter@dameleon, mail:dameleon[at]gmail.com) license: MIT version: 0.2.0 */
-;(function(window, document, isArray, isNodeList, undefined) {
-    'use strict';
+;(function(global, document, isArray, isNodeList, undefined) {
+    "use strict";
 
-    var IDENT = 'tt',
+    var IDENT = "tt",
         querySelectorRe = /^(.+[\#\.\s\[>:,]|[\[:])/,
         loaded = false,
         loadQueue = [],
-        delegateListeners = {};
+        delegateListeners = {},
+        domTester = document.createElement("div");
 
     // for old android compatiblity
     // Object.keys - MDN https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/Object/keys#Compatiblity
@@ -16,11 +17,11 @@
 
     // String.prototype.trim = MDN https://developer.mozilla.org/en/docs/JavaScript/Reference/Global_Objects/String/trim#Compatibility
     if (!String.prototype.trim) {
-        String.prototype.trim=function(){return this.replace(/^\s+|\s+$/g,'');};
+        String.prototype.trim=function(){return this.replace(/^\s+|\s+$/g,"");};
     }
 
     // call load callback queue
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener("DOMContentLoaded", function() {
         loaded = true;
         for (var i = 0, iz = loadQueue.length; i < iz; ++i) {
             loadQueue[i]();
@@ -30,16 +31,16 @@
     //
     function tt(mix, parent) {
         var target = null,
-            selector = '';
+            selector = "";
 
-        if (typeof mix === 'string') {
+        if (typeof mix === "string") {
             selector = mix;
             parent = parent || document;
             target = querySelectorRe.test(mix) ?
                         parent.querySelectorAll(mix) :
-                     mix[0] === '#' ?
+                     mix[0] === "#" ?
                         [parent.getElementById(mix.substring(1, mix.length))] :
-                     mix[0] === '.' ?
+                     mix[0] === "." ?
                         parent.getElementsByClassName(mix.substring(1, mix.length)) :
                         parent.getElementsByTagName(mix);
         } else if (mix) {
@@ -50,7 +51,7 @@
                 target = mix;
             } else if (mix === document || mix === document.body) {
                 target = [document.body];
-            } else if (typeof mix === 'function') {
+            } else if (typeof mix === "function") {
                 if (loaded) {
                     mix();
                 } else {
@@ -59,7 +60,7 @@
             } else if (mix instanceof TT) {
                 return mix;
             } else {
-                throw new Error('arguments type error');
+                throw new Error("argument type error");
             }
         }
         return new TT(target || [], selector);
@@ -71,18 +72,17 @@
     tt.isNodeList = isNodeList;
 
     tt.type = function(target, matches) {
-        var str,
-            res = target === null       ? 'null' :
-                  target === void 0     ? 'undefined' :
-                  target === window     ? 'window' :
-                  target === document   ? 'document' :
-                  target.nodeType       ? 'node' :
-                  isArray(target)    ? 'array' :
-                  isNodeList(target) ? 'nodelist' : '';
+        var res = target === null     ? "null" :
+                  target === void 0   ? "undefined" :
+                  target === global   ? "window" :
+                  target === document ? "document" :
+                  target.nodeType     ? "node" :
+                  isArray(target)     ? "array" :
+                  isNodeList(target)  ? "nodelist" : "";
 
         if (!res) {
             res = typeof target;
-            if (res === 'object') {
+            if (res === "object") {
                 res = Object.prototype.toString.call(target).
                       toLowerCase().match(/.*\s([a-z]*)\]/)[1];
             }
@@ -152,7 +152,7 @@
             deep = false,
             arg, target;
 
-        if (args[0] === 'true') {
+        if (args[0] === true) {
             deep = true;
             ++i;
         }
@@ -160,7 +160,7 @@
 
         for (; i < iz; ++i) {
             arg = args[i];
-            if (tt.type(arg) !== 'object') {
+            if (tt.type(arg) !== "object") {
                 continue;
             }
             tt.each(Object.keys(arg), _extend);
@@ -169,8 +169,8 @@
 
         function _extend(key, index) {
             if (deep &&
-                tt.type(target[key], 'object') &&
-                tt.type(arg[key], 'object')) {
+                tt.type(target[key], "object") &&
+                tt.type(arg[key], "object")) {
                     tt.extend(target[key], arg[key]);
             } else {
                 target[key] = arg[key];
@@ -179,16 +179,16 @@
     };
 
 
-    tt.query2object = function(hash) {
-        if (!hash) {
+    tt.query2object = function(query) {
+        if (!tt.type(query, "string")) {
             return {};
         }
         var result = {},
-            pair = hash.split('&'),
+            pair = query.split("&"),
             i = 0, iz = pair.length;
 
         for (; i < iz; ++i) {
-            var k_v = pair[i].split('=');
+            var k_v = pair[i].split("=");
 
             result[k_v[0]] = k_v[1];
         }
@@ -196,34 +196,34 @@
     };
 
     tt.param = function(obj) {
+        if (!tt.type(obj, "object")) {
+            return obj;
+        }
         var key, keys = Object.keys(obj),
             i = 0, iz = keys.length,
             results = [];
 
         for (;i < iz; ++i) {
             key = keys[i];
-            results.push(encodeURIComponent(key) + '=' + encodeURIComponent(obj[key]));
+            results.push(encodeURIComponent(key) + "=" + encodeURIComponent(obj[key]));
         }
-        return results.join('&');
+        return results.join("&");
     };
 
     tt.triggerEvent = function(node, event, type, bubbles, cancelable) {
-        if (!node) {
-            return;
+        if (!node || !event) {
+            throw new Error("Error: argument error");
         }
-        if (!event) {
-            throw new Error('require event name');
-        }
-        if ('string' !== typeof type) {
+        if ("string" !== typeof type) {
             type = event;
-            event = type === 'click' ? 'MouseEvents' : 'Event';
+            event = type === "click" ? "MouseEvents" : "Event";
         }
         var ev = document.createEvent(event);
 
         ev.initEvent(
                 type,
-                (bubbles === 'undefined') ? false : bubbles,
-                (cancelable === 'undefined') ? false : cancelable);
+                (bubbles === undefined) ? false : bubbles,
+                (cancelable === undefined) ? false : cancelable);
         node.dispatchEvent(ev);
     };
 
@@ -238,8 +238,8 @@
     };
 
     tt.cssCamelizer = function(str) {
-        if (typeof str !== "string") {
-            throw new Error("arugment type error");
+        if (!str || typeof str !== "string") {
+            throw new Error("Error: argument error");
         }
         var res = "";
 
@@ -257,8 +257,8 @@
     };
 
     tt.cssHyphenizer = function(str) {
-        if (typeof str !== "string") {
-            throw new Error("arugment type error");
+        if (!str || typeof str !== "string") {
+            throw new Error("Error: argument error");
         }
         var prefix = ["webkit", "moz", "o", "ms", "khtml"],
             upperRe = /[A-Z]/g,
@@ -279,8 +279,8 @@
     };
 
     tt.tag = function(name, raw) {
-        if (typeof name !== "string") {
-            throw new Error("argument type error");
+        if (!name || typeof name !== "string") {
+            throw new Error("Error: argument error");
         }
         var tag = document.createElement(name);
 
@@ -289,7 +289,7 @@
 
     tt.createEnvData = function(nav) {
         var res = {},
-            ua = (nav || window.navigator).userAgent.toLowerCase();
+            ua = (nav || global.navigator).userAgent.toLowerCase();
 
         res.android = /android/.test(ua);
         res.ios = /ip(hone|od|ad)/.test(ua);
@@ -307,10 +307,7 @@
             null;
         res.version = res.version && res.version[1];
         res.versionCode = _getVersionCode(res.version);
-        res.isCompatible = res.android && res.versionCode < 3000 ||
-                           res.ios && res.versionCode < 5000 ||
-                           res.opera;
-        res.supportTouch = 'ontouchstart' in window;
+        res.supportTouch = "ontouchstart" in global;
 
         return res;
 
@@ -334,7 +331,141 @@
         }
     };
 
-    tt.env = tt.createEnvData(window.navigator);
+    tt.env = tt.createEnvData(navigator);
+
+    /***
+     * tt.ajax({
+     *  async: true,
+     *  beforeSend: function(xhr) {},
+     *  cache: true,
+     *  complete: function(response, xhr) {},
+     *  contents: {},
+     *  contentType: 'application/x-www-form-urlencoded; charset=UTF-8',
+     *  context: document.body,
+     *  crossDomain: false,
+     *  data: {},
+     *  dataType: 'text',
+     *  error: function(xhr) {},
+     *  headers: {},
+     *  jsonp: '',
+     *  jsonpCallback: '',
+     *  mimeType: '',
+     *  processData: true,
+     *  success: function(data, status, xhr) {},
+     *  timeout: 0,
+     *  type: 'GET',
+     *  url: '',
+     *  user: null,
+     *  password: null
+     * });
+     *
+     */
+    tt.ajax = function(mix, setting) {
+        var timeout,
+            xhr = new XMLHttpRequest();
+
+        setting = setting || {};
+        if (tt.type(mix, "object")) {
+            setting = mix;
+        } else if (tt.type(mix, "string")) {
+            setting.url = mix;
+        } else {
+            throw new Error("Error: missing argument");
+        }
+
+        setting = tt.extend({
+            async       : true,
+            beforeSend  : null,
+            cache       : true,
+            complete    : null,
+            contentType : "application/x-www-form-urlencoded; charset=UTF-8",
+            context     : document.body,
+            data        : null,
+            dataType    : "text",
+            error       : null,
+            headers     : null,
+            mimeType    : null,
+            success     : null,
+            timeout     : 0,
+            type        : "GET",
+            url         : "",
+            user        : "",
+            password    : ""
+        }, setting);
+
+        setting.type = setting.type.toUpperCase();
+
+        if (setting.data && setting.type === "GET") {
+            setting.url = setting.url + "?" + tt.param(setting.data);
+            setting.data = null;
+        } else {
+            setting.data = tt.param(setting.data);
+        }
+
+        xhr.onerror = function() {
+            _callCallbacks("error");
+        };
+
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState === 4) {
+                _callCallbacks("success");
+            }
+        };
+
+        xhr.open(setting.type,
+                 setting.url,
+                 setting.async,
+                 setting.user,
+                 setting.password);
+        if (setting.type === "POST") {
+            xhr.setRequestHeader("Content-type", setting.contentType);
+            xhr.setRequestHeader("Content-length", setting.data.length);
+        }
+        if (tt.type(setting.headers, "object")) {
+            tt.each(setting.headers, function(key, value) {
+                xhr.setRequestHeader(key, value);
+            });
+        }
+        if (setting.dataType) {
+            xhr.responseType = setting.dataType;
+        }
+        if (setting.mimeType) {
+            xhr.overrideMimeType(setting.mimeType) ;
+        }
+        if (setting.beforeSend) {
+            setting.beforeSend(xhr);
+        }
+        if (setting.timeout) {
+            timeout = setTimeout(function() {
+                xhr.abort();
+                _callCallbacks("error");
+            }, setting,timeout);
+        }
+        xhr.send(setting.data);
+
+        function _callCallbacks(status) {
+            var res = xhr.response,
+                context = setting.context;
+
+            clearTimeout(timeout);
+            switch (status) {
+            case "success":
+                if (setting.success) {
+                    setting.success.apply(context, [xhr.response, xhr.status, xhr]);
+                }
+                break;
+            case "error":
+                if (setting.error) {
+                    setting.error.apply(context, [xhr.status, xhr]);
+                }
+                break;
+            }
+            if (setting.complete) {
+                setting.complete(context, [xhr.response, xhr.status, xhr]);
+            }
+            xhr = null;
+        }
+    };
 
 
     // ##### TT constructor
@@ -438,7 +569,7 @@
                         var match = tt(listener.target).match(function() {
                             var res = this.compareDocumentPosition(eventTarget);
 
-                            if (res === 0 || res & window.Node.DOCUMENT_POSITION_CONTAINED_BY) {
+                            if (res === 0 || res & global.Node.DOCUMENT_POSITION_CONTAINED_BY) {
                                 return true;
                             }
                             return false;
@@ -447,9 +578,9 @@
                         if (match) {
                             event = tt.extend({}, ev);
                             event.currentTarget = match;
-                            if (typeof listener.callback === 'function') {
+                            if (typeof listener.callback === "function") {
                                 listener.callback(event);
-                            } else if ('handleEvent' in listener.callback) {
+                            } else if ("handleEvent" in listener.callback) {
                                 listener.callback.handleEvent(event);
                             }
                             return true;
@@ -486,7 +617,7 @@
         },
 
         addClass: (function() {
-            var _addClass = tt.env.isCompatible ? _addClassByClassName : _addClassByClassList;
+            var _addClass = domTester.classList ? _addClassByClassList : _addClassByClassName;
 
             return function(className) {
                 _addClass.call(this, className);
@@ -524,7 +655,7 @@
         })(),
 
         removeClass: (function() {
-            var _removeClass = tt.env.isCompatible ? _removeClassByClassName : _removeClassByClassList;
+            var _removeClass = domTester.classList ? _removeClassByClassList : _removeClassByClassName;
 
             return function(className) {
                 _removeClass.call(this, className);
@@ -538,15 +669,15 @@
             }
 
             function _removeClassByClassName(className) {
-                className = ' ' + className + ' ';
+                className = " " + className + " ";
                 this.each(function() {
-                    this.className = (' ' + this.className + ' ').replace(className, '');
+                    this.className = (" " + this.className + " ").replace(className, "");
                 });
             }
         })(),
 
         hasClass: (function() {
-            var _hasClass = tt.env.isCompatible ? _hasClassByClassName : _hasClassByClassList;
+            var _hasClass = domTester.classList ? _hasClassByClassList : _hasClassByClassName;
 
             return function(className) {
                 var res;
@@ -563,7 +694,7 @@
 
             function _hasClassByClassName(className) {
                 return this.match(function() {
-                    return (' ' + this.className + ' ').indexOf(' ' + className + ' ') > -1;
+                    return (" " + this.className + " ").indexOf(" " + className + " ") > -1;
                 });
             }
         })(),
@@ -608,7 +739,7 @@
                     match = target.match(function() {
                         var pos = parent.compareDocumentPosition(this);
 
-                        return (pos === 0 || (pos & window.Node.DOCUMENT_POSITION_CONTAINED_BY)) ?
+                        return (pos === 0 || (pos & Node.DOCUMENT_POSITION_CONTAINED_BY)) ?
                                     true :
                                     false;
                     });
@@ -663,22 +794,22 @@
                     while (this.firstChild) {
                         this.removeChild(this.firstChild);
                     }
-                    this.insertAdjacentHTML('afterbegin', mix);
+                    this.insertAdjacentHTML("afterbegin", mix);
                 });
             }
             return this;
         },
 
         append: function(mix) {
-            this.each((typeof mix === 'string') ?
-                function() { this.insertAdjacentHTML('beforeend', mix); } :
+            this.each((typeof mix === "string") ?
+                function() { this.insertAdjacentHTML("beforeend", mix); } :
                 function() { this.appendChild(mix); });
             return this;
         },
 
         prepend: function(mix) {
-            this.each((typeof mix === 'string') ?
-                function() { this.insertAdjacentHTML('afterbegin', mix); } :
+            this.each((typeof mix === "string") ?
+                function() { this.insertAdjacentHTML("afterbegin", mix); } :
                 function() { this.insertBefore(mix, this.firstChild); }
             );
             return this;
@@ -701,8 +832,8 @@
         },
 
         replace: function(mix) {
-            this.each((typeof mix === 'string') ?
-                function() { this.insertAdjacentHTML('beforebegin', mix); } :
+            this.each((typeof mix === "string") ?
+                function() { this.insertAdjacentHTML("beforebegin", mix); } :
                 function() { this.parentNode.insertBefore(mix, this); });
             this.remove();
             return this;
@@ -725,7 +856,7 @@
                 } else if (value === "") {
                     _removeProperty(mix);
                 } else {
-                    return window.getComputedStyle(this[0]).getPropertyValue(mix);
+                    return global.getComputedStyle(this[0]).getPropertyValue(mix);
                 }
             }
 
@@ -745,8 +876,9 @@
         },
 
         data: (function() {
-            var _getDataAttr = tt.env.isCompatible ? _getDataByAttributes : _getDataByDataset,
-                _setDataAttr = tt.env.isCompatible ? _setDataByAttributes : _setDataByDataset;
+            var cond = domTester.dataset,
+                _getDataAttr = cond ? _getDataByDataset : _getDataByAttributes,
+                _setDataAttr = cond ? _setDataByDataset : _setDataByAttributes;
 
             return function (mix, value) {
                 var self = this,
@@ -756,7 +888,7 @@
                 case 0:
                     return _getDataAttr.call(this);
                 case 1:
-                    if (typeof mix === 'object') {
+                    if (typeof mix === "object") {
                         tt.each(mix, function(key, val) {
                             _setDataAttr.call(self, key, val);
                         });
@@ -817,22 +949,22 @@
         })(),
 
         show: function(value) {
-            var currentValue = this.css('display'),
+            var currentValue = this.css("display"),
                 beforeValue = this._data.beforeDisplay || null;
 
-            if (currentValue !== 'none') {
+            if (currentValue !== "none") {
                 return;
             }
-            return this.css('display', value || beforeValue || 'block');
+            return this.css("display", value || beforeValue || "block");
         },
 
         hide: function() {
-            var currentValue = this.css('display');
+            var currentValue = this.css("display");
 
-            if (currentValue !== 'none') {
+            if (currentValue !== "none") {
                 this._data.beforeDisplay = currentValue;
             }
-            return this.css('display', 'none');
+            return this.css("display", "none");
         },
 
         trigger: function(event, type, bubbles, cancelable) {
@@ -849,19 +981,19 @@
                 var offset = this.getBoundingClientRect();
 
                 res[index] = {
-                    left: offset.left + window.pageXOffset,
-                    top: offset.top + window.pageYOffset
+                    left: offset.left + global.pageXOffset,
+                    top: offset.top + global.pageYOffset
                 };
             });
             return this.length === 1 ? res[0] : res;
         }
     };
 
-    window[IDENT] = window[IDENT] || tt;
+    global[IDENT] = global[IDENT] || tt;
 })(
     this,
-    this.document,
+    document,
     Array.isArray||(Array.isArray=function(a){return Object.prototype.toString.call(a)==="[object Array]";}),
-    function(a) {var b=Object.prototype.toString.call(a);return b==='[object NodeList]'||b==='[object HTMLCollection]';}
+    function(a) {var b=Object.prototype.toString.call(a);return b==="[object NodeList]"||b==="[object HTMLCollection]";}
 );
 

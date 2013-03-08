@@ -37,6 +37,7 @@ module.exports = function(grunt) {
                 eqeqeq: true,
                 undef: true,
                 validthis: true,
+                browser: true,
                 globals: {
                     tt: true
                 }
