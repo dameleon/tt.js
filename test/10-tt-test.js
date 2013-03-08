@@ -231,6 +231,8 @@ buster.testCase("tt.js test", {
                 ]
             };
 
+            /(ip(hone|ad|od)|android|windows\sphone).*?(applewebkit|(chrome|crios)|firefox|opera|trident)/
+
             for (var key in testUA) {
                 var values = testUA[key];
 
