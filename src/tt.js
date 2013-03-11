@@ -94,8 +94,8 @@
                 if (matches[i] === res) {
                     return true;
                 }
-                return false;
             }
+            return false;
         } else {
             return matches === res;
         }
@@ -287,79 +287,33 @@
         return raw ? tag : tt(tag) ;
     };
 
-    tt.createEnvData = function(nav) {
-        var ua = (nav || global.navigator).userAgent.toLowerCase(),
-            os = ua.match(/ip(hone|ad|od)|android|windows\sphone/),
-            browser = ua.match(/(chrome|crios|applewebkit|firefox|opera|trident)/),
-            res, version = null;
-
-        global.console.log(os, browser);
-
-        os = os ? os[0][0] : '';
-        browser = browser ? browser[0][0] : '';
-
-        res = {
-            android: os === 'a',
-            ios: os === 'i',
-            windowsPhone: os === 'w',
-            androidBrowser: res.android && browser === 'a',
-            mobileSafari: res.ios && browser === 'a',
-            chrome: browser === 'c',
-            firefox: browser === 'f',
-            opera: browser === 'o',
-            ie: browser === 't'
-        };
-
-        res.version =
-            (res.androidBrowser || res.chrome) ? ua.match(/android\s(\S.*?)\;/) :
-            res.mobileSafari ? ua.match(/os\s(\S.*?)\s/) :
-            null;
-        res.version = res.version && res.version[1];
-        res.versionCode = _getVersionCode(res.version);
-
-        return res;
-
-        function _getVersionCode(version) {
-            if (!version) {
-                return null;
-            }
-            var res, digit = 4, diff = 0;
-
-            version = version.replace(/\D/g, "");
-            diff = digit - version.length;
-
-            if (diff > 0) {
-                res = (+version) * Math.pow(10, diff);
-            } else if (diff < 0) {
-                res = +(version.substr(0, digit));
-            } else {
-                res = +version;
-            }
-            return res;
-        }
-    };
-
     //tt.createEnvData = function(nav) {
-    //    var res = {},
-    //        ua = (nav || global.navigator).userAgent.toLowerCase();
+    //    var ua = (nav || global.navigator).userAgent.toLowerCase(),
+    //        os = ua.match(/ip(hone|ad|od)|android|windows\sphone/),
+    //        browser = ua.match(/(chrome|crios|applewebkit|firefox|opera|trident)/),
+    //        res, version = null;
 
-    //    res.android = /android/.test(ua);
-    //    res.ios = /ip(hone|od|ad)/.test(ua);
-    //    res.windowsPhone = /windows\sphone/.test(ua);
-    //    res.chrome = (res.android && /chrome/.test(ua)) || (res.ios && /crios/.test(ua));
-    //    res.firefox = /firefox/.test(ua);
-    //    res.opera = /opera/.test(ua);
-    //    res.ie = /msie/.test(ua);
-    //    res.androidBrowser = res.android && !res.chrome && /applewebkit/.test(ua);
-    //    res.mobileSafari = res.ios && !res.chrome && /applewebkit/.test(ua);
-    //    res.other = !(res.androidBrowser || res.mobileSafari || res.chrome || res.firefox || res.opera || res.ie);
+    //    os = os ? os[0][0] : '';
+    //    browser = browser ? browser[0][0] : '';
+
+    //    res = {
+    //        android        : os === 'a',
+    //        ios            : os === 'i',
+    //        windowsPhone   : os === 'w',
+    //        androidBrowser : res.android && browser === 'a',
+    //        mobileSafari   : res.ios && browser === 'a',
+    //        chrome         : browser === 'c',
+    //        firefox        : browser === 'f',
+    //        opera          : browser === 'o',
+    //        ie             : browser === 't'
+    //    };
+
     //    res.version =
     //        (res.androidBrowser || res.chrome) ? ua.match(/android\s(\S.*?)\;/) :
-    //        res.mobileSafari ? ua.match(/os\s(\S.*?)\s/) :
+    //        (res.mobileSafari || res.chrome) ? ua.match(/os\s(\S.*?)\s/) :
     //        null;
     //    res.version = res.version && res.version[1];
     //    res.versionCode = _getVersionCode(res.version);
-    //    res.supportTouch = "ontouchstart" in global;
 
     //    return res;
 
@@ -382,6 +336,52 @@
     //        return res;
     //    }
     //};
+
+    tt.createEnvData = function(nav) {
+        var res = {},
+            ua = (nav || global.navigator).userAgent.toLowerCase();
+
+        res = {
+            android      : /android/.test(ua),
+            ios          : /ip(hone|od|ad)/.test(ua),
+            chrome       : /(chrome|crios)/.test(ua),
+            windowsPhone : /windows\sphone/.test(ua),
+            firefox      : /firefox/.test(ua),
+            opera        : /opera/.test(ua),
+            ie           : /msie/.test(ua)
+        };
+
+        res.androidBrowser = !res.chrome && res.android && /applewebkit/.test(ua);
+        res.mobileSafari = !res.chrome && res.ios && /applewebkit/.test(ua);
+        res.version =
+            (res.androidBrowser || res.androidBrowser && res.chrome) ? ua.match(/android\s(\S.*?)\;/) :
+            (res.mobileSafari || res.mobileSafari && res.chrome) ? ua.match(/os\s(\S.*?)\s/) :
+            null;
+        res.version = res.version && res.version[1];
+        res.versionCode = _getVersionCode(res.version);
+        res.supportTouch = "ontouchstart" in global;
+
+        return res;
+
+        function _getVersionCode(version) {
+            if (!version) {
+                return null;
+            }
+            var res, digit = 4, diff = 0;
+
+            version = version.replace(/\D/g, "");
+            diff = digit - version.length;
+
+            if (diff > 0) {
+                res = (+version) * Math.pow(10, diff);
+            } else if (diff < 0) {
+                res = +(version.substr(0, digit));
+            } else {
+                res = +version;
+            }
+            return res;
+        }
+    };
 
     tt.env = tt.createEnvData(navigator);
 
