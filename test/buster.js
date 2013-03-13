@@ -8,10 +8,10 @@ config["ttjsTests"] = {
         "src/tt.js"
     ],
     resources: [
-        {
-            "path": "/",
-            "file": "test/fixtures/index.html"
-        }
+        { "path": "/", "file": "test/fixtures/index.html" },
+        { "path": "/json", "file": "test/fixtures/ajax.json" },
+        { "path": "/html", "file": "test/fixtures/ajax.html" },
+        { "path": "/text", "file": "test/fixtures/ajax.txt" },
     ],
     tests: [
         "test/*-test.js"

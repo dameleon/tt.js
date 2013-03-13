@@ -294,6 +294,53 @@ buster.testCase("tt.js test", {
             assert.exception(function() {
                 tt.ajax();
             }, 'Error');
+
+            tt.ajax({
+                beforeSend  : null,
+                cache       : true,
+                complete    : null,
+                context     : document.body,
+                data        : null,
+                dataType    : "text",
+                error       : null,
+                success     : null,
+                url         : "/json",
+            });
+
+            tt.ajax({
+                beforeSend  : null,
+                cache       : true,
+                complete    : null,
+                context     : document.body,
+                data        : null,
+                dataType    : "document",
+                error       : null,
+                success     : null,
+                url         : "/html",
+            });
+
+            tt.ajax({
+                beforeSend  : null,
+                cache       : true,
+                complete    : null,
+                context     : document.body,
+                data        : null,
+                dataType    : "text",
+                error       : null,
+                success     : null,
+                url         : "/text",
+            });
+
+            tt.ajax({
+                beforeSend  : null,
+                cache       : true,
+                complete    : null,
+                context     : document.body,
+                data        : null,
+                error       : null,
+                success     : null,
+                url         : "/not_found_url"
+            });
         }
     }
 });

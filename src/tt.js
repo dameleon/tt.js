@@ -474,15 +474,7 @@
             });
         }
         if (setting.dataType) {
-            switch (setting.dataType) {
-            case "json": xhr.responseType = "application/json"; break;
-            case "xml":  xhr.responseType = "application/xml, text/xml"; break;
-            case "html": xhr.responseType = "text/html"; break;
-            case "text": xhr.responseType = "text/plain"; break;
-            default:
-                xhr.responseType =
-                    (setting.dataType.indexOf("/") > -1) ? setting.dataType : "text/plain";
-            }
+            xhr.responseType = setting.dataType;
         }
         if (setting.mimeType) {
             xhr.overrideMimeType(setting.mimeType) ;
@@ -505,11 +497,15 @@
             var res = xhr.response,
                 context = setting.context;
 
+            if (res && setting.dataType === "json") {
+                res = tt.parseJSON(res);
+            }
+
             clearTimeout(timeout);
             switch (status) {
             case "success":
                 if (setting.success) {
-                    setting.success.apply(context, [xhr.response, xhr.status, xhr]);
+                    setting.success.apply(context, [res, xhr.status, xhr]);
                 }
                 break;
             case "error":
@@ -519,7 +515,7 @@
                 break;
             }
             if (setting.complete) {
-                setting.complete(context, [xhr.response, xhr.status, xhr]);
+                setting.complete(context, [res, xhr.status, xhr]);
             }
             xhr = null;
         }
