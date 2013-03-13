@@ -287,77 +287,33 @@
         return raw ? tag : tt(tag) ;
     };
 
-    //tt.createEnvData = function(nav) {
-    //    var ua = (nav || global.navigator).userAgent.toLowerCase(),
-    //        os = ua.match(/ip(hone|ad|od)|android|windows\sphone/),
-    //        browser = ua.match(/(chrome|crios|applewebkit|firefox|opera|trident)/),
-    //        res, version = null;
-
-    //    os = os ? os[0][0] : '';
-    //    browser = browser ? browser[0][0] : '';
-
-    //    res = {
-    //        android        : os === 'a',
-    //        ios            : os === 'i',
-    //        windowsPhone   : os === 'w',
-    //        androidBrowser : res.android && browser === 'a',
-    //        mobileSafari   : res.ios && browser === 'a',
-    //        chrome         : browser === 'c',
-    //        firefox        : browser === 'f',
-    //        opera          : browser === 'o',
-    //        ie             : browser === 't'
-    //    };
-
-    //    res.version =
-    //        (res.androidBrowser || res.chrome) ? ua.match(/android\s(\S.*?)\;/) :
-    //        (res.mobileSafari || res.chrome) ? ua.match(/os\s(\S.*?)\s/) :
-    //        null;
-    //    res.version = res.version && res.version[1];
-    //    res.versionCode = _getVersionCode(res.version);
-
-    //    return res;
-
-    //    function _getVersionCode(version) {
-    //        if (!version) {
-    //            return null;
-    //        }
-    //        var res, digit = 4, diff = 0;
-
-    //        version = version.replace(/\D/g, "");
-    //        diff = digit - version.length;
-
-    //        if (diff > 0) {
-    //            res = (+version) * Math.pow(10, diff);
-    //        } else if (diff < 0) {
-    //            res = +(version.substr(0, digit));
-    //        } else {
-    //            res = +version;
-    //        }
-    //        return res;
-    //    }
-    //};
-
     tt.createEnvData = function(nav) {
         var res = {},
             ua = (nav || global.navigator).userAgent.toLowerCase();
 
-        res = {
-            android      : /android/.test(ua),
-            ios          : /ip(hone|od|ad)/.test(ua),
-            chrome       : /(chrome|crios)/.test(ua),
-            windowsPhone : /windows\sphone/.test(ua),
-            firefox      : /firefox/.test(ua),
-            opera        : /opera/.test(ua),
-            ie           : /msie/.test(ua)
-        };
+        res.android = /android/.test(ua);
+        res.ios = /ip(hone|od|ad)/.test(ua);
 
+        if (!res.android && !res.ios) {
+            res.windowsPhone = /windows\sphone/.test(ua);
+            res.ie = /msie/.test(ua);
+        }
+
+        res.chrome = /(chrome|crios)/.test(ua);
+        res.firefox = /firefox/.test(ua);
+        res.opera = /opera/.test(ua);
         res.androidBrowser = !res.chrome && res.android && /applewebkit/.test(ua);
         res.mobileSafari = !res.chrome && res.ios && /applewebkit/.test(ua);
+
         res.version =
             (res.androidBrowser || res.androidBrowser && res.chrome) ? ua.match(/android\s(\S.*?)\;/) :
             (res.mobileSafari || res.mobileSafari && res.chrome) ? ua.match(/os\s(\S.*?)\s/) :
             null;
-        res.version = res.version && res.version[1];
+        res.version = res.version ?
+                res.ios ?
+                    res.version[1].replace("_", ".") :
+                    res.version[1] :
+                null;
         res.versionCode = _getVersionCode(res.version);
         res.supportTouch = "ontouchstart" in global;
 
@@ -374,8 +330,6 @@
 
             if (diff > 0) {
                 res = (+version) * Math.pow(10, diff);
-            } else if (diff < 0) {
-                res = +(version.substr(0, digit));
             } else {
                 res = +version;
             }
@@ -448,7 +402,10 @@
         setting.type = setting.type.toUpperCase();
 
         if (setting.data && setting.type === "GET") {
-            setting.url = setting.url + "?" + tt.param(setting.data);
+            setting.url =
+                setting.url +
+                setting.url.indexOf("?") > -1 ? "&" : "?" +
+                tt.param(setting.data);
             setting.data = null;
         } else {
             setting.data = tt.param(setting.data);
@@ -469,6 +426,7 @@
                  setting.async,
                  setting.user,
                  setting.password);
+
         if (setting.type === "POST") {
             xhr.setRequestHeader("Content-type", setting.contentType);
             xhr.setRequestHeader("Content-length", setting.data.length);
@@ -479,7 +437,15 @@
             });
         }
         if (setting.dataType) {
-            xhr.responseType = setting.dataType;
+            switch (setting.dataType) {
+            case "json": xhr.responseType = "application/json"; break;
+            case "xml":  xhr.responseType = "application/xml, text/xml"; break;
+            case "html": xhr.responseType = "text/html"; break;
+            case "text": xhr.responseType = "text/plain"; break;
+            default:
+                xhr.responseType =
+                    (setting.dataType.indexOf("/") > -1) ? setting.dataType : "text/plain";
+            }
         }
         if (setting.mimeType) {
             xhr.overrideMimeType(setting.mimeType) ;
@@ -493,7 +459,10 @@
                 _callCallbacks("error");
             }, setting,timeout);
         }
+
         xhr.send(setting.data);
+
+        return xhr;
 
         function _callCallbacks(status) {
             var res = xhr.response,
