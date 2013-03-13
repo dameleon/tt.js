@@ -289,6 +289,11 @@ buster.testCase("tt.js test", {
         },
         "tt.env test": function() {
             assert.isObject(tt.env);
+        },
+        "tt.ajax test": function() {
+            assert.exception(function() {
+                tt.ajax();
+            }, 'Error');
         }
     }
 });
