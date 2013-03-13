@@ -1,4 +1,4 @@
-/** tt.js version:0.2.0 author:kei takahashi(twitter@dameleon) at:2013-03-08 */
+/** tt.js version:0.2.0 author:kei takahashi(twitter@dameleon) at:2013-03-13 */
 ;(function(global, document, isArray, isNodeList, undefined) {
     "use strict";
 
@@ -14,7 +14,6 @@
     if (!Object.keys) {
         Object.keys=function(){var e=Object.prototype.hasOwnProperty,f=!{toString:null}.propertyIsEnumerable("toString"),c="toString toLocaleString valueOf hasOwnProperty isPrototypeOf propertyIsEnumerable constructor".split(" "),g=c.length;return function(b){if("object"!==typeof b&&"function"!==typeof b||null===b){throw new TypeError("Object.keys called on non-object");}var d=[],a;for(a in b){e.call(b,a);d.push(a);}if(f){for(a=0;a<g;a++){e.call(b,c[a]);d.push(c[a]);}return d;}};}();
     }
-
     // String.prototype.trim = MDN https://developer.mozilla.org/en/docs/JavaScript/Reference/Global_Objects/String/trim#Compatibility
     if (!String.prototype.trim) {
         String.prototype.trim=function(){return this.replace(/^\s+|\s+$/g,"");};
@@ -94,8 +93,8 @@
                 if (matches[i] === res) {
                     return true;
                 }
-                return false;
             }
+            return false;
         } else {
             return matches === res;
         }
@@ -178,6 +177,44 @@
         }
     };
 
+    tt.proxy = function() {
+        if (arguments.length < 2) {
+            throw new Error('Error: missing argument error');
+        }
+        var args = [].slice.call(arguments),
+            func = args.shift(),
+            self = args.shift(),
+            tmp;
+
+        if (typeof self === 'string') {
+            tmp = func[self];
+            self = func;
+            func = tmp;
+        }
+        return function() {
+            return func.apply(self, args);
+        };
+    };
+
+    tt.parseJSON = function(text) {
+        if (!text) {
+            return {};
+        }
+        // idea from @uupaa
+        var obj;
+
+        try {
+            obj = JSON.parse(text);
+            return obj;
+        } catch (p_o) {}
+        try {
+            /*jshint evil: true */
+            obj = (new Function('return ' + text))();
+        } catch (o_q) {
+            throw new Error("Error: can't parse text to json");
+        }
+        return obj;
+    };
 
     tt.query2object = function(query) {
         if (!tt.type(query, "string")) {
@@ -212,7 +249,7 @@
 
     tt.triggerEvent = function(node, event, type, bubbles, cancelable) {
         if (!node || !event) {
-            throw new Error("Error: argument error");
+            throw new Error("Error: missing argument error");
         }
         if ("string" !== typeof type) {
             type = event;
@@ -293,19 +330,27 @@
 
         res.android = /android/.test(ua);
         res.ios = /ip(hone|od|ad)/.test(ua);
-        res.windowsPhone = /windows\sphone/.test(ua);
-        res.chrome = (res.android && /chrome/.test(ua)) || (res.ios && /crios/.test(ua));
+
+        if (!res.android && !res.ios) {
+            res.windowsPhone = /windows\sphone/.test(ua);
+            res.ie = /msie/.test(ua);
+        }
+
+        res.chrome = /(chrome|crios)/.test(ua);
         res.firefox = /firefox/.test(ua);
         res.opera = /opera/.test(ua);
-        res.ie = /msie/.test(ua);
-        res.androidBrowser = res.android && !res.chrome && /applewebkit/.test(ua);
-        res.mobileSafari = res.ios && !res.chrome && /applewebkit/.test(ua);
-        res.other = !(res.androidBrowser || res.mobileSafari || res.chrome || res.firefox || res.opera || res.ie);
+        res.androidBrowser = !res.chrome && res.android && /applewebkit/.test(ua);
+        res.mobileSafari = !res.chrome && res.ios && /applewebkit/.test(ua);
+
         res.version =
-            (res.androidBrowser || res.chrome) ? ua.match(/android\s(\S.*?)\;/) :
-            res.mobileSafari ? ua.match(/os\s(\S.*?)\s/) :
+            (res.androidBrowser || res.android && res.chrome) ? ua.match(/android\s(\S.*?)\;/) :
+            (res.mobileSafari || res.ios && res.chrome) ? ua.match(/os\s(\S.*?)\s/) :
             null;
-        res.version = res.version && res.version[1];
+        res.version = res.version ?
+                res.ios ?
+                    res.version[1].replace("_", ".") :
+                    res.version[1] :
+                null;
         res.versionCode = _getVersionCode(res.version);
         res.supportTouch = "ontouchstart" in global;
 
@@ -322,8 +367,6 @@
 
             if (diff > 0) {
                 res = (+version) * Math.pow(10, diff);
-            } else if (diff < 0) {
-                res = +(version.substr(0, digit));
             } else {
                 res = +version;
             }
@@ -396,7 +439,10 @@
         setting.type = setting.type.toUpperCase();
 
         if (setting.data && setting.type === "GET") {
-            setting.url = setting.url + "?" + tt.param(setting.data);
+            setting.url =
+                setting.url +
+                setting.url.indexOf("?") > -1 ? "&" : "?" +
+                tt.param(setting.data);
             setting.data = null;
         } else {
             setting.data = tt.param(setting.data);
@@ -417,6 +463,7 @@
                  setting.async,
                  setting.user,
                  setting.password);
+
         if (setting.type === "POST") {
             xhr.setRequestHeader("Content-type", setting.contentType);
             xhr.setRequestHeader("Content-length", setting.data.length);
@@ -427,7 +474,15 @@
             });
         }
         if (setting.dataType) {
-            xhr.responseType = setting.dataType;
+            switch (setting.dataType) {
+            case "json": xhr.responseType = "application/json"; break;
+            case "xml":  xhr.responseType = "application/xml, text/xml"; break;
+            case "html": xhr.responseType = "text/html"; break;
+            case "text": xhr.responseType = "text/plain"; break;
+            default:
+                xhr.responseType =
+                    (setting.dataType.indexOf("/") > -1) ? setting.dataType : "text/plain";
+            }
         }
         if (setting.mimeType) {
             xhr.overrideMimeType(setting.mimeType) ;
@@ -441,7 +496,10 @@
                 _callCallbacks("error");
             }, setting,timeout);
         }
+
         xhr.send(setting.data);
+
+        return xhr;
 
         function _callCallbacks(status) {
             var res = xhr.response,

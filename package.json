@@ -30,6 +30,6 @@
   },
   "keywords": [],
   "scripts": {
-    "preinstall": "npm i -g grunt-cli"
+    "preinstall": "npm i -g grunt-cli && npm install -g buster"
   }
 }

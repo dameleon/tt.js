@@ -129,6 +129,45 @@ buster.testCase("tt.js test", {
                 }
             });
         },
+        "proxy test": function() {
+            var arg = "arg",
+                obj = {
+                    init: function() { return this; },
+                    hoge: "fuga"
+                };
+
+            assert.exception(function () {
+                tt.proxy();
+            }, 'Error');
+
+            assert.equals(obj, tt.proxy(function() { return this; }, obj)());
+            assert.equals(arg, tt.proxy(function(a) { return a; }, obj, arg)());
+            assert.equals(obj, tt.proxy(obj, 'init')());
+        },
+        "parseJSON test": function() {
+            var jsonText = '{"hoge": "hoge", "fuga": "fuga", "piyo": "piyo"}',
+                fakeJsonText = '{hoge: "hoge", fuga: "fuga", piyo: "piyo"}',
+                brokenJsonText = '{hoge: fuga,}',
+                obj = {
+                    hoge: "hoge",
+                    fuga: "fuga",
+                    piyo: "piyo"
+                };
+
+            assert.exception(function() {
+                tt.parseJSON(brokenJsonText);
+            });
+            assert.equals({}, tt.parseJSON());
+            _assert(jsonText);
+            _assert(fakeJsonText);
+
+            function _assert(text) {
+                var res = tt.parseJSON(text);
+                tt.each(obj, function(key, val) {
+                    assert.equals(obj[key], res[key]);
+                });
+            }
+        },
         "query2object test": function() {
             assert.isFunction(tt.query2object);
 
@@ -230,8 +269,6 @@ buster.testCase("tt.js test", {
                     ["", "Mozilla/5.0 (Android; Linux armv7l; rv:9.0) Gecko/20111216 Firefox/9.0 Fennec/9.0"]
                 ]
             };
-
-            /(ip(hone|ad|od)|android|windows\sphone).*?(applewebkit|(chrome|crios)|firefox|opera|trident)/
 
             for (var key in testUA) {
                 var values = testUA[key];

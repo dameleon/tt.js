@@ -4,7 +4,7 @@ module.exports = function(grunt) {
         pkg: grunt.file.readJSON('package.json'),
         buster: {
             test: {
-                config: 'test/buster.js',
+//                config: 'test/buster.js',
             },
             server: {
                 port: 1111

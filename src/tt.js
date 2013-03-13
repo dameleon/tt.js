@@ -14,7 +14,6 @@
     if (!Object.keys) {
         Object.keys=function(){var e=Object.prototype.hasOwnProperty,f=!{toString:null}.propertyIsEnumerable("toString"),c="toString toLocaleString valueOf hasOwnProperty isPrototypeOf propertyIsEnumerable constructor".split(" "),g=c.length;return function(b){if("object"!==typeof b&&"function"!==typeof b||null===b){throw new TypeError("Object.keys called on non-object");}var d=[],a;for(a in b){e.call(b,a);d.push(a);}if(f){for(a=0;a<g;a++){e.call(b,c[a]);d.push(c[a]);}return d;}};}();
     }
-
     // String.prototype.trim = MDN https://developer.mozilla.org/en/docs/JavaScript/Reference/Global_Objects/String/trim#Compatibility
     if (!String.prototype.trim) {
         String.prototype.trim=function(){return this.replace(/^\s+|\s+$/g,"");};
@@ -178,6 +177,44 @@
         }
     };
 
+    tt.proxy = function() {
+        if (arguments.length < 2) {
+            throw new Error('Error: missing argument error');
+        }
+        var args = [].slice.call(arguments),
+            func = args.shift(),
+            self = args.shift(),
+            tmp;
+
+        if (typeof self === 'string') {
+            tmp = func[self];
+            self = func;
+            func = tmp;
+        }
+        return function() {
+            return func.apply(self, args);
+        };
+    };
+
+    tt.parseJSON = function(text) {
+        if (!text) {
+            return {};
+        }
+        // idea from @uupaa
+        var obj;
+
+        try {
+            obj = JSON.parse(text);
+            return obj;
+        } catch (p_o) {}
+        try {
+            /*jshint evil: true */
+            obj = (new Function('return ' + text))();
+        } catch (o_q) {
+            throw new Error("Error: can't parse text to json");
+        }
+        return obj;
+    };
 
     tt.query2object = function(query) {
         if (!tt.type(query, "string")) {
@@ -212,7 +249,7 @@
 
     tt.triggerEvent = function(node, event, type, bubbles, cancelable) {
         if (!node || !event) {
-            throw new Error("Error: argument error");
+            throw new Error("Error: missing argument error");
         }
         if ("string" !== typeof type) {
             type = event;
@@ -306,8 +343,8 @@
         res.mobileSafari = !res.chrome && res.ios && /applewebkit/.test(ua);
 
         res.version =
-            (res.androidBrowser || res.androidBrowser && res.chrome) ? ua.match(/android\s(\S.*?)\;/) :
-            (res.mobileSafari || res.mobileSafari && res.chrome) ? ua.match(/os\s(\S.*?)\s/) :
+            (res.androidBrowser || res.android && res.chrome) ? ua.match(/android\s(\S.*?)\;/) :
+            (res.mobileSafari || res.ios && res.chrome) ? ua.match(/os\s(\S.*?)\s/) :
             null;
         res.version = res.version ?
                 res.ios ?
