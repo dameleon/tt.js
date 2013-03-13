@@ -28,5 +28,8 @@
     "grunt-buster": "~0.1.2",
     "grunt-contrib-yuidoc": "~0.4.0"
   },
-  "keywords": []
+  "keywords": [],
+  "scripts": {
+    "preinstall": "npm i -g grunt-cli"
+  }
 }
