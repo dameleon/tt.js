@@ -503,7 +503,7 @@
                 context = setting.context;
 
             clearTimeout(timeout);
-            if (res.dataType === "json" && tt.type(res, "string")) {
+            if (setting.dataType === "json" && tt.type(res, "string")) {
                 res = tt.parseJSON(res);
             }
             switch (status) {
@@ -519,7 +519,7 @@
                 break;
             }
             if (setting.complete) {
-                setting.complete(context, [res, xhr.status, xhr]);
+                setting.complete.apply(context, [res, xhr.status, xhr]);
             }
             xhr = null;
         }

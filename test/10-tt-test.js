@@ -1,6 +1,7 @@
 // プラグイン名変えたら色々と書きなおす必要がありますよっと
 buster.testCase("tt.js test", {
     "setUp": function() {
+        this.isPhantomjs = /phantomjs/.test(navigator.userAgent.toLowerCase());
     },
     "Basic test": {
         "tt function": function() {
@@ -290,18 +291,19 @@ buster.testCase("tt.js test", {
         "tt.env test": function() {
             assert.isObject(tt.env);
         },
-        "tt.ajax json test": function() {
-            var dfd = when.defer();
-
+        "tt.ajax function test": function() {
             assert.exception(function() {
                 tt.ajax();
             }, 'Error');
+        },
+        "tt.ajax json test": function() {
+            var dfd = when.defer();
 
             tt.ajax({
                 beforeSend  : null,
                 cache       : true,
                 complete    : function(res) {
-                    assert(res);
+                    assert.equals(res.result, "success");
                     dfd.resolver.resolve();
                 },
                 context     : document.body,
@@ -314,23 +316,53 @@ buster.testCase("tt.js test", {
 
             return dfd.promise;
         },
-        "tt.ajax html test": function(done) {
+        "tt.ajax html test": function() {
+            var that = this,
+                dfd = when.defer();
 
             tt.ajax({
                 beforeSend  : null,
                 cache       : true,
-                complete    : function() {
-                    assert(true);
-                    done();
+                complete    : function(res) {
+                    // phantomjs isn't support xhr.responseType = "document"
+                    if (that.isPhantomjs) {
+                        assert(res);
+                    } else {
+                        assert(res.body.textContent, "success");
+                    }
+                    dfd.resolver.resolve();
                 },
                 context     : document.body,
                 data        : null,
-                dataType    : "document",
+                // phantomjs isn't support xhr.responseType = "document"
+                dataType    : this.isPhantomjs ? "text" : "document",
                 error       : null,
                 success     : null,
                 url         : buster.env.contextPath + "/html",
             });
 
-        }
+            return dfd.promise;
+        },
+        "tt.ajax text test": function() {
+            var that = this,
+                dfd = when.defer();
+
+            tt.ajax({
+                beforeSend  : null,
+                cache       : true,
+                complete    : function(res) {
+                    assert.equals(res, "success\n")
+                    dfd.resolver.resolve();
+                },
+                context     : document.body,
+                data        : null,
+                dataType    : "text",
+                error       : null,
+                success     : null,
+                url         : buster.env.contextPath + "/text",
+            });
+
+            return dfd.promise;
+        },
     }
 });

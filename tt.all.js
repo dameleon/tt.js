@@ -1,4 +1,4 @@
-/** tt.js version:0.2.0 author:kei takahashi(twitter@dameleon) at:2013-03-13 */
+/** tt.js version:0.2.0 author:kei takahashi(twitter@dameleon) at:2013-03-14 */
 ;(function(global, document, isArray, isNodeList, undefined) {
     "use strict";
 
@@ -183,22 +183,24 @@
         }
         var args = [].slice.call(arguments),
             func = args.shift(),
-            self = args.shift(),
+            context = args.shift(),
             tmp;
 
-        if (typeof self === 'string') {
-            tmp = func[self];
-            self = func;
+        if (typeof context === 'string') {
+            tmp = func[context];
+            context = func;
             func = tmp;
         }
         return function() {
-            return func.apply(self, args);
+            return func.apply(context, args);
         };
     };
 
     tt.parseJSON = function(text) {
         if (!text) {
             return {};
+        } else if (typeof text === "object") {
+            return text;
         }
         // idea from @uupaa
         var obj;
@@ -474,14 +476,10 @@
             });
         }
         if (setting.dataType) {
-            switch (setting.dataType) {
-            case "json": xhr.responseType = "application/json"; break;
-            case "xml":  xhr.responseType = "application/xml, text/xml"; break;
-            case "html": xhr.responseType = "text/html"; break;
-            case "text": xhr.responseType = "text/plain"; break;
-            default:
-                xhr.responseType =
-                    (setting.dataType.indexOf("/") > -1) ? setting.dataType : "text/plain";
+            try {
+                xhr.responseType = setting.dataType;
+            } catch (e) {
+                xhr.responseType = "text";
             }
         }
         if (setting.mimeType) {
@@ -496,7 +494,6 @@
                 _callCallbacks("error");
             }, setting,timeout);
         }
-
         xhr.send(setting.data);
 
         return xhr;
@@ -506,10 +503,13 @@
                 context = setting.context;
 
             clearTimeout(timeout);
+            if (setting.dataType === "json" && tt.type(res, "string")) {
+                res = tt.parseJSON(res);
+            }
             switch (status) {
             case "success":
                 if (setting.success) {
-                    setting.success.apply(context, [xhr.response, xhr.status, xhr]);
+                    setting.success.apply(context, [res, xhr.status, xhr]);
                 }
                 break;
             case "error":
@@ -519,7 +519,7 @@
                 break;
             }
             if (setting.complete) {
-                setting.complete(context, [xhr.response, xhr.status, xhr]);
+                setting.complete.apply(context, [res, xhr.status, xhr]);
             }
             xhr = null;
         }
@@ -758,10 +758,10 @@
         })(),
 
         toggleClass: function(className, strict) {
-            var self = this;
+            var that = this;
 
             if (strict) {
-                self.each(function() {
+                that.each(function() {
                     var ttObj = tt(this);
 
                     if (ttObj.hasClass(className)) {
@@ -771,10 +771,10 @@
                     }
                 });
             } else {
-                if (tt(self[0]).hasClass(className)) {
-                    self.removeClass(className);
+                if (tt(that[0]).hasClass(className)) {
+                    that.removeClass(className);
                 } else {
-                    self.addClass(className);
+                    that.addClass(className);
                 }
             }
             return this;
@@ -808,7 +808,7 @@
         },
 
         attr: function(mix, value) {
-            var self = this, key;
+            var that = this, key;
 
             switch (arguments.length) {
             case 1:
@@ -830,7 +830,7 @@
                 if (value === undefined || value === null) {
                     value = "";
                 }
-                self.each(function() {
+                that.each(function() {
                     if (value === "") {
                         this.removeAttribute(key);
                         return;
@@ -898,7 +898,7 @@
         },
 
         css: function(mix, value) {
-            var self = this;
+            var that = this;
 
             if (typeof mix === "object") {
                 tt.each(mix, function(key, val) {
@@ -921,13 +921,13 @@
             return this;
 
             function _removeProperty(prop) {
-                self.each(function() {
+                that.each(function() {
                     this.style.removeProperty(prop);
                 });
             }
 
             function _setStyle(prop, val) {
-                self.each(function() {
+                that.each(function() {
                     this.style[prop] = val;
                 });
             }
@@ -939,7 +939,7 @@
                 _setDataAttr = cond ? _setDataByDataset : _setDataByAttributes;
 
             return function (mix, value) {
-                var self = this,
+                var that = this,
                     key;
 
                 switch (arguments.length) {
@@ -948,7 +948,7 @@
                 case 1:
                     if (typeof mix === "object") {
                         tt.each(mix, function(key, val) {
-                            _setDataAttr.call(self, key, val);
+                            _setDataAttr.call(that, key, val);
                         });
                         return this;
                     } else {
@@ -1049,7 +1049,7 @@
 
     global[IDENT] = global[IDENT] || tt;
 })(
-    this,
+    (this.self || global),
     document,
     Array.isArray||(Array.isArray=function(a){return Object.prototype.toString.call(a)==="[object Array]";}),
     function(a) {var b=Object.prototype.toString.call(a);return b==="[object NodeList]"||b==="[object HTMLCollection]";}
