@@ -406,7 +406,7 @@
      *
      */
     tt.ajax = function(mix, setting) {
-        var timeout,
+        var called = false,
             xhr = new XMLHttpRequest();
 
         setting = setting || {};
@@ -450,12 +450,8 @@
             setting.data = tt.param(setting.data);
         }
 
-        xhr.onabort = function() {
-            _callCallbacks(xhr.status);
-        };
-
         xhr.onerror = function() {
-            _callCallbacks(xhr.status);
+            _callCallbacks(0);
         };
 
         xhr.onreadystatechange = function() {
@@ -493,13 +489,17 @@
             setting.beforeSend(xhr);
         }
         if (setting.timeout) {
-            xhr.timeout = timeout;
+            xhr.timeout = setting.timeout;
         }
         xhr.send(setting.data);
 
         return xhr;
 
         function _callCallbacks(statusCode) {
+            if (called) {
+                return;
+            }
+            called = true;
             var cond = (statusCode >= 200 && statusCode < 400),
                 res = cond ? xhr.response : null,
                 context = setting.context;

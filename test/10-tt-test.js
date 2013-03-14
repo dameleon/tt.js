@@ -376,12 +376,11 @@ buster.testCase("tt.js test", {
                 data        : null,
                 dataType    : "text",
                 error       : function(status) {
-                    //console.log(status);
                     assert(true);
                     dfd.resolver.resolve();
                 },
                 success     : null,
-                url         : "http://hogehoge.commmon/not_found",
+                url         : "http://anothor_aaaaaaaaaadomain.com/not_found",
                 timeout     : 100
             });
 
