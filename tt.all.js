@@ -378,33 +378,6 @@
 
     tt.env = tt.createEnvData(navigator);
 
-    /***
-     * tt.ajax({
-     *  async: true,
-     *  beforeSend: function(xhr) {},
-     *  cache: true,
-     *  complete: function(response, xhr) {},
-     *  contents: {},
-     *  contentType: 'application/x-www-form-urlencoded; charset=UTF-8',
-     *  context: document.body,
-     *  crossDomain: false,
-     *  data: {},
-     *  dataType: 'text',
-     *  error: function(xhr) {},
-     *  headers: {},
-     *  jsonp: '',
-     *  jsonpCallback: '',
-     *  mimeType: '',
-     *  processData: true,
-     *  success: function(data, status, xhr) {},
-     *  timeout: 0,
-     *  type: 'GET',
-     *  url: '',
-     *  user: null,
-     *  password: null
-     * });
-     *
-     */
     tt.ajax = function(mix, setting) {
         var called = false,
             xhr = new XMLHttpRequest();
@@ -672,88 +645,11 @@
             return this;
         },
 
-        addClass: (function() {
-            var _addClass = domTester.classList ? _addClassByClassList : _addClassByClassName;
+        addClass: domTester.classList ? _addClassByClassList : _addClassByClassName,
 
-            return function(className) {
-                _addClass.call(this, className);
-                return this;
-            };
+        removeClass: domTester.classList ? _removeClassByClassList : _removeClassByClassName ,
 
-            function _addClassByClassList(className) {
-                this.each(function() {
-                    this.classList.add(className);
-                });
-            }
-
-            function _addClassByClassName(className) {
-                var stashName = this[0].className,
-                    newName = _createName(stashName, className);
-
-                this.each(function(index) {
-                    if (tt(this).hasClass(className)) {
-                        return;
-                    }
-                    if (index && stashName !== this.className) {
-                        stashName = this.className;
-                        newName = _createName(stashName, className);
-                    }
-                    this.className = newName;
-                });
-
-                function _createName(currentName, newName) {
-                    var res = currentName.split(" ");
-
-                    res[res.length] = newName;
-                    return res.join(" ");
-                }
-            }
-        })(),
-
-        removeClass: (function() {
-            var _removeClass = domTester.classList ? _removeClassByClassList : _removeClassByClassName;
-
-            return function(className) {
-                _removeClass.call(this, className);
-                return this;
-            };
-
-            function _removeClassByClassList(className) {
-                this.each(function() {
-                    this.classList.remove(className);
-                });
-            }
-
-            function _removeClassByClassName(className) {
-                className = " " + className + " ";
-                this.each(function() {
-                    this.className = (" " + this.className + " ").replace(className, "");
-                });
-            }
-        })(),
-
-        hasClass: (function() {
-            var _hasClass = domTester.classList ? _hasClassByClassList : _hasClassByClassName;
-
-            return function(className) {
-                var res;
-
-                res = _hasClass.call(this, className.trim());
-                return res ? true : false;
-            };
-
-            function _hasClassByClassList(className) {
-                return this.match(function() {
-                    return this.classList.contains(className);
-                });
-            }
-
-            function _hasClassByClassName(className) {
-                return this.match(function() {
-                    return (" " + this.className + " ").indexOf(" " + className + " ") > -1;
-                });
-            }
-        })(),
+        hasClass: domTester.classList ? _hasClassByClassList : _hasClassByClassName,
 
         toggleClass: function(className, strict) {
             var that = this;
@@ -1046,6 +942,64 @@
     };
 
     global[IDENT] = global[IDENT] || tt;
+
+
+    function _addClassByClassList(className) {
+        return this.each(function() {
+            this.classList.add(className);
+        });
+    }
+
+    function _addClassByClassName(className) {
+        var stashName = this[0].className,
+            newName = _createName(stashName, className);
+
+        return this.each(function(index) {
+            if (tt(this).hasClass(className)) {
+                return;
+            }
+            if (index && stashName !== this.className) {
+                stashName = this.className;
+                newName = _createName(stashName, className);
+            }
+            this.className = newName;
+        });
+
+        function _createName(currentName, newName) {
+            var res = currentName.split(" ");
+
+            res[res.length] = newName;
+            return res.join(" ");
+        }
+    }
+
+    function _removeClassByClassList(className) {
+        return this.each(function() {
+            this.classList.remove(className);
+        });
+    }
+
+    function _removeClassByClassName(className) {
+        className = " " + className + " ";
+        return this.each(function() {
+            this.className = (" " + this.className + " ").replace(className, "");
+        });
+    }
+
+    function _hasClassByClassList(className) {
+        var res = this.match(function() {
+            return this.classList.contains(className);
+        });
+
+        return res ? true : false;
+    }
+
+    function _hasClassByClassName(className) {
+        return this.match(function() {
+            return (" " + this.className + " ").indexOf(" " + className + " ") > -1;
+        });
+    }
+
 })(
     (this.self || global),
     document,
