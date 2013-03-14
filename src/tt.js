@@ -1049,7 +1049,7 @@
 
     global[IDENT] = global[IDENT] || tt;
 })(
-    this,
+    (this.self || global),
     document,
     Array.isArray||(Array.isArray=function(a){return Object.prototype.toString.call(a)==="[object Array]";}),
     function(a) {var b=Object.prototype.toString.call(a);return b==="[object NodeList]"||b==="[object HTMLCollection]";}
