@@ -183,16 +183,16 @@
         }
         var args = [].slice.call(arguments),
             func = args.shift(),
-            self = args.shift(),
+            context = args.shift(),
             tmp;
 
-        if (typeof self === 'string') {
-            tmp = func[self];
-            self = func;
+        if (typeof context === 'string') {
+            tmp = func[context];
+            context = func;
             func = tmp;
         }
         return function() {
-            return func.apply(self, args);
+            return func.apply(context, args);
         };
     };
 
@@ -758,10 +758,10 @@
         })(),
 
         toggleClass: function(className, strict) {
-            var self = this;
+            var that = this;
 
             if (strict) {
-                self.each(function() {
+                that.each(function() {
                     var ttObj = tt(this);
 
                     if (ttObj.hasClass(className)) {
@@ -771,10 +771,10 @@
                     }
                 });
             } else {
-                if (tt(self[0]).hasClass(className)) {
-                    self.removeClass(className);
+                if (tt(that[0]).hasClass(className)) {
+                    that.removeClass(className);
                 } else {
-                    self.addClass(className);
+                    that.addClass(className);
                 }
             }
             return this;
@@ -808,7 +808,7 @@
         },
 
         attr: function(mix, value) {
-            var self = this, key;
+            var that = this, key;
 
             switch (arguments.length) {
             case 1:
@@ -830,7 +830,7 @@
                 if (value === undefined || value === null) {
                     value = "";
                 }
-                self.each(function() {
+                that.each(function() {
                     if (value === "") {
                         this.removeAttribute(key);
                         return;
@@ -898,7 +898,7 @@
         },
 
         css: function(mix, value) {
-            var self = this;
+            var that = this;
 
             if (typeof mix === "object") {
                 tt.each(mix, function(key, val) {
@@ -921,13 +921,13 @@
             return this;
 
             function _removeProperty(prop) {
-                self.each(function() {
+                that.each(function() {
                     this.style.removeProperty(prop);
                 });
             }
 
             function _setStyle(prop, val) {
-                self.each(function() {
+                that.each(function() {
                     this.style[prop] = val;
                 });
             }
@@ -939,7 +939,7 @@
                 _setDataAttr = cond ? _setDataByDataset : _setDataByAttributes;
 
             return function (mix, value) {
-                var self = this,
+                var that = this,
                     key;
 
                 switch (arguments.length) {
@@ -948,7 +948,7 @@
                 case 1:
                     if (typeof mix === "object") {
                         tt.each(mix, function(key, val) {
-                            _setDataAttr.call(self, key, val);
+                            _setDataAttr.call(that, key, val);
                         });
                         return this;
                     } else {
