@@ -199,6 +199,8 @@
     tt.parseJSON = function(text) {
         if (!text) {
             return {};
+        } else if (typeof text === "object") {
+            return text;
         }
         // idea from @uupaa
         var obj;
@@ -474,7 +476,11 @@
             });
         }
         if (setting.dataType) {
-            xhr.responseType = setting.dataType;
+            try {
+                xhr.responseType = setting.dataType;
+            } catch (e) {
+                xhr.responseType = "text";
+            }
         }
         if (setting.mimeType) {
             xhr.overrideMimeType(setting.mimeType) ;
@@ -488,7 +494,6 @@
                 _callCallbacks("error");
             }, setting,timeout);
         }
-
         xhr.send(setting.data);
 
         return xhr;
@@ -497,11 +502,10 @@
             var res = xhr.response,
                 context = setting.context;
 
-            if (res && setting.dataType === "json") {
+            clearTimeout(timeout);
+            if (res.dataType === "json" && tt.type(res, "string")) {
                 res = tt.parseJSON(res);
             }
-
-            clearTimeout(timeout);
             switch (status) {
             case "success":
                 if (setting.success) {

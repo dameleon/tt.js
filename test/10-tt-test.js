@@ -290,7 +290,9 @@ buster.testCase("tt.js test", {
         "tt.env test": function() {
             assert.isObject(tt.env);
         },
-        "tt.ajax test": function() {
+        "tt.ajax json test": function() {
+            var dfd = when.defer();
+
             assert.exception(function() {
                 tt.ajax();
             }, 'Error');
@@ -298,49 +300,37 @@ buster.testCase("tt.js test", {
             tt.ajax({
                 beforeSend  : null,
                 cache       : true,
-                complete    : null,
+                complete    : function(res) {
+                    assert(res);
+                    dfd.resolver.resolve();
+                },
                 context     : document.body,
                 data        : null,
-                dataType    : "text",
+                dataType    : "json",
                 error       : null,
                 success     : null,
-                url         : "/json",
+                url         : buster.env.contextPath + "/json",
             });
+
+            return dfd.promise;
+        },
+        "tt.ajax html test": function(done) {
 
             tt.ajax({
                 beforeSend  : null,
                 cache       : true,
-                complete    : null,
+                complete    : function() {
+                    assert(true);
+                    done();
+                },
                 context     : document.body,
                 data        : null,
                 dataType    : "document",
                 error       : null,
                 success     : null,
-                url         : "/html",
+                url         : buster.env.contextPath + "/html",
             });
 
-            tt.ajax({
-                beforeSend  : null,
-                cache       : true,
-                complete    : null,
-                context     : document.body,
-                data        : null,
-                dataType    : "text",
-                error       : null,
-                success     : null,
-                url         : "/text",
-            });
-
-            tt.ajax({
-                beforeSend  : null,
-                cache       : true,
-                complete    : null,
-                context     : document.body,
-                data        : null,
-                error       : null,
-                success     : null,
-                url         : "/not_found_url"
-            });
         }
     }
 });
