@@ -500,25 +500,24 @@
                 return;
             }
             called = true;
-            var cond = (statusCode >= 200 && statusCode < 400),
-                res = cond ? xhr.response : null,
-                context = setting.context;
 
-            if (setting.dataType === "json" && tt.type(res, "string")) {
-                res = tt.parseJSON(res);
-            }
+            var res, context = setting.context;
 
-            if (cond) {
+            if (statusCode >= 200 && statusCode < 400) {
+                res = xhr.response;
+                if (setting.dataType === "json" && tt.type(res, "string")) {
+                    res = tt.parseJSON(res);
+                }
                 if (setting.success) {
                     setting.success.apply(context, [res, statusCode, xhr]);
                 }
             } else {
                 if (setting.error) {
-                    setting.error.apply(context, [statusCode, xhr]);
+                    setting.error.apply(context, [xhr, statusCode]);
                 }
             }
             if (setting.complete) {
-                setting.complete.apply(context, [res, statusCode, xhr]);
+                setting.complete.apply(context, [xhr, statusCode]);
             }
             xhr = null;
         }

@@ -406,7 +406,7 @@
      *
      */
     tt.ajax = function(mix, setting) {
-        var timeout,
+        var called = false,
             xhr = new XMLHttpRequest();
 
         setting = setting || {};
@@ -451,12 +451,12 @@
         }
 
         xhr.onerror = function() {
-            _callCallbacks("error");
+            _callCallbacks(0);
         };
 
         xhr.onreadystatechange = function() {
             if (xhr.readyState === 4) {
-                _callCallbacks("success");
+                _callCallbacks(xhr.status);
             }
         };
 
@@ -489,37 +489,35 @@
             setting.beforeSend(xhr);
         }
         if (setting.timeout) {
-            timeout = setTimeout(function() {
-                xhr.abort();
-                _callCallbacks("error");
-            }, setting,timeout);
+            xhr.timeout = setting.timeout;
         }
         xhr.send(setting.data);
 
         return xhr;
 
-        function _callCallbacks(status) {
-            var res = xhr.response,
-                context = setting.context;
-
-            clearTimeout(timeout);
-            if (setting.dataType === "json" && tt.type(res, "string")) {
-                res = tt.parseJSON(res);
+        function _callCallbacks(statusCode) {
+            if (called) {
+                return;
             }
-            switch (status) {
-            case "success":
+            called = true;
+
+            var res, context = setting.context;
+
+            if (statusCode >= 200 && statusCode < 400) {
+                res = xhr.response;
+                if (setting.dataType === "json" && tt.type(res, "string")) {
+                    res = tt.parseJSON(res);
+                }
                 if (setting.success) {
-                    setting.success.apply(context, [res, xhr.status, xhr]);
+                    setting.success.apply(context, [res, statusCode, xhr]);
                 }
-                break;
-            case "error":
+            } else {
                 if (setting.error) {
-                    setting.error.apply(context, [xhr.status, xhr]);
+                    setting.error.apply(context, [xhr, statusCode]);
                 }
-                break;
             }
             if (setting.complete) {
-                setting.complete.apply(context, [res, xhr.status, xhr]);
+                setting.complete.apply(context, [xhr, statusCode]);
             }
             xhr = null;
         }

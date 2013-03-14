@@ -302,15 +302,15 @@ buster.testCase("tt.js test", {
             tt.ajax({
                 beforeSend  : null,
                 cache       : true,
-                complete    : function(res) {
-                    assert.equals(res.result, "success");
-                    dfd.resolver.resolve();
-                },
+                complete    : null,
                 context     : document.body,
                 data        : null,
                 dataType    : "json",
                 error       : null,
-                success     : null,
+                success     : function(res) {
+                    assert.equals(res.result, "success");
+                    dfd.resolver.resolve();
+                },
                 url         : buster.env.contextPath + "/json",
             });
 
@@ -323,7 +323,13 @@ buster.testCase("tt.js test", {
             tt.ajax({
                 beforeSend  : null,
                 cache       : true,
-                complete    : function(res) {
+                complete    : null,
+                context     : document.body,
+                data        : null,
+                // phantomjs isn't support xhr.responseType = "document"
+                dataType    : this.isPhantomjs ? "text" : "document",
+                error       : null,
+                success     : function(res) {
                     // phantomjs isn't support xhr.responseType = "document"
                     if (that.isPhantomjs) {
                         assert(res);
@@ -332,12 +338,6 @@ buster.testCase("tt.js test", {
                     }
                     dfd.resolver.resolve();
                 },
-                context     : document.body,
-                data        : null,
-                // phantomjs isn't support xhr.responseType = "document"
-                dataType    : this.isPhantomjs ? "text" : "document",
-                error       : null,
-                success     : null,
                 url         : buster.env.contextPath + "/html",
             });
 
@@ -350,15 +350,15 @@ buster.testCase("tt.js test", {
             tt.ajax({
                 beforeSend  : null,
                 cache       : true,
-                complete    : function(res) {
-                    assert.equals(res, "success\n")
-                    dfd.resolver.resolve();
-                },
+                complete    : null,
                 context     : document.body,
                 data        : null,
                 dataType    : "text",
                 error       : null,
-                success     : null,
+                success     : function(res) {
+                    assert.equals(res, "success");
+                    dfd.resolver.resolve();
+                },
                 url         : buster.env.contextPath + "/text",
             });
 
@@ -380,7 +380,7 @@ buster.testCase("tt.js test", {
                     dfd.resolver.resolve();
                 },
                 success     : null,
-                url         : "http://anothor_aaaaaaaaaadomain.com/not_found",
+                url         : "http:://anothor_aaaaaaaaaadomain.com/not_found",
                 timeout     : 100
             });
 
