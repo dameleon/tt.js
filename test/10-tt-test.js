@@ -364,5 +364,28 @@ buster.testCase("tt.js test", {
 
             return dfd.promise;
         },
+        "tt.ajax error test": function() {
+            var that = this,
+                dfd = when.defer();
+
+            tt.ajax({
+                beforeSend  : null,
+                cache       : true,
+                complete    : null,
+                context     : document.body,
+                data        : null,
+                dataType    : "text",
+                error       : function(status) {
+                    //console.log(status);
+                    assert(true);
+                    dfd.resolver.resolve();
+                },
+                success     : null,
+                url         : "http://hogehoge.commmon/not_found",
+                timeout     : 100
+            });
+
+            return dfd.promise;
+        },
     }
 });
