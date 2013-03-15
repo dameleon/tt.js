@@ -856,27 +856,67 @@
             };
 
             function _setDataByDataset(key, val) {
-                this.each(function() {
-                    if (val === "") {
-                        delete this.dataset[key];
-                        return;
-                    }
-                    this.dataset[key] = val;
-                });
+                var type = tt.type(val),
+                    func = null;
+
+                if (val === "" ||
+                    type === "undefined" ||
+                    type === "null") {
+                        if (this._data[key]) {
+                            delete this._data[key];
+                            return;
+                        } else {
+                            func = function() { delete this.dataset[key]; };
+                        }
+                } else if (type === "string" || type === "number") {
+                    func = function() { this.dataset[key] = val; };
+                } else {
+                    this._data[key] = val;
+                    return;
+                }
+                this.each(func);
             }
 
             function _getDataByDataset(key) {
                 if (!this[0]) {
                     return null;
                 }
-                return key ? this[0].dataset[key] : this[0].dataset;
+                var node = this[0],
+                    res = {};
+
+                if (key) {
+                    if (this._data[key]) {
+                        return this._data[key] || null;
+                    } else {
+                        return node.dataset[key] || null;
+                    }
+                } else {
+                    tt.each(node.dataset, function(key, val) {
+                        res[key] = val;
+                    });
+                    tt.extend(res, this._data);
+                }
+                return res;
             }
 
             function _setDataByAttributes(key, val) {
-                this.attr("data-" + key, val);
+                var type = tt.type(val);
+
+                if (tt.type(val, ["string", "number", "undefined", "null"])) {
+                    if (val === "" && this._data[key]) {
+                        delete this._data[key];
+                        return null;
+                    }
+                    this.attr("data-" + key, val);
+                } else {
+                    this._data[key] = val;
+                }
             }
 
             function _getDataByAttributes(key) {
+                if (!this[0]) {
+                    return null;
+                }
                 var res = {},
                     dataName = "data-",
                     node = this[0],
@@ -885,6 +925,8 @@
 
                 if (!node) {
                     return null;
+                } else if (this._data[key]) {
+                    return this._data[key];
                 } else if (key) {
                     dataName += key;
                     return this.attr(dataName);
@@ -896,6 +938,9 @@
                         res[key] = attrs[i].value;
                     }
                 }
+                tt.each(this._data, function(key, val) {
+                    res[key] = val;
+                });
                 return res;
             }
         })(),
