@@ -349,10 +349,10 @@
             (res.mobileSafari || res.ios && res.chrome) ? ua.match(/os\s(\S.*?)\s/) :
             null;
         res.version = res.version ?
-                res.ios ?
-                    res.version[1].replace("_", ".") :
-                    res.version[1] :
-                null;
+            res.ios ?
+                res.version[1].replace("_", ".") :
+                res.version[1] :
+            null;
         res.versionCode = _getVersionCode(res.version);
         res.supportTouch = "ontouchstart" in global;
 
@@ -497,7 +497,12 @@
     };
 
 
-    // ##### TT constructor
+    /**
+     * create TT typed object with NodeElements
+     *
+     * @class TT
+     * @constructor
+     */
     function TT(nodes, selector) {
         var i = 0, iz;
 
@@ -511,14 +516,32 @@
         return this;
     }
 
-    // ##### class method
+    /**
+     * TT methods
+     *
+     * @property prototype
+     * @type Object
+     */
     TT.prototype = tt.fn = {
         constructor: TT,
 
+        /**
+         * Returns NodeElements
+         *
+         * @method get
+         * @param {Number} index NodeElements index
+         * @return {NodeElement} registered NodeElement
+         */
         get: function(index) {
             return this[index || 0];
         },
 
+        /**
+         * Returns array in NodeElements
+         *
+         * @method toArray
+         * @return {Array} registered NodeElements
+         */
         toArray: function() {
             var arr = [];
 
@@ -528,6 +551,13 @@
             return arr;
         },
 
+        /**
+         * Call function with context of NodeElement and parameter of elements index number
+         *
+         * @method each
+         * @param {Function} fn Function to be executed repeatedly
+         * @return {Object} TT object
+         */
         each: function(fn) {
             var i = 0, iz = this.length;
 
@@ -537,6 +567,14 @@
             return this;
         },
 
+        /**
+         * Call function with context of NodeElement and parameter of elements index number
+         * If it returns true, then this function return context that matches
+         *
+         * @method match
+         * @param {Function} fn Function to be executed repeatedly
+         * @return {Object} TT Object
+         */
         match: function(fn) {
             var i = 0, iz = this.length;
 
@@ -548,32 +586,69 @@
             return null;
         },
 
+        /**
+         * Bind events to NodeElement
+         *
+         * @method on
+         * @param {String} type
+         * @param {String/Function} mix
+         * @param {Function} [options] callback
+         * @return {Object} TT Object
+         */
         on: function(type, mix, callback) {
             if (tt.type(mix, 'string')) {
-                this.delegate(mix, type, callback);
+                this.delegate(type, mix, callback);
             } else {
                 this.bind(type, mix);
             }
             return this;
         },
 
+        /**
+         * Un bind events from NodeElement
+         *
+         * @method off
+         * @param {String} type
+         * @param {String/Function} mix
+         * @param {Function} callback
+         * @return {Object} TT Object
+         */
         off: function(type, mix, callback) {
             if (tt.type(mix, 'string')) {
-                this.undelegate(mix, type, callback);
+                this.undelegate(type, mix, callback);
             } else {
                 this.unbind(type, mix);
             }
             return this;
         },
 
-        bind: function(type, callback, capture) {
+        /**
+         * Bind events to NodeElement
+         * This is simply wrapper of addEventListener
+         *
+         * @method bond
+         * @param {String} type
+         * @param {Function/Object} callback
+         * @param {Bool} [options] capture
+         * @return {Object} TT Object
+         */
+        bind: function(type, mix, capture) {
             capture = capture || false;
             this.each(function() {
-                this.addEventListener(type, callback, capture);
+                this.addEventListener(type, mix, capture);
             }, true);
             return this;
         },
 
+        /**
+         * Un bind events from NodeElement
+         * This is simply wrapper of removeEventListener
+         *
+         * @method unbind
+         * @param {String} type
+         * @param {Function/Object} mix
+         * @return {Object} TT Object
+         */
         unbind: function(type, mix) {
             this.each(function() {
                 this.removeEventListener(type, mix);
@@ -581,7 +656,17 @@
             return this;
         },
 
-        delegate: function(target, type, callback) {
+        /**
+         * Bind events to NodeElement
+         * To bind the event of delegate type
+         *
+         * @method delegate
+         * @param {String} type
+         * @param {String/Object} target
+         * @param {Function/Object} callback
+         * @return {Object} TT Object
+         */
+        delegate: function(type, target, callback) {
             var delegate = this._delegates[type],
                 listener = {
                     target: target,
@@ -623,7 +708,17 @@
             return this;
         },
 
-        undelegate: function(target, type, callback) {
+        /**
+         * Un bind events from NodeElement
+         * To un bind the event of delegate type
+         *
+         * @method undelegate
+         * @param {String} type
+         * @param {String/Function} mix
+         * @param {Function} callback
+         * @return {Object} TT Object
+         */
+        undelegate: function(type, target, callback) {
             var delegate = this._delegates[type],
                 listeners = delegate.listeners;
 
@@ -645,12 +740,41 @@
             return this;
         },
 
+        /**
+         * Add class name
+         *
+         * @method addClass
+         * @param {String} classname
+         * @return {Object} TT object
+         */
         addClass: domTester.classList ? _addClassByClassList : _addClassByClassName,
 
+        /**
+         * Remove class name
+         *
+         * @method removeClass
+         * @param {String} classname
+         * @return {Object} TT object
+         */
         removeClass: domTester.classList ? _removeClassByClassList : _removeClassByClassName ,
 
+        /**
+         * Search class name
+         *
+         * @method hasClass
+         * @param {String} classname
+         * @return {Object} TT object
+         */
         hasClass: domTester.classList ? _hasClassByClassList : _hasClassByClassName,
 
+        /**
+         * Toggle class name
+         *
+         * @method toggleClass
+         * @param {String} classname
+         * @param {Bool} strict
+         * @return {Object} TT object
+         */
         toggleClass: function(className, strict) {
             var that = this;
 
@@ -674,6 +798,13 @@
             return this;
         },
 
+        /**
+         * Find NodeElements under registered NodeElements
+         *
+         * @method find
+         * @param {String} query
+         * @return {Object} TT object
+         */
         find: function(query) {
             var res = [];
 
@@ -683,6 +814,13 @@
             return tt(res);
         },
 
+        /**
+         * Search NodeElement in registered NodeElements
+         *
+         * @method contains
+         * @param {String/Object} mix
+         * @return {Node} matches NodeElement
+         */
         contains: function(mix) {
             var res, target = tt(mix);
 
@@ -1051,4 +1189,3 @@
     Array.isArray||(Array.isArray=function(a){return Object.prototype.toString.call(a)==="[object Array]";}),
     function(a) {var b=Object.prototype.toString.call(a);return b==="[object NodeList]"||b==="[object HTMLCollection]";}
 );
-
