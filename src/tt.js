@@ -6,7 +6,6 @@
         querySelectorRe = /^(.+[\#\.\s\[>:,]|[\[:])/,
         loaded = false,
         loadQueue = [],
-        delegateListeners = {},
         domTester = document.createElement("div");
 
     // for old android compatiblity
@@ -27,7 +26,20 @@
         }
     }, false);
 
-    //
+    /**
+     * tt.js main function
+     *
+     * This function does the following arguments to be passed by
+     *
+     * ### CSSQueryString, NodeElement, NodeList or its like Array, document or document.body, tt object
+     * Create tt class object (DOM Operator)
+     *
+     * ### Function
+     * If the HTML is already loaded is executed immediately, if not already loaded is executed at the timing of the DOMContentLoaded
+     *
+     * @class tt
+     * @main tt
+     */
     function tt(mix, parent) {
         var target = null,
             selector = "";
@@ -65,7 +77,13 @@
         return new TT(target || [], selector);
     }
 
-    // ##### object method
+    /**
+     * Detect array strictly
+     *
+     * @method tt.isArray
+     * @params {Any} target detect target
+     * @return {Bool} result
+     */
     tt.isArray = isArray;
 
     tt.isNodeList = isNodeList;
@@ -498,7 +516,7 @@
 
 
     /**
-     * create TT typed object with NodeElements
+     * TT Object constructor
      *
      * @class TT
      * @constructor
@@ -506,9 +524,39 @@
     function TT(nodes, selector) {
         var i = 0, iz;
 
+        /**
+         * Selector text
+         *
+         * @property selector
+         * @type String
+         */
         this.selector = selector;
+
+        /**
+         * Length of registered NodeElements
+         *
+         * @property length
+         * @type Number
+         */
         this.length = iz = nodes.length;
+
+        /**
+         * Delegate registration information of registered NodeElements
+         *
+         *
+         * @property _delegates
+         * @type Object
+         * @private
+         */
         this._delegates = {};
+
+        /**
+         * Data for registered NodeElements
+         *
+         * @property _data
+         * @type Object
+         * @private
+         */
         this._data = {};
         for (; i < iz; ++i) {
             this[i] = nodes[i];
@@ -518,9 +566,6 @@
 
     /**
      * TT methods
-     *
-     * @property prototype
-     * @type Object
      */
     TT.prototype = tt.fn = {
         constructor: TT,
@@ -591,7 +636,7 @@
          *
          * @method on
          * @param {String} type
-         * @param {String/Function} mix
+         * @param {String|Function} mix
          * @param {Function} [options] callback
          * @return {Object} TT Object
          */
@@ -609,7 +654,7 @@
          *
          * @method off
          * @param {String} type
-         * @param {String/Function} mix
+         * @param {String|Function} mix
          * @param {Function} callback
          * @return {Object} TT Object
          */
@@ -626,9 +671,9 @@
          * Bind events to NodeElement
          * This is simply wrapper of addEventListener
          *
-         * @method bond
+         * @method bind
          * @param {String} type
-         * @param {Function/Object} callback
+         * @param {Function|Object} callback
          * @param {Bool} [options] capture
          * @return {Object} TT Object
          */
@@ -646,7 +691,7 @@
          *
          * @method unbind
          * @param {String} type
-         * @param {Function/Object} mix
+         * @param {Function|Object} mix
          * @return {Object} TT Object
          */
         unbind: function(type, mix) {
@@ -662,8 +707,8 @@
          *
          * @method delegate
          * @param {String} type
-         * @param {String/Object} target
-         * @param {Function/Object} callback
+         * @param {String|Object} target
+         * @param {Function|Object} callback
          * @return {Object} TT Object
          */
         delegate: function(type, target, callback) {
@@ -714,7 +759,7 @@
          *
          * @method undelegate
          * @param {String} type
-         * @param {String/Function} mix
+         * @param {String|Function} mix
          * @param {Function} callback
          * @return {Object} TT Object
          */
@@ -818,7 +863,7 @@
          * Find NodeElement from registered elements
          *
          * @method contains
-         * @param {String/Object} mix QueryString, NodeElement, NodeList
+         * @param {String|Object} mix QueryString, NodeElement, NodeList
          * @return {Node} matches NodeElement
          */
         contains: function(mix) {
@@ -845,8 +890,8 @@
          *
          * @method attr
          * @param {String} mix QueryString, NodeElement, NodeList
-         * @param {String/Object} mix QueryString, NodeElement, NodeList
-         * @return {Object/String} Key-value object of attributes or attribute value
+         * @param {String|Object} mix QueryString, NodeElement, NodeList
+         * @return {Object|String} Key-value object of attributes or attribute value
          */
         attr: function(mix, value) {
             var that = this, attrs;
@@ -894,8 +939,8 @@
          *
          * @method attr
          * @param {String} mix QueryString, NodeElement, NodeList
-         * @param {String/Object} mix QueryString, NodeElement, NodeList
-         * @return {Object/String} Key-value object of attributes or attribute value
+         * @param {String|Object} mix QueryString, NodeElement, NodeList
+         * @return {Object|String} Key-value object of attributes or attribute value
          */
         html: function(mix) {
             if (mix === undefined || mix === null) {
@@ -915,45 +960,81 @@
             return this;
         },
 
+        /**
+         * Append NodeElement or text html to registered NodeElements
+         *
+         * @method append
+         * @param {String|Node} mix NodeElement, Text html
+         * @return {Object} TT object
+         */
         append: function(mix) {
-            this.each((typeof mix === "string") ?
+            return this.each((typeof mix === "string") ?
                 function() { this.insertAdjacentHTML("beforeend", mix); } :
                 function() { this.appendChild(mix); });
-            return this;
         },
 
+        /**
+         * Prepend NodeElement or text html to registered NodeElements
+         *
+         * @method prepend
+         * @param {String|Node} mix NodeElement, Text html
+         * @return {Object} TT object
+         */
         prepend: function(mix) {
-            this.each((typeof mix === "string") ?
+            return this.each((typeof mix === "string") ?
                 function() { this.insertAdjacentHTML("afterbegin", mix); } :
                 function() { this.insertBefore(mix, this.firstChild); }
             );
-            return this;
         },
 
+        /**
+         * Remove NodeElements of registered from html
+         *
+         * @method remove
+         * @return {Object} TT object
+         */
         remove: function() {
-            this.each(function() {
+            return this.each(function() {
                 this.parentNode.removeChild(this);
             });
-            return this;
         },
 
+        /**
+         * Remove child elements of registered NodeElements
+         *
+         * @method clear
+         * @return {Object} TT object
+         */
         clear: function() {
-            this.each(function() {
+            return this.each(function() {
                 while (this.firstChild) {
                     this.removeChild(this.firstChild);
                 }
             });
-            return this;
         },
 
+        /**
+         * Replace NodeElements of registered NodeElements
+         *
+         * @method replace
+         * @param {String|Node} mix text html or NodeElement
+         * @return {Object} TT object
+         */
         replace: function(mix) {
             this.each((typeof mix === "string") ?
                 function() { this.insertAdjacentHTML("beforebegin", mix); } :
                 function() { this.parentNode.insertBefore(mix, this); });
-            this.remove();
-            return this;
+            return this.remove();
         },
 
+        /**
+         * Set or get css styles
+         *
+         * @method css
+         * @param {String|Object} [options] mix CSS property name, object of CSS style set
+         * @param {String|Number} [options] value CSS style value
+         * @return {String|Number|CSSStyleDeclaration}
+         */
         css: function(mix, value) {
             var that = this;
 
@@ -973,6 +1054,8 @@
                 } else {
                     return global.getComputedStyle(this[0]).getPropertyValue(mix);
                 }
+            } else {
+                return global.getComputedStyle(this[0]);
             }
 
             return this;
@@ -990,6 +1073,15 @@
             }
         },
 
+        /**
+         * Set or get element's dataset
+         * If the array or object, data type passed to save the _data object instance
+         *
+         * @method data
+         * @param {String|Object} [options] mix CSS property name, object of CSS style set
+         * @param {String|Number} [options] value CSS style value
+         * @return {String|Number|CSSStyleDeclaration}
+         */
         data: (function() {
             var cond = domTester.dataset,
                 _getDataAttr = cond ? _getDataByDataset : _getDataByAttributes,
@@ -1108,25 +1200,48 @@
             }
         })(),
 
+        /**
+         * Show NodeElements, if it is hide curretly
+         *
+         * @method show
+         * @param {String|Object} [options] value CSS value of display property
+         * @return {Object} tt object
+         */
         show: function(value) {
             var currentValue = this.css("display"),
-                beforeValue = this._data.beforeDisplay || null;
+                lastValue = this._data.lastDisplay || null;
 
             if (currentValue !== "none") {
                 return;
             }
-            return this.css("display", value || beforeValue || "block");
+            return this.css("display", value || lastValue || "block");
         },
 
+        /**
+         * Hide NodeElements, if it is show currently
+         *
+         * @method hide
+         * @return {Object} tt object
+         */
         hide: function() {
             var currentValue = this.css("display");
 
             if (currentValue !== "none") {
-                this._data.beforeDisplay = currentValue;
+                this._data.lastDisplay = currentValue;
             }
             return this.css("display", "none");
         },
 
+        /**
+         * Trigger events for registered NodeElements
+         *
+         * @method trigger
+         * @param {String} event event name
+         * @param {String} type event type name
+         * @param {Bool} [options] bubbles event bubbling flag
+         * @param {Bool} [options] cancelable event cancelable flag
+         * @return {Object} tt object
+         */
         trigger: function(event, type, bubbles, cancelable) {
             this.each(function() {
                 tt.triggerEvent(this, event, type, bubbles, cancelable);
@@ -1134,6 +1249,22 @@
             return this;
         },
 
+        /**
+         * Get offset position of registered NodeElements
+         * Ex.
+         *  document.body
+         *  +--------------------------
+         *  |             |
+         *  |            top
+         *  |             v
+         *  | -- left --> +---------+
+         *  |             | Element |
+         *  |             +---------+
+         *  |
+         *
+         * @name offset
+         * @return {Object|Array} {left: Number, top: Number} or their array
+         */
         offset: function() {
             var res = [];
 
