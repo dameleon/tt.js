@@ -815,23 +815,23 @@
         },
 
         /**
-         * Search NodeElement in registered NodeElements
+         * Find NodeElement from registered elements
          *
          * @method contains
-         * @param {String/Object} mix
+         * @param {String/Object} mix QueryString, NodeElement, NodeList
          * @return {Node} matches NodeElement
          */
         contains: function(mix) {
             var res, target = tt(mix);
 
             res = this.match(function() {
-                var parent = this,
+                var root = this,
                     match = target.match(function() {
-                        var pos = parent.compareDocumentPosition(this);
+                        var pos = root.compareDocumentPosition(this);
 
                         return (pos === 0 || (pos & Node.DOCUMENT_POSITION_CONTAINED_BY)) ?
-                                    true :
-                                    false;
+                                true :
+                                false;
                     });
 
                 return match ? true : false;
@@ -839,13 +839,29 @@
             return res;
         },
 
+        /**
+         * Set attribute values
+         * Get attributes list or attribute value
+         *
+         * @method attr
+         * @param {String} mix QueryString, NodeElement, NodeList
+         * @param {String/Object} mix QueryString, NodeElement, NodeList
+         * @return {Object/String} Key-value object of attributes or attribute value
+         */
         attr: function(mix, value) {
-            var that = this, key;
+            var that = this, attrs;
 
             switch (arguments.length) {
+            case 0:
+                mix = {};
+                attrs = this[0].attributes;
+                for (var i = 0, iz = attrs.length; i < iz; ++i) {
+                    mix[attr.nodeName] = attr.nodeValue;
+                }
+                return mix;
             case 1:
                 if (typeof mix === "object") {
-                    tt.each(mix, function() {
+                    tt.each(mix, function(key) {
                         _setAttr(key, mix[key]);
                     });
                 } else {
@@ -872,6 +888,15 @@
             }
         },
 
+        /**
+         * Replace html in registered NodeElements
+         * or get text html in thier
+         *
+         * @method attr
+         * @param {String} mix QueryString, NodeElement, NodeList
+         * @param {String/Object} mix QueryString, NodeElement, NodeList
+         * @return {Object/String} Key-value object of attributes or attribute value
+         */
         html: function(mix) {
             if (mix === undefined || mix === null) {
                 return this[0].innerHTML;
