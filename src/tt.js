@@ -163,6 +163,15 @@
         return null;
     };
 
+    /**
+     * Extend target object with each objects
+     * If first argument is true, will be recursive copy
+     *
+     * @method tt.extend
+     * @params {Object|Bool} any first target object or deep flag
+     * @params {Object} [options] override objects
+     * @return {Object} result object
+     */
     tt.extend = function() {
         var args = [].slice.call(arguments),
             i = 1, iz = args.length,
@@ -195,16 +204,25 @@
         }
     };
 
+    /**
+     * Returns a function and arguments hold any context
+     *
+     * @method tt.proxy
+     * @params {Function} func
+     * @params {Any} context
+     * @params {Any} [options] args
+     * @return {Function} Callback function
+     */
     tt.proxy = function() {
         if (arguments.length < 2) {
-            throw new Error('Error: missing argument error');
+            throw new Error("Error: missing argument error");
         }
         var args = [].slice.call(arguments),
             func = args.shift(),
             context = args.shift(),
             tmp;
 
-        if (typeof context === 'string') {
+        if (typeof context === "string") {
             tmp = func[context];
             context = func;
             func = tmp;
@@ -214,13 +232,20 @@
         };
     };
 
+    /**
+     * Parse string of json to json object
+     *
+     * @method tt.parseJSON
+     * @params {String} text parse target string
+     * @return {Function} Callback function
+     */
     tt.parseJSON = function(text) {
         if (!text) {
             return {};
         } else if (typeof text === "object") {
             return text;
         }
-        // idea from @uupaa
+        // idea from twitter@uupaa
         var obj;
 
         try {
@@ -236,9 +261,19 @@
         return obj;
     };
 
+    /**
+     * Parse query string to object
+     *
+     * @method tt.query2object
+     * @params {String} query query string
+     * @return {Object} result
+     */
     tt.query2object = function(query) {
         if (!tt.type(query, "string")) {
             return {};
+        }
+        if (query[0] === "?") {
+            query = query.substr(1, query.length);
         }
         var result = {},
             pair = query.split("&"),
@@ -252,6 +287,13 @@
         return result;
     };
 
+    /**
+     * Parse query string to object
+     *
+     * @method tt.query2object
+     * @params {String} query query string
+     * @return {Object} result
+     */
     tt.param = function(obj) {
         if (!tt.type(obj, "object")) {
             return obj;
@@ -1242,7 +1284,7 @@
          * @param {Bool} [options] cancelable event cancelable flag
          * @return {Object} tt object
          */
-        trigger: function(event, type, bubbles, cancelable) {
+        trigger: function(type, data) {
             this.each(function() {
                 tt.triggerEvent(this, event, type, bubbles, cancelable);
             });
@@ -1319,9 +1361,9 @@
     }
 
     function _removeClassByClassName(className) {
-        className = " " + className + " ";
+        className = " " + className;
         return this.each(function() {
-            this.className = (" " + this.className + " ").replace(className, "");
+            this.className = (" " + this.className).replace(className, "").trim();
         });
     }
 
