@@ -32,13 +32,17 @@
      * This function does the following arguments to be passed by
      *
      * ### CSSQueryString, NodeElement, NodeList or its like Array, document or document.body, tt object
-     * Create tt class object (DOM Operator)
+     * >> Create tt class object (DOM Operator)
      *
      * ### Function
-     * If the HTML is already loaded is executed immediately, if not already loaded is executed at the timing of the DOMContentLoaded
+     * >> If the HTML is already loaded is executed immediately, if not already loaded is executed at the timing of the DOMContentLoaded
      *
      * @class tt
-     * @main tt
+     * @module tt
+     * @constructor
+     * @param {String|Function|Node|NodeList|NodeList like Array|document|document.body} mix
+     * @param {Node} [options] parent If first params is String, sets the parent of the search target
+     * @return {Object|undefined} Return tt object of if first params is Function return undefined
      */
     function tt(mix, parent) {
         var target = null,
@@ -68,30 +72,47 @@
                 } else {
                     loadQueue.push(mix);
                 }
-            } else if (mix instanceof TT) {
+                return;
+            } else if (mix instanceof TTCreater) {
                 return mix;
             } else {
                 throw new Error("argument type error");
             }
         }
-        return new TT(target || [], selector);
+        return new TTCreater(target || [], selector);
     }
 
     /**
      * Detect array strictly
      *
-     * @method tt.isArray
-     * @params {Any} target detect target
+     * @method isArray
+     * @param {Any} target detect target
      * @return {Bool} result
      */
     tt.isArray = isArray;
 
+    /**
+     * Detect array strictly
+     *
+     * @method isNodeList
+     * @param {Any} target detect target
+     * @return {Bool} result
+     */
     tt.isNodeList = isNodeList;
 
+    /**
+     * Return target type
+     * If matches is passed and returns result of comparing target
+     *
+     * @method type
+     * @param {Any} target judgment target
+     * @param {String|Array} matches List, or string type to be compared
+     * @return {Bool} result
+     */
     tt.type = function(target, matches) {
         var res = target === null     ? "null" :
                   target === void 0   ? "undefined" :
-                  target === global   ? "window" :
+                  target === global   ? "global" :
                   target === document ? "document" :
                   target.nodeType     ? "node" :
                   isArray(target)     ? "array" :
@@ -118,6 +139,13 @@
         }
     };
 
+    /**
+     * Execute iterate a function from array or object
+     *
+     * @method each
+     * @param {Array|Object} mix target to pass to a function
+     * @param {Function} fn function to execute iteratively
+     */
     tt.each = function(mix, fn) {
         var arr, key,
             i = 0, iz;
@@ -137,6 +165,13 @@
         }
     };
 
+    /**
+     * Execute iterate a function from array or object
+     *
+     * @method each
+     * @param {Array|Object} mix target to pass to a function
+     * @param {Function} fn function to execute iteratively
+     */
     tt.match = function(mix, fn) {
         var arr,
             key, res = {},
@@ -516,12 +551,11 @@
 
 
     /**
-     * TT Object constructor
      *
-     * @class TT
+     * @class TTCreater
      * @constructor
      */
-    function TT(nodes, selector) {
+    function TTCreater(nodes, selector) {
         var i = 0, iz;
 
         /**
@@ -568,7 +602,7 @@
      * TT methods
      */
     TT.prototype = tt.fn = {
-        constructor: TT,
+        constructor: TTCreater,
 
         /**
          * Returns NodeElements
