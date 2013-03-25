@@ -11,7 +11,7 @@ buster.testCase("tt.js test", {
             var tts = tt("");
 
             assert.equals(typeof tts, "object");
-            assert.equals(tts.constructor.name, "TT");
+            assert.equals(tts.constructor.name, "TTCreater");
         },
         "tt loaded function": function() {
             var spy = sinon.spy();
@@ -49,7 +49,7 @@ buster.testCase("tt.js test", {
 
             assert.equals(tt.type(null), 'null');
             assert.equals(tt.type(undefined), 'undefined');
-            assert.equals(tt.type(window), 'window');
+            assert.equals(tt.type(window), 'global');
             assert.equals(tt.type(document), 'document');
             assert.equals(tt.type(document.body), 'node');
             assert.equals(tt.type([]), 'array');

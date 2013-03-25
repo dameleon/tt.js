@@ -137,8 +137,8 @@ buster.testCase("tt.js test", {
         assert.equals(tt(document.body).find('.fixture-class').length, 5);
     },
     "contain test": function() {
-        assert.equals(tt(document.body).find('.fixture-class').length, 5);
-        refute(tt(document.body).contains(".notfound"));
+        assert(tt(document.body).contains("#fixture-id").length);
+        refute(tt(document.body).contains(".notfound").length);
     },
     "attr test": function() {
         assert.equals(this.tts.id.attr("name"), this.fixtures.id.getAttribute("name"));

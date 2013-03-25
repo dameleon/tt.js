@@ -3,7 +3,7 @@
     "use strict";
 
     var IDENT = "tt",
-        querySelectorRe = /^(.+[\#\.\s\[>:,]|[\[:])/,
+        querySelectorRe = /^(.+[\#\.\s\[\*>:,]|[\[:])/,
         loaded = false,
         loadQueue = [],
         domTester = document.createElement("div");
@@ -16,6 +16,11 @@
     // String.prototype.trim = MDN https://developer.mozilla.org/en/docs/JavaScript/Reference/Global_Objects/String/trim#Compatibility
     if (!String.prototype.trim) {
         String.prototype.trim=function(){return this.replace(/^\s+|\s+$/g,"");};
+    }
+
+    // Node.contains shim
+    if (!Node.contains) {
+        Node.contains=function(a){var b=this.compareDocumentPosition(a);return (b===0||b&Node.DOCUMENT_POSITION_CONTAINED_BY);};
     }
 
     // call load callback queue
@@ -643,7 +648,7 @@
     /**
      * TT methods
      */
-    TT.prototype = tt.fn = {
+    tt.fn = TTCreater.prototype = {
         constructor: TTCreater,
 
         /**
@@ -705,6 +710,32 @@
                 }
             }
             return null;
+        },
+
+        push: function(mix) {
+            if (mix && mix.nodeType) {
+                this[this.length] = mix;
+                ++this.length;
+            } else if (tt.type(mix, ["array", "nodelist"])) {
+                for (var i = 0, iz = mix.length; i < iz; ++i) {
+                    this[this.length] = mix[i];
+                    ++this.length;
+                }
+            }
+            return this;
+        },
+
+        indexOf: function(node) {
+            var res = -1;
+
+            this.match(function(index) {
+                if (this === node) {
+                    res = index;
+                    return true;
+                }
+                return false;
+            });
+            return res;
         },
 
         /**
@@ -802,9 +833,7 @@
 
                     tt.match(delegate.listeners, function(listener) {
                         var match = tt(listener.target).match(function() {
-                            var res = this.compareDocumentPosition(eventTarget);
-
-                            if (res === 0 || res & global.Node.DOCUMENT_POSITION_CONTAINED_BY) {
+                            if (this.contains(eventTarget)) {
                                 return true;
                             }
                             return false;
@@ -943,19 +972,18 @@
          * @return {Node} matches NodeElement
          */
         contains: function(mix) {
-            var res, target = tt(mix);
+            var res = tt(),
+                target = tt(mix);
 
-            res = this.match(function() {
-                var root = this,
-                    match = target.match(function() {
-                        var pos = root.compareDocumentPosition(this);
-
-                        return (pos === 0 || (pos & Node.DOCUMENT_POSITION_CONTAINED_BY)) ?
-                                true :
-                                false;
+            this.each(function() {
+                var context = this,
+                    cond = target.match(function() {
+                        return context.contains(this);
                     });
 
-                return match ? true : false;
+                if (cond) {
+                    res.push(this);
+                }
             });
             return res;
         },
@@ -970,13 +998,15 @@
          * @return {Object|String} Key-value object of attributes or attribute value
          */
         attr: function(mix, value) {
-            var that = this, attrs;
+            var that = this;
 
             switch (arguments.length) {
             case 0:
+                var attrs = this[0].attributes, attr;
+
                 mix = {};
-                attrs = this[0].attributes;
                 for (var i = 0, iz = attrs.length; i < iz; ++i) {
+                    attr = attrs[i];
                     mix[attr.nodeName] = attr.nodeValue;
                 }
                 return mix;
@@ -1087,6 +1117,86 @@
                     this.removeChild(this.firstChild);
                 }
             });
+        },
+
+        parent: function(mix) {
+            var res = tt();
+
+            if (mix) {
+                var target = tt(mix).toArray();
+
+                this.each(function() {
+                    if (target.indexOf(this.parentNode) > -1) {
+                        res.push(this.parentNode);
+                    }
+                });
+            } else {
+                this.each(function() {
+                    res.push(this.parentNode);
+                });
+            }
+            return res;
+        },
+
+        parents: function(mix) {
+            var that = this,
+                res;
+
+            if (mix) {
+                res = tt();
+                tt(mix).each(function() {
+                    var context = this,
+                        match = that.match(function() {
+                            var pos = context.compareDocumentPosition(this);
+
+                            return (pos & Node.DOCUMENT_POSITION_CONTAINED_BY);
+                        });
+
+                    if (match) {
+                        res.push(this);
+                    }
+                });
+            } else {
+                res = [];
+                this.match(function() {
+                    var parent;
+
+                    while ((parent = this.parentNode) !== null) {
+                        if (res.indexOf(parent) === -1) {
+                            res.push(parent);
+                        } else {
+                            break;
+                        }
+                    }
+                    return false;
+                });
+                res = tt(res);
+            }
+            return res;
+        },
+
+        closest: function(mix) {
+            var res = [],
+                target;
+
+            if (!mix) {
+                return tt();
+            }
+            target = tt(mix).toArray();
+            this.each(function() {
+                var element = this;
+
+                while (element) {
+                    if (target.indexOf(element) > -1) {
+                        if (res.indexOf(element) === -1) {
+                            res.push(element);
+                        }
+                        break;
+                    }
+                    element = element.parentNode;
+                }
+            });
+            return tt(res);
         },
 
         /**
@@ -1318,7 +1428,7 @@
          * @param {Bool} [options] cancelable event cancelable flag
          * @return {Object} tt object
          */
-        trigger: function(type, data) {
+        trigger: function(event, type, bubbles, cancelable) {
             this.each(function() {
                 tt.triggerEvent(this, event, type, bubbles, cancelable);
             });
@@ -1357,7 +1467,6 @@
     };
 
     global[IDENT] = global[IDENT] || tt;
-
 
     function _addClassByClassList(className) {
         return this.each(function() {
