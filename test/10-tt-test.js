@@ -320,8 +320,23 @@ buster.testCase("tt.js test", {
             var that = this,
                 dfd = when.defer();
 
-            if (!(tt.env.android && tt.env.versionCode < 3000)) {
-                console.log('in');
+            // phantomjs, before android 2.3 is not supported dataType="document"
+            if (this.isPhantomjs || (tt.env.android && tt.env.versionCode < 3000)) {
+                tt.ajax({
+                    beforeSend  : null,
+                    cache       : true,
+                    complete    : null,
+                    context     : document.body,
+                    data        : null,
+                    dataType    : "text",
+                    error       : null,
+                    success     : function(res) {
+                        assert(res);
+                        dfd.resolver.resolve();
+                    },
+                    url         : buster.env.contextPath + "/html",
+                });
+            } else {
                 tt.ajax({
                     beforeSend  : null,
                     cache       : true,
@@ -342,9 +357,6 @@ buster.testCase("tt.js test", {
                     },
                     url         : buster.env.contextPath + "/html",
                 });
-            } else {
-                assert(true);
-                dfd.resolver.resolve();
             }
 
             return dfd.promise;
