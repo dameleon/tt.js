@@ -1071,13 +1071,15 @@
          * @return {Object} TT object
          */
         append: function(mix) {
+            var useCopy = this.length > 1;
+
             return this.each((typeof mix === "string") ?
                 function() { this.insertAdjacentHTML("beforeend", mix); } :
                 function() {
 					var that = this;
 
 					if (mix.nodeType) {
-						this.appendChild(mix.cloneNode(true));
+						this.appendChild(useCopy ? mix.cloneNode(true) : mix);
 					} else if (mix instanceof TTCreater) {
 						mix.each(function() {
 							that.appendChild(this);
@@ -1094,13 +1096,15 @@
          * @return {Object} TT object
          */
         prepend: function(mix) {
+            var useCopy = this.length > 1;
+
             return this.each((typeof mix === "string") ?
                 function() { this.insertAdjacentHTML("afterbegin", mix); } :
 				function() {
 					var that = this;
 
 					if (mix.nodeType) {
-						this.insertBefore(mix.cloneNode(true), this.firstChild);
+						this.insertBefore(useCopy ? mix.cloneNode(true) : mix, this.firstChild);
 					} else if (mix instanceof TTCreater) {
 						mix.each(function() {
 							that.insertBefore(this, that.firstChild);
