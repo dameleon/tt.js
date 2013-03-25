@@ -11,7 +11,7 @@
     // for old android compatiblity
     // Object.keys - MDN https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/Object/keys#Compatiblity
     if (!Object.keys) {
-        Object.keys=function(){var e=Object.prototype.hasOwnProperty,f=!{toString:null}.propertyIsEnumerable("toString"),c="toString toLocaleString valueOf hasOwnProperty isPrototypeOf propertyIsEnumerable constructor".split(" "),g=c.length;return function(b){if("object"!==typeof b&&"function"!==typeof b||null===b){throw new TypeError("Object.keys called on non-object");}var d=[],a;for(a in b){e.call(b,a);d.push(a);}if(f){for(a=0;a<g;a++){e.call(b,c[a]);d.push(c[a]);}return d;}};}();
+        Object.keys=(function(){var a=Object.prototype.hasOwnProperty,b=!{toString:null}.propertyIsEnumerable("toString"),c=["toString","toLocaleString","valueOf","hasOwnProperty","isPrototypeOf","propertyIsEnumerable","constructor"],d=c.length;return function(e){if("object"!==typeof e&&"function"!==typeof e||null===e){throw new TypeError("Object.keys called on non-object");}var f=[];for(var g in e){if(a.call(e,g)){f.push(g);}}if(b){for(var h=0;d>h;h++){if(a.call(e,c[h])){f.push(c[h]);}}}return f;};})();
     }
     // String.prototype.trim = MDN https://developer.mozilla.org/en/docs/JavaScript/Reference/Global_Objects/String/trim#Compatibility
     if (!String.prototype.trim) {
@@ -126,8 +126,7 @@
         if (!res) {
             res = typeof target;
             if (res === "object") {
-                res = Object.prototype.toString.call(target).
-                      toLowerCase().match(/.*\s([a-z]*)\]/)[1];
+                res = Object.prototype.toString.call(target).toLowerCase().match(/.*\s([a-z]*)\]/)[1];
             }
         }
         if (!matches) {
