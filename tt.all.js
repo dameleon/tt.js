@@ -577,7 +577,7 @@
             var res, context = setting.context;
 
             if (statusCode >= 200 && statusCode < 400) {
-                res = xhr.response;
+                res = xhr.response || xhr.responseText;
                 if (setting.dataType === "json" && tt.type(res, "string")) {
                     res = tt.parseJSON(res);
                 }
@@ -826,7 +826,7 @@
                 };
 
             if (!delegate) {
-                delegate = this._delegate[type] = {};
+                delegate = this._delegates[type] = {};
                 delegate.listeners = [];
                 delegate.handler = function(ev) {
                     var event, eventTarget = ev.target;
@@ -840,12 +840,10 @@
                         });
 
                         if (match) {
-                            event = tt.extend({}, ev);
-                            event.currentTarget = match;
                             if (typeof listener.callback === "function") {
-                                listener.callback(event);
+                                listener.callback.call(match, ev);
                             } else if ("handleEvent" in listener.callback) {
-                                listener.callback.handleEvent(event);
+                                listener.callback.handleEvent.call(match, ev);
                             }
                             return true;
                         }
@@ -1076,7 +1074,17 @@
         append: function(mix) {
             return this.each((typeof mix === "string") ?
                 function() { this.insertAdjacentHTML("beforeend", mix); } :
-                function() { this.appendChild(mix); });
+                function() {
+					var that = this;
+
+					if (mix.nodeType) {
+						this.appendChild(mix.cloneNode(true));
+					} else if (mix instanceof TTCreater) {
+						mix.each(function() {
+							that.appendChild(this);
+						});
+					}
+				});
         },
 
         /**
@@ -1089,8 +1097,17 @@
         prepend: function(mix) {
             return this.each((typeof mix === "string") ?
                 function() { this.insertAdjacentHTML("afterbegin", mix); } :
-                function() { this.insertBefore(mix, this.firstChild); }
-            );
+				function() {
+					var that = this;
+
+					if (mix.nodeType) {
+						this.insertBefore(mix.cloneNode(true), this.firstChild);
+					} else if (mix instanceof TTCreater) {
+						mix.each(function() {
+							that.insertBefore(this, that.firstChild);
+						});
+					}
+				});
         },
 
         /**
@@ -1463,7 +1480,13 @@
                 };
             });
             return this.length === 1 ? res[0] : res;
-        }
+        },
+		width: function() {
+			return this[0].offsetWidth;
+		},
+		height: function() {
+			return this[0].offsetHeight;
+		}
     };
 
     global[IDENT] = global[IDENT] || tt;
