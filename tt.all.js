@@ -1,4 +1,4 @@
-/** tt.js version:0.2.0 author:kei takahashi(twitter@dameleon) at:2013-03-25 */
+/** tt.js version:0.4.0 author:kei takahashi(twitter@dameleon) at:2013-03-25 */
 ;(function(global, document, isArray, isNodeList, undefined) {
     "use strict";
 

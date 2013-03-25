@@ -343,11 +343,9 @@ buster.testCase("tt.js test", {
                     complete    : null,
                     context     : document.body,
                     data        : null,
-                    // phantomjs isn't support xhr.responseType = "document"
                     dataType    : this.isPhantomjs ? "text" : "document",
                     error       : null,
                     success     : function(res) {
-                        // phantomjs isn't support xhr.responseType = "document"
                         if (that.isPhantomjs) {
                             assert(res);
                         } else {
