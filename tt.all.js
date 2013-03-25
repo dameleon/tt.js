@@ -6,6 +6,7 @@
         querySelectorRe = /^(.+[\#\.\s\[\*>:,]|[\[:])/,
         loaded = false,
         loadQueue = [],
+        env = _createEnvData(global.navigator),
         domTester = document.createElement("div");
 
     // for old android compatiblity
@@ -425,57 +426,9 @@
         return raw ? tag : tt(tag) ;
     };
 
-    tt.createEnvData = function(nav) {
-        var res = {},
-            ua = (nav || global.navigator).userAgent.toLowerCase();
+    tt.createEnvData = _createEnvData;
 
-        res.android = /android/.test(ua);
-        res.ios = /ip(hone|od|ad)/.test(ua);
-
-        if (!res.android && !res.ios) {
-            res.windowsPhone = /windows\sphone/.test(ua);
-            res.ie = /msie/.test(ua);
-        }
-
-        res.chrome = /(chrome|crios)/.test(ua);
-        res.firefox = /firefox/.test(ua);
-        res.opera = /opera/.test(ua);
-        res.androidBrowser = !res.chrome && res.android && /applewebkit/.test(ua);
-        res.mobileSafari = !res.chrome && res.ios && /applewebkit/.test(ua);
-
-        res.version =
-            (res.androidBrowser || res.android && res.chrome) ? ua.match(/android\s(\S.*?)\;/) :
-            (res.mobileSafari || res.ios && res.chrome) ? ua.match(/os\s(\S.*?)\s/) :
-            null;
-        res.version = res.version ?
-            res.ios ?
-                res.version[1].replace("_", ".") :
-                res.version[1] :
-            null;
-        res.versionCode = _getVersionCode(res.version);
-        res.supportTouch = "ontouchstart" in global;
-
-        return res;
-
-        function _getVersionCode(version) {
-            if (!version) {
-                return null;
-            }
-            var res, digit = 4, diff = 0;
-
-            version = version.replace(/\D/g, "");
-            diff = digit - version.length;
-
-            if (diff > 0) {
-                res = (+version) * Math.pow(10, diff);
-            } else {
-                res = +version;
-            }
-            return res;
-        }
-    };
-
-    tt.env = tt.createEnvData(navigator);
+    tt.env = env;
 
     tt.ajax = function(mix, setting) {
         var called = false,
@@ -1071,7 +1024,7 @@
          * @return {Object} TT object
          */
         append: function(mix) {
-            var useCopy = this.length > 1;
+            var useClone = this.length > 1;
 
             return this.each((typeof mix === "string") ?
                 function() { this.insertAdjacentHTML("beforeend", mix); } :
@@ -1079,7 +1032,7 @@
 					var that = this;
 
 					if (mix.nodeType) {
-						this.appendChild(useCopy ? mix.cloneNode(true) : mix);
+						this.appendChild(useClone ? mix.cloneNode(true) : mix);
 					} else if (mix instanceof TTCreater) {
 						mix.each(function() {
 							that.appendChild(this);
@@ -1096,7 +1049,7 @@
          * @return {Object} TT object
          */
         prepend: function(mix) {
-            var useCopy = this.length > 1;
+            var useClone = this.length > 1;
 
             return this.each((typeof mix === "string") ?
                 function() { this.insertAdjacentHTML("afterbegin", mix); } :
@@ -1104,7 +1057,7 @@
 					var that = this;
 
 					if (mix.nodeType) {
-						this.insertBefore(useCopy ? mix.cloneNode(true) : mix, this.firstChild);
+						this.insertBefore(useClone ? mix.cloneNode(true) : mix, this.firstChild);
 					} else if (mix instanceof TTCreater) {
 						mix.each(function() {
 							that.insertBefore(this, that.firstChild);
@@ -1493,6 +1446,56 @@
     };
 
     global[IDENT] = global[IDENT] || tt;
+
+    function _createEnvData(nav) {
+        var res = {},
+            ua = (nav || global.navigator).userAgent.toLowerCase();
+
+        res.android = /android/.test(ua);
+        res.ios = /ip(hone|od|ad)/.test(ua);
+
+        if (!res.android && !res.ios) {
+            res.windowsPhone = /windows\sphone/.test(ua);
+            res.ie = /msie/.test(ua);
+        }
+
+        res.chrome = /(chrome|crios)/.test(ua);
+        res.firefox = /firefox/.test(ua);
+        res.opera = /opera/.test(ua);
+        res.androidBrowser = !res.chrome && res.android && /applewebkit/.test(ua);
+        res.mobileSafari = !res.chrome && res.ios && /applewebkit/.test(ua);
+
+        res.version =
+            (res.androidBrowser || res.android && res.chrome) ? ua.match(/android\s(\S.*?)\;/) :
+            (res.mobileSafari || res.ios && res.chrome) ? ua.match(/os\s(\S.*?)\s/) :
+            null;
+        res.version = res.version ?
+            res.ios ?
+                res.version[1].replace("_", ".") :
+                res.version[1] :
+            null;
+        res.versionCode = _getVersionCode(res.version);
+        res.supportTouch = "ontouchstart" in global;
+
+        return res;
+
+        function _getVersionCode(version) {
+            if (!version) {
+                return null;
+            }
+            var res, digit = 4, diff = 0;
+
+            version = version.replace(/\D/g, "");
+            diff = digit - version.length;
+
+            if (diff > 0) {
+                res = (+version) * Math.pow(10, diff);
+            } else {
+                res = +version;
+            }
+            return res;
+        }
+    }
 
     function _addClassByClassList(className) {
         return this.each(function() {
