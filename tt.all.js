@@ -23,7 +23,7 @@
         Object.keys=(function(){var a=Object.prototype.hasOwnProperty,b=!{toString:null}.propertyIsEnumerable("toString"),c=["toString","toLocaleString","valueOf","hasOwnProperty","isPrototypeOf","propertyIsEnumerable","constructor"],d=c.length;return function(e){if("object"!==typeof e&&"function"!==typeof e||null===e){throw new TypeError("Object.keys called on non-object");}var f=[];for(var g in e){if(a.call(e,g)){f.push(g);}}if(b){for(var h=0;d>h;h++){if(a.call(e,c[h])){f.push(c[h]);}}}return f;};})();
     }
     // Array.isArray shim
-    if (Array.isArray) {
+    if (!Array.isArray) {
         Array.isArray=function(a){return Object.prototype.toString.call(a)==="[object Array]";};
     }
     // String.prototype.trim = MDN https://developer.mozilla.org/en/docs/JavaScript/Reference/Global_Objects/String/trim#Compatibility
@@ -1055,9 +1055,11 @@
 		}
     };
 
+    // globalize
     global[IDENT] = global[IDENT] || tt;
 
 
+    // tt object functions
     // Iterate functions
 
     /**
