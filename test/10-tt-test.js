@@ -234,8 +234,8 @@ buster.testCase("tt.js test", {
             assert.exception(function() { tt.cssHyphenizer() }, "Error");
         },
         "tag test": function() {
-            var ttObj = tt.tag("div"),
-                div = tt.tag("div", true);
+            var ttObj = tt.tag("div", true),
+                div = tt.tag("div");
 
             assert.equals(ttObj.get().nodeName.toLowerCase(), "div");
             assert.equals(div.nodeName.toLowerCase(), "div");

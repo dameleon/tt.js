@@ -1,4 +1,4 @@
-/** tt.js version:0.4.0 author:kei takahashi(twitter@dameleon) at:2013-03-26 */
+/** tt.js version:0.5.0 author:kei takahashi(twitter@dameleon) at:2013-03-27 */
 ;(function(global, document, undefined) {
     "use strict";
 
@@ -112,9 +112,12 @@
 
 
     /**
+     * tt.js class creater
      *
      * @class TTCreater
      * @constructor
+     * @param {Array|NodeList} nodes NodeList or Array incorporates elements
+     * @param {String} selector selector text
      */
     function TTCreater(nodes, selector) {
         var i = 0, iz;
@@ -128,7 +131,7 @@
         this.selector = selector;
 
         /**
-         * Length of registered NodeElements
+         * Length of registered elements
          *
          * @property length
          * @type Number
@@ -136,7 +139,7 @@
         this.length = iz = nodes.length;
 
         /**
-         * Delegate registration information of registered NodeElements
+         * Delegate registration information of registered elements
          *
          *
          * @property _delegates
@@ -146,7 +149,7 @@
         this._delegates = {};
 
         /**
-         * Data for registered NodeElements
+         * Data for registered elements
          *
          * @property _data
          * @type Object
@@ -166,10 +169,10 @@
         constructor: TTCreater,
 
         /**
-         * Returns NodeElements
+         * Returns elements
          *
          * @method get
-         * @param {Number} index NodeElements index
+         * @param {Number} index elements index
          * @return {NodeElement} registered NodeElement
          */
         get: function(index) {
@@ -177,10 +180,10 @@
         },
 
         /**
-         * Returns array in NodeElements
+         * Returns array in elements
          *
          * @method toArray
-         * @return {Array} registered NodeElements
+         * @return {Array} registered elements
          */
         toArray: function() {
             var arr = [];
@@ -226,6 +229,13 @@
             return null;
         },
 
+        /**
+         * Push element(s) to TT Object
+         *
+         * @method push
+         * @param {Node|NodeList|Array} mix element or elements list
+         * @return {Object} TT Object
+         */
         push: function(mix) {
             if (mix && mix.nodeType) {
                 this[this.length] = mix;
@@ -239,6 +249,13 @@
             return this;
         },
 
+        /**
+         * Get index of registered element
+         *
+         * @method indexOf
+         * @param {Node} node serach target element
+         * @return {Number} index number
+         */
         indexOf: function(node) {
             var res = -1;
 
@@ -509,7 +526,7 @@
         },
 
         /**
-         * Find NodeElements under registered NodeElements
+         * Find elements under registered elements
          *
          * @method find
          * @param {String} query
@@ -600,7 +617,7 @@
         },
 
         /**
-         * Replace html in registered NodeElements
+         * Replace html in registered elements
          * or get text html in thier
          *
          * @method attr
@@ -627,7 +644,7 @@
         },
 
         /**
-         * Append NodeElement or text html to registered NodeElements
+         * Append NodeElement or text html to registered elements
          *
          * @method append
          * @param {String|Node} mix NodeElement, Text html
@@ -652,7 +669,7 @@
         },
 
         /**
-         * Prepend NodeElement or text html to registered NodeElements
+         * Prepend NodeElement or text html to registered elements
          *
          * @method prepend
          * @param {String|Node} mix NodeElement, Text html
@@ -677,7 +694,7 @@
         },
 
         /**
-         * Remove NodeElements of registered from html
+         * Remove elements of registered from html
          *
          * @method remove
          * @return {Object} TT object
@@ -689,7 +706,7 @@
         },
 
         /**
-         * Remove child elements of registered NodeElements
+         * Remove child elements of registered elements
          *
          * @method clear
          * @return {Object} TT object
@@ -702,6 +719,13 @@
             });
         },
 
+        /**
+         * Get parent element from registered elements
+         *
+         * @method parent
+         * @param {String|Object} mix Query string for search elements or TT object
+         * @return {Object} TT object
+         */
         parent: function(mix) {
             var res = tt();
 
@@ -721,6 +745,13 @@
             return res;
         },
 
+        /**
+         * Get parent elements of the element back in DOM tree from registered elements
+         *
+         * @method parents
+         * @param {String|Object} mix Query string for search elements or TT object
+         * @return {Object} TT object
+         */
         parents: function(mix) {
             var that = this,
                 res;
@@ -758,6 +789,13 @@
             return res;
         },
 
+        /**
+         * Get closest element from registered element with query string or target element
+         *
+         * @method closest
+         * @param {String|Object} mix Query string for search elements or TT object
+         * @return {Object} TT object
+         */
         closest: function(mix) {
             var res = [],
                 target;
@@ -783,7 +821,7 @@
         },
 
         /**
-         * Replace NodeElements of registered NodeElements
+         * Replace elements of registered elements
          *
          * @method replace
          * @param {String|Node} mix text html or NodeElement
@@ -970,7 +1008,7 @@
         })(),
 
         /**
-         * Show NodeElements, if it is hide curretly
+         * Show elements, if it is hide curretly
          *
          * @method show
          * @param {String|Object} [options] value CSS value of display property
@@ -987,7 +1025,7 @@
         },
 
         /**
-         * Hide NodeElements, if it is show currently
+         * Hide elements, if it is show currently
          *
          * @method hide
          * @return {Object} tt object
@@ -1002,7 +1040,7 @@
         },
 
         /**
-         * Trigger events for registered NodeElements
+         * Trigger events for registered elements
          *
          * @method trigger
          * @param {String} event event name
@@ -1019,7 +1057,7 @@
         },
 
         /**
-         * Get offset position of registered NodeElements
+         * Get offset position of registered elements
          * Ex.
          *  document.body
          *  +--------------------------
@@ -1047,11 +1085,27 @@
             });
             return this.length === 1 ? res[0] : res;
         },
-		width: function() {
-			return this[0].offsetWidth;
+
+        /**
+         * Get width from registered elements
+         *
+         * @method width
+         * @param {Number} [options] index number of registered elements
+         * @return {Number} number of element width
+         */
+		width: function(index) {
+			return this[index || 0].offsetWidth;
 		},
-		height: function() {
-			return this[0].offsetHeight;
+
+        /**
+         * Get height from registered elements
+         *
+         * @method height
+         * @param {Number} [options] index number of registered elements
+         * @return {Number} number of element height
+         */
+		height: function(index) {
+			return this[index || 0].offsetHeight;
 		}
     };
 
@@ -1059,7 +1113,8 @@
     global[IDENT] = global[IDENT] || tt;
 
 
-    // tt object functions
+    //##  tt object functions
+
     // Iterate functions
 
     /**
@@ -1218,6 +1273,15 @@
 
 
     // useful functions
+
+    /**
+     * XMLHttpRequest wrapper method
+     *
+     * @method tt_ajax
+     * @param {String|Object} mix request url or setting object
+     * @param {Object} [options] setting setting object
+     * @return {Object} XMLHttpRequest object
+     */
     function tt_ajax(mix, setting) {
         var called = false,
             xhr = new XMLHttpRequest();
@@ -1336,6 +1400,25 @@
         }
     }
 
+    /**
+     * Create an object of environmental information based on the information of the navigator
+     *
+     * Environmental information can be obtained based on the following key
+     *
+     * Decision os:         ios, android, windowsPhone
+     *
+     * Decision browsers:   mobileSafari, androidBrowser, chrome, firefox, opera, ie, other
+     *
+     * version information: (only mobileSafari androidBrowser)
+     *
+     *                      version(raw data)
+     *
+     *                      versionCode(version number of 4-digit or higher)
+     *
+     * @method tt_createEnvData
+     * @param {Navigator} navigator object
+     * @return {Object} object
+     */
     function tt_createEnvData(nav) {
         var res = {},
             ua = (nav || global.navigator).userAgent.toLowerCase();
@@ -1386,6 +1469,13 @@
         }
     }
 
+    /**
+     * Get string CSS camel case from string of CSS hyphen case
+     *
+     * @method tt_cssCamelizer
+     * @param {String} str CSS property value
+     * @return {String}
+     */
     function tt_cssCamelizer(str) {
         if (!str || typeof str !== "string") {
             throw new Error("Error: argument error");
@@ -1405,6 +1495,13 @@
         return res;
     }
 
+    /**
+     * Get string CSS hyphen case from string of CSS camel case
+     *
+     * @method cssHyphenizer
+     * @param {String} str CSS property value
+     * @return {String}
+     */
     function tt_cssHyphenizer(str) {
         if (!str || typeof str !== "string") {
             throw new Error("Error: argument error");
@@ -1427,6 +1524,14 @@
         return res;
     }
 
+    /**
+     * Get value of CSS with a prefix
+     *
+     * @method cssPrefix
+     * @param {String} value CSS value
+     * @param {Array} prefix additional prefixes list
+     * @return {Array}
+     */
     function tt_cssPrefix(value, prefix) {
         var res = [];
 
@@ -1441,7 +1546,7 @@
      * Parse query string to object
      *
      * @method tt_query2object
-     * @params {String} query query string
+     * @param {String} query query string
      * @return {Object} result
      */
     function tt_param(obj) {
@@ -1463,7 +1568,7 @@
      * Parse string of json to json object
      *
      * @method tt_parseJSON
-     * @params {String} text parse target string
+     * @param {String} text parse target string
      * @return {Function} Callback function
      */
     function tt_parseJSON(text) {
@@ -1492,9 +1597,9 @@
      * Returns a function and arguments hold any context
      *
      * @method tt_proxy
-     * @params {Function} func
-     * @params {Any} context
-     * @params {Any} [options] args
+     * @param {Function} func
+     * @param {Any} context
+     * @param {Any} [options] args
      * @return {Function} Callback function
      */
     function tt_proxy() {
@@ -1520,7 +1625,7 @@
      * Parse query string to object
      *
      * @method tt_query2object
-     * @params {String} query query string
+     * @param {String} query query string
      * @return {Object} result
      */
     function tt_query2object(query) {
@@ -1542,30 +1647,137 @@
         return result;
     }
 
-    function tt_tag(name, raw) {
+    /**
+     * Create Node or tt object which involve it
+     *
+     * @method tt_tag
+     * @param {String} query query string
+     * @param {Bool} raw
+     * @return {Object} result
+     */
+    function tt_tag(name, createTT) {
         if (!name || typeof name !== "string") {
             throw new Error("Error: argument error");
         }
         var tag = document.createElement(name);
 
-        return raw ? tag : tt(tag) ;
+        return createTT ? tt(tag) : tag;
     }
 
+    /**
+     * Trigger event to target element
+     *
+     * @method tt_triggerEvent
+     * @param {Node} query string
+     * @param {String} query string
+     * @param {String} query string
+     * @param {Bool} query string
+     * @param {Bool} query string
+     * @return {Object} result
+     */
     function tt_triggerEvent(node, event, type, bubbles, cancelable) {
         if (!node || !event) {
             throw new Error("Error: missing argument error");
         }
-        if ("string" !== typeof type) {
+        if (!tt_type(type, "string")) {
             type = event;
             event = type === "click" ? "MouseEvents" : "Event";
         }
         var ev = document.createEvent(event);
 
-        ev.initEvent(
-                type,
-                (bubbles === undefined) ? false : bubbles,
-                (cancelable === undefined) ? false : cancelable);
+        ev.initEvent(type, bubbles || false, cancelable || false);
         node.dispatchEvent(ev);
     }
 
 })((this.self || global), document);
+
+
+;(function(window, document, tt, undefined) {
+
+var supportTouch = 'ontouchstart' in document, // for pc support
+	events = {
+		touchStart:supportTouch ? 'touchstart' : 'mousedown',
+		touchMove: supportTouch ? 'touchmove' : 'mousemove',
+		touchEnd:  supportTouch ? 'touchend'   : 'mouseup'
+	},
+    setting = {
+        timeout: 300
+    };
+
+var touchHandler = {
+        threshold: tt.env.android ? 50 : 30,
+        startPoint: null,
+        currentTarget: null,
+        handleEvent: function(ev) {
+            switch (ev.type) {
+            case events.touchMove:
+                if (this.startPoint) {
+                    this._touchMove(ev);
+                }
+                break;
+            case events.touchStart:
+                this._touchStart(ev);
+                break;
+            case events.touchEnd:
+                if (this.startPoint) {
+                    this._touchEnd(ev);
+                }
+                break;
+            }
+        },
+        _touchStart: function(ev) {
+            var self = this;
+
+            this.startPoint = getPoint(ev);
+            this.currentTarget = ev.target;
+            setTimeout(function() {
+                self._clear();
+            }, setting.timeout);
+            trigger(this.currentTarget, 'touch', this.startPoint.x, this.startPoint.y);
+        },
+        _touchMove: function(ev) {
+
+        },
+        _touchEnd: function(ev) {
+            var currentPoint = getPoint(ev);
+
+            if (this.threshold < Math.abs(this.startPoint.x - currentPoint.x) &&
+                this.threshold < Math.abs(this.startPoint.y - currentPoint.y)) {
+                    this._clear();
+            } else {
+                trigger(this.currentTarget, 'tap', currentPoint.x, currentPoint.y);
+            }
+        },
+        _clear: function() {
+            this.startPoint = null;
+            this.currentTarget = null;
+        }
+};
+
+document.addEventListener(events.touchStart, touchHandler, false);
+//document.addEventListener(events.touchMove, touchHandler, false);
+document.addEventListener(events.touchEnd, touchHandler, false);
+
+function getPoint(event) {
+	return {
+		x: getPage(event, 'pageX'),
+		y: getPage(event, 'pageY')
+	};
+}
+
+function getPage(event, page) {
+	return supportTouch ? event.changedTouches[0][page] : event[page];
+}
+
+function trigger(element, type, pageX, pageY) {
+    setTimeout(function() {
+        var event = document.createEvent('Event');
+
+        event.initEvent(type, true, true);
+        event.pageX = pageX;
+        event.pageY = pageY;
+        element.dispatchEvent(event);
+    });
+}
+
+})(this, document, this.tt);
