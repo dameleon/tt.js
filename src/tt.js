@@ -46,8 +46,6 @@
      * >> If the HTML is already loaded is executed immediately, if not already loaded is executed at the timing of the DOMContentLoaded
      *
      * @class tt
-     * @module tt
-     * @constructor
      * @param {String|Function|Node|NodeList|NodeList like Array|document|document.body} mix
      * @param {Node} [options] parent If first params is String, sets the parent of the search target
      * @return {Object|undefined} Return tt object of if first params is Function return undefined
@@ -90,6 +88,7 @@
         return new TTCreater(target || [], selector);
     }
 
+    ////// static methods
     tt.ajax          = tt_ajax;
     tt.createEnvData = tt_createEnvData;
     tt.cssCamelizer  = tt_cssCamelizer;
@@ -108,6 +107,593 @@
     tt.tag           = tt_tag;
     tt.triggerEvent  = tt_triggerEvent;
     tt.type          = tt_type;
+
+    //// Iterate functions
+    /**
+     * Execute iterate a function from array or object
+     *
+     * @method tt.each
+     * @static
+     * @param {Array|Object} mix target to pass to a function
+     * @param {Function} fn function to execute iteratively
+     */
+    function tt_each(mix, fn) {
+        var arr, key,
+            i = 0, iz;
+
+        if (Array.isArray(mix)) {
+            iz = mix.length;
+            for (; i < iz; ++i) {
+                fn(mix[i], i);
+            }
+        } else if (typeof mix === "object") {
+            arr = Object.keys(mix);
+            iz = arr.length;
+            for (; i < iz; ++i) {
+                key = arr[i];
+                fn(key, mix[key]);
+            }
+        }
+    }
+
+    /**
+     * Extend target object with each objects
+     * If first argument is true, will be recursive copy
+     *
+     * @method tt.extend
+     * @static
+     * @param {Object|Bool} any first target object or deep flag
+     * @param {Object} [options] override objects
+     * @return {Object} result object
+     */
+    function tt_extend() {
+        var args = [].slice.call(arguments),
+            i = 1, iz = args.length,
+            deep = false,
+            arg, target;
+
+        if (args[0] === true) {
+            deep = true;
+            ++i;
+        }
+        target = args[(i - 1)] || {};
+
+        for (; i < iz; ++i) {
+            arg = args[i];
+            if (tt_type(arg) !== "object") {
+                continue;
+            }
+            tt_each(Object.keys(arg), _extend);
+        }
+        return target;
+
+        function _extend(key, index) {
+            if (deep &&
+                tt_type(target[key], "object") &&
+                tt_type(arg[key], "object")) {
+                    tt_extend(target[key], arg[key]);
+            } else {
+                target[key] = arg[key];
+            }
+        }
+    }
+
+    /**
+     * Execute iterate a function from array or object
+     *
+     * @method tt.match
+     * @static
+     * @param {Array|Object} mix target to pass to a function
+     * @param {Function} fn function to execute iteratively
+     */
+    function tt_match(mix, fn) {
+        var arr,
+            key, res = {},
+            i = 0, iz;
+
+        if (Array.isArray(mix)) {
+            iz = mix.length;
+            for (; i < iz; ++i) {
+                if (fn(mix[i], i)) {
+                    return mix[i];
+                }
+            }
+        } else if (typeof mix === "object") {
+            arr = Object.keys(mix);
+            iz = arr.length;
+            for (; i < iz; ++i) {
+                key = arr[i];
+                if (fn(key, mix[key], i)) {
+                    res[key] = mix[key];
+                    return res;
+                }
+            }
+        }
+        return null;
+    }
+
+
+    //// detect type functions
+    /**
+     * Detect array strictly
+     *
+     * @method tt.isNodeList
+     * @static
+     * @param {Any} target detect target
+     * @return {Bool} result
+     */
+    function tt_isNodeList(mix) {
+        var type=Object.prototype.toString.call(mix);
+
+        return type === "[object NodeList]" || type === "[object HTMLCollection]";
+    }
+
+    /**
+     * Return target type
+     * If matches is passed and returns result of comparing target
+     *
+     * @method tt.type
+     * @static
+     * @param {Any} target judgment target
+     * @param {String|Array} matches List, or string type to be compared
+     * @return {Bool} result
+     */
+    function tt_type(target, matches) {
+        var res = target === null       ? "null" :
+                  target === void 0     ? "undefined" :
+                  target === global     ? "global" :
+                  target === document   ? "document" :
+                  target.nodeType       ? "node" :
+                  Array.isArray(target) ? "array" :
+                  tt_isNodeList(target) ? "nodelist" : undefined;
+
+        if (!res) {
+            res = typeof target;
+            if (res === "object") {
+                res = Object.prototype.toString.call(target).toLowerCase().match(/.*\s([a-z]*)\]/)[1];
+            }
+        }
+        if (!matches) {
+            return res;
+        } else if (Array.isArray(matches)) {
+            for (var i = 0, iz = matches.length; i < iz; ++i) {
+                if (matches[i] === res) {
+                    return true;
+                }
+            }
+            return false;
+        } else {
+            return matches === res;
+        }
+    }
+
+
+    //// useful functions
+    /**
+     * XMLHttpRequest wrapper method
+     *
+     * @method tt.ajax
+     * @static
+     * @param {String|Object} mix request url or setting object
+     * @param {Object} [options] setting setting object
+     * @return {Object} XMLHttpRequest object
+     */
+    function tt_ajax(mix, setting) {
+        var called = false,
+            xhr = new XMLHttpRequest();
+
+        setting = setting || {};
+        if (tt_type(mix, "object")) {
+            setting = mix;
+        } else if (tt_type(mix, "string")) {
+            setting.url = mix;
+        } else {
+            throw new Error("Error: missing argument");
+        }
+
+        setting = tt_extend({
+            async       : true,
+            beforeSend  : null,
+            cache       : true,
+            complete    : null,
+            contentType : "application/x-www-form-urlencoded; charset=UTF-8",
+            context     : document.body,
+            data        : null,
+            dataType    : "text",
+            error       : null,
+            headers     : null,
+            mimeType    : null,
+            success     : null,
+            timeout     : 0,
+            type        : "GET",
+            url         : "",
+            user        : "",
+            password    : ""
+        }, setting);
+
+        setting.type = setting.type.toUpperCase();
+
+        if (setting.data && setting.type === "GET") {
+            setting.url =
+                setting.url +
+                setting.url.indexOf("?") > -1 ? "&" : "?" +
+                tt_param(setting.data);
+            setting.data = null;
+        } else {
+            setting.data = tt_param(setting.data);
+        }
+
+        xhr.onerror = function() {
+            _callCallbacks(0);
+        };
+
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState === 4) {
+                _callCallbacks(xhr.status);
+            }
+        };
+
+        xhr.open(setting.type,
+                 setting.url,
+                 setting.async,
+                 setting.user,
+                 setting.password);
+
+        if (setting.type === "POST") {
+            xhr.setRequestHeader("Content-type", setting.contentType);
+            xhr.setRequestHeader("Content-length", setting.data.length);
+        }
+        if (tt_type(setting.headers, "object")) {
+            tt_each(setting.headers, function(key, value) {
+                xhr.setRequestHeader(key, value);
+            });
+        }
+        if (setting.dataType) {
+            try {
+                xhr.responseType = setting.dataType;
+            } catch (e) {
+                xhr.responseType = "text";
+            }
+        }
+        if (setting.mimeType) {
+            xhr.overrideMimeType(setting.mimeType) ;
+        }
+        if (setting.beforeSend) {
+            setting.beforeSend(xhr);
+        }
+        if (setting.timeout) {
+            xhr.timeout = setting.timeout;
+        }
+        xhr.send(setting.data);
+
+        return xhr;
+
+        function _callCallbacks(statusCode) {
+            if (called) {
+                return;
+            }
+            called = true;
+
+            var res, context = setting.context;
+
+            if (statusCode >= 200 && statusCode < 400) {
+                res = xhr.response || xhr.responseText;
+                if (setting.dataType === "json" && tt_type(res, "string")) {
+                    res = tt_parseJSON(res);
+                }
+                if (setting.success) {
+                    setting.success.apply(context, [res, statusCode, xhr]);
+                }
+            } else {
+                if (setting.error) {
+                    setting.error.apply(context, [xhr, statusCode]);
+                }
+            }
+            if (setting.complete) {
+                setting.complete.apply(context, [xhr, statusCode]);
+            }
+            xhr = null;
+        }
+    }
+
+    /**
+     * Create an object of environmental information based on the information of the navigator
+     *
+     * Environmental information can be obtained based on the following key
+     *
+     * Decision os:         ios, android, windowsPhone
+     *
+     * Decision browsers:   mobileSafari, androidBrowser, chrome, firefox, opera, ie, other
+     *
+     * version information: (only mobileSafari androidBrowser)
+     *
+     *                      version(raw data)
+     *
+     *                      versionCode(version number of 4-digit or higher)
+     *
+     * @method tt.createEnvData
+     * @static
+     * @param {Navigator} navigator object
+     * @return {Object} object
+     */
+    function tt_createEnvData(nav) {
+        var res = {},
+            ua = (nav || global.navigator).userAgent.toLowerCase();
+
+        res.android = /android/.test(ua);
+        res.ios = /ip(hone|od|ad)/.test(ua);
+
+        if (!res.android && !res.ios) {
+            res.windowsPhone = /windows\sphone/.test(ua);
+            res.ie = /msie/.test(ua);
+        }
+
+        res.chrome = /(chrome|crios)/.test(ua);
+        res.firefox = /firefox/.test(ua);
+        res.opera = /opera/.test(ua);
+        res.androidBrowser = !res.chrome && res.android && /applewebkit/.test(ua);
+        res.mobileSafari = !res.chrome && res.ios && /applewebkit/.test(ua);
+
+        res.version =
+            (res.androidBrowser || res.android && res.chrome) ? ua.match(/android\s(\S.*?)\;/) :
+            (res.mobileSafari || res.ios && res.chrome) ? ua.match(/os\s(\S.*?)\s/) :
+            null;
+        res.version = res.version ?
+            res.ios ?
+                res.version[1].replace("_", ".") :
+                res.version[1] :
+            null;
+        res.versionCode = _getVersionCode(res.version);
+        res.supportTouch = "ontouchstart" in global;
+
+        return res;
+
+        function _getVersionCode(version) {
+            if (!version) {
+                return null;
+            }
+            var res, digit = 4, diff = 0;
+
+            version = version.replace(/\D/g, "");
+            diff = digit - version.length;
+
+            if (diff > 0) {
+                res = (+version) * Math.pow(10, diff);
+            } else {
+                res = +version;
+            }
+            return res;
+        }
+    }
+
+    /**
+     * Get string CSS camel case from string of CSS hyphen case
+     *
+     * @method tt.cssCamelizer
+     * @static
+     * @param {String} str CSS property value
+     * @return {String}
+     */
+    function tt_cssCamelizer(str) {
+        if (!str || typeof str !== "string") {
+            throw new Error("Error: argument error");
+        }
+        var res = "";
+
+        if (str[0] === "-") {
+            str = str.substr(1, str.length);
+        }
+        tt.each(str.split("-"), function(value, index) {
+            if (!index) {
+                res += value;
+                return;
+            }
+            res += value[0].toUpperCase() + value.substr(1, value.length);
+        });
+        return res;
+    }
+
+    /**
+     * Get string CSS hyphen case from string of CSS camel case
+     *
+     * @method tt.cssHyphenizer
+     * @static
+     * @param {String} str CSS property value
+     * @return {String}
+     */
+    function tt_cssHyphenizer(str) {
+        if (!str || typeof str !== "string") {
+            throw new Error("Error: argument error");
+        }
+        var prefix = ["webkit", "moz", "o", "ms", "khtml"],
+            upperRe = /[A-Z]/g,
+            upperStr = str.match(upperRe),
+            res = "";
+
+        tt_each(str.split(upperRe), function(value, index) {
+            if (prefix.indexOf(value) > -1) {
+                res += "-" + value;
+                return;
+            } else if (!index) {
+                res += value;
+                return;
+            }
+            res += ("-" + upperStr.shift().toLowerCase() + value);
+        });
+        return res;
+    }
+
+    /**
+     * Get value of CSS with a prefix
+     *
+     * @method tt.cssPrefix
+     * @static
+     * @param {String} value CSS value
+     * @param {Array} prefix additional prefixes list
+     * @return {Array}
+     */
+    function tt_cssPrefix(value, prefix) {
+        var res = [];
+
+        prefix = prefix || ["webkit", "moz", "o", "ms", "khtml"];
+        tt_each(prefix, function(str, index) {
+            res[index] = "-" + str + "-" + value;
+        });
+        return res;
+    }
+
+    /**
+     * Parse query string to object
+     *
+     * @method tt.query2object
+     * @static
+     * @param {String} query query string
+     * @return {Object} result
+     */
+    function tt_param(obj) {
+        if (!tt_type(obj, "object")) {
+            return obj;
+        }
+        var key, keys = Object.keys(obj),
+            i = 0, iz = keys.length,
+            results = [];
+
+        for (;i < iz; ++i) {
+            key = keys[i];
+            results.push(encodeURIComponent(key) + "=" + encodeURIComponent(obj[key]));
+        }
+        return results.join("&");
+    }
+
+    /**
+     * Parse string of json to json object
+     *
+     * @method tt.parseJSON
+     * @static
+     * @param {String} text parse target string
+     * @return {Function} Callback function
+     */
+    function tt_parseJSON(text) {
+        if (!text) {
+            return {};
+        } else if (typeof text === "object") {
+            return text;
+        }
+        // idea from twitter@uupaa
+        var obj;
+
+        try {
+            obj = JSON.parse(text);
+            return obj;
+        } catch (p_o) {}
+        try {
+            /*jshint evil: true */
+            obj = (new Function('return ' + text))();
+        } catch (o_q) {
+            throw new Error("Error: can't parse text to json");
+        }
+        return obj;
+    }
+
+    /**
+     * Returns a function and arguments hold any context
+     *
+     * @method tt.proxy
+     * @static
+     * @param {Function} func
+     * @param {Any} context
+     * @param {Any} [options] args
+     * @return {Function} Callback function
+     */
+    function tt_proxy() {
+        if (arguments.length < 2) {
+            throw new Error("Error: missing argument error");
+        }
+        var args = [].slice.call(arguments),
+            func = args.shift(),
+            context = args.shift(),
+            tmp;
+
+        if (typeof context === "string") {
+            tmp = func[context];
+            context = func;
+            func = tmp;
+        }
+        return function() {
+            return func.apply(context, args);
+        };
+    }
+
+    /**
+     * Parse query string to object
+     *
+     * @method tt.query2object
+     * @static
+     * @param {String} query query string
+     * @return {Object} result
+     */
+    function tt_query2object(query) {
+        if (!tt_type(query, "string")) {
+            return {};
+        }
+        if (query[0] === "?") {
+            query = query.substr(1, query.length);
+        }
+        var result = {},
+            pair = query.split("&"),
+            i = 0, iz = pair.length;
+
+        for (; i < iz; ++i) {
+            var k_v = pair[i].split("=");
+
+            result[k_v[0]] = k_v[1];
+        }
+        return result;
+    }
+
+    /**
+     * Create Node or tt object which involve it
+     *
+     * @method tt.tag
+     * @static
+     * @param {String} query query string
+     * @param {Bool} raw
+     * @return {Object} result
+     */
+    function tt_tag(name, createTT) {
+        if (!name || typeof name !== "string") {
+            throw new Error("Error: argument error");
+        }
+        var tag = document.createElement(name);
+
+        return createTT ? tt(tag) : tag;
+    }
+
+    /**
+     * Trigger event to target element
+     *
+     * @method tt.triggerEvent
+     * @static
+     * @param {Node} query string
+     * @param {String} query string
+     * @param {String} query string
+     * @param {Bool} query string
+     * @param {Bool} query string
+     * @return {Object} result
+     */
+    function tt_triggerEvent(node, event, type, bubbles, cancelable) {
+        if (!node || !event) {
+            throw new Error("Error: missing argument error");
+        }
+        if (!tt_type(type, "string")) {
+            type = event;
+            event = type === "click" ? "MouseEvents" : "Event";
+        }
+        var ev = document.createEvent(event);
+
+        ev.initEvent(type, bubbles || false, cancelable || false);
+        node.dispatchEvent(ev);
+    }
 
 
     /**
@@ -161,9 +747,6 @@
         return this;
     }
 
-    /**
-     * TT methods
-     */
     tt.fn = TTCreater.prototype = {
         constructor: TTCreater,
 
@@ -1068,7 +1651,7 @@
          *  |             +---------+
          *  |
          *
-         * @name offset
+         * @method offset
          * @return {Object|Array} {left: Number, top: Number} or their array
          */
         offset: function() {
@@ -1108,585 +1691,9 @@
 		}
     };
 
+
     // globalize
     global[IDENT] = global[IDENT] || tt;
-
-
-    //##  tt object functions
-
-    // Iterate functions
-
-    /**
-     * Execute iterate a function from array or object
-     *
-     * @method each
-     * @param {Array|Object} mix target to pass to a function
-     * @param {Function} fn function to execute iteratively
-     */
-    function tt_each(mix, fn) {
-        var arr, key,
-            i = 0, iz;
-
-        if (Array.isArray(mix)) {
-            iz = mix.length;
-            for (; i < iz; ++i) {
-                fn(mix[i], i);
-            }
-        } else if (typeof mix === "object") {
-            arr = Object.keys(mix);
-            iz = arr.length;
-            for (; i < iz; ++i) {
-                key = arr[i];
-                fn(key, mix[key]);
-            }
-        }
-    }
-
-    /**
-     * Extend target object with each objects
-     * If first argument is true, will be recursive copy
-     *
-     * @method tt_extend
-     * @params {Object|Bool} any first target object or deep flag
-     * @params {Object} [options] override objects
-     * @return {Object} result object
-     */
-    function tt_extend() {
-        var args = [].slice.call(arguments),
-            i = 1, iz = args.length,
-            deep = false,
-            arg, target;
-
-        if (args[0] === true) {
-            deep = true;
-            ++i;
-        }
-        target = args[(i - 1)] || {};
-
-        for (; i < iz; ++i) {
-            arg = args[i];
-            if (tt_type(arg) !== "object") {
-                continue;
-            }
-            tt_each(Object.keys(arg), _extend);
-        }
-        return target;
-
-        function _extend(key, index) {
-            if (deep &&
-                tt_type(target[key], "object") &&
-                tt_type(arg[key], "object")) {
-                    tt_extend(target[key], arg[key]);
-            } else {
-                target[key] = arg[key];
-            }
-        }
-    }
-
-    /**
-     * Execute iterate a function from array or object
-     *
-     * @method each
-     * @param {Array|Object} mix target to pass to a function
-     * @param {Function} fn function to execute iteratively
-     */
-    function tt_match(mix, fn) {
-        var arr,
-            key, res = {},
-            i = 0, iz;
-
-        if (Array.isArray(mix)) {
-            iz = mix.length;
-            for (; i < iz; ++i) {
-                if (fn(mix[i], i)) {
-                    return mix[i];
-                }
-            }
-        } else if (typeof mix === "object") {
-            arr = Object.keys(mix);
-            iz = arr.length;
-            for (; i < iz; ++i) {
-                key = arr[i];
-                if (fn(key, mix[key], i)) {
-                    res[key] = mix[key];
-                    return res;
-                }
-            }
-        }
-        return null;
-    }
-
-
-    // detect type functions
-
-    /**
-     * Detect array strictly
-     *
-     * @method isNodeList
-     * @param {Any} target detect target
-     * @return {Bool} result
-     */
-    function tt_isNodeList(mix) {
-        var type=Object.prototype.toString.call(mix);
-
-        return type === "[object NodeList]" || type === "[object HTMLCollection]";
-    }
-
-    /**
-     * Return target type
-     * If matches is passed and returns result of comparing target
-     *
-     * @method type
-     * @param {Any} target judgment target
-     * @param {String|Array} matches List, or string type to be compared
-     * @return {Bool} result
-     */
-    function tt_type(target, matches) {
-        var res = target === null       ? "null" :
-                  target === void 0     ? "undefined" :
-                  target === global     ? "global" :
-                  target === document   ? "document" :
-                  target.nodeType       ? "node" :
-                  Array.isArray(target) ? "array" :
-                  tt_isNodeList(target) ? "nodelist" : undefined;
-
-        if (!res) {
-            res = typeof target;
-            if (res === "object") {
-                res = Object.prototype.toString.call(target).toLowerCase().match(/.*\s([a-z]*)\]/)[1];
-            }
-        }
-        if (!matches) {
-            return res;
-        } else if (Array.isArray(matches)) {
-            for (var i = 0, iz = matches.length; i < iz; ++i) {
-                if (matches[i] === res) {
-                    return true;
-                }
-            }
-            return false;
-        } else {
-            return matches === res;
-        }
-    }
-
-
-    // useful functions
-
-    /**
-     * XMLHttpRequest wrapper method
-     *
-     * @method tt_ajax
-     * @param {String|Object} mix request url or setting object
-     * @param {Object} [options] setting setting object
-     * @return {Object} XMLHttpRequest object
-     */
-    function tt_ajax(mix, setting) {
-        var called = false,
-            xhr = new XMLHttpRequest();
-
-        setting = setting || {};
-        if (tt_type(mix, "object")) {
-            setting = mix;
-        } else if (tt_type(mix, "string")) {
-            setting.url = mix;
-        } else {
-            throw new Error("Error: missing argument");
-        }
-
-        setting = tt_extend({
-            async       : true,
-            beforeSend  : null,
-            cache       : true,
-            complete    : null,
-            contentType : "application/x-www-form-urlencoded; charset=UTF-8",
-            context     : document.body,
-            data        : null,
-            dataType    : "text",
-            error       : null,
-            headers     : null,
-            mimeType    : null,
-            success     : null,
-            timeout     : 0,
-            type        : "GET",
-            url         : "",
-            user        : "",
-            password    : ""
-        }, setting);
-
-        setting.type = setting.type.toUpperCase();
-
-        if (setting.data && setting.type === "GET") {
-            setting.url =
-                setting.url +
-                setting.url.indexOf("?") > -1 ? "&" : "?" +
-                tt_param(setting.data);
-            setting.data = null;
-        } else {
-            setting.data = tt_param(setting.data);
-        }
-
-        xhr.onerror = function() {
-            _callCallbacks(0);
-        };
-
-        xhr.onreadystatechange = function() {
-            if (xhr.readyState === 4) {
-                _callCallbacks(xhr.status);
-            }
-        };
-
-        xhr.open(setting.type,
-                 setting.url,
-                 setting.async,
-                 setting.user,
-                 setting.password);
-
-        if (setting.type === "POST") {
-            xhr.setRequestHeader("Content-type", setting.contentType);
-            xhr.setRequestHeader("Content-length", setting.data.length);
-        }
-        if (tt_type(setting.headers, "object")) {
-            tt_each(setting.headers, function(key, value) {
-                xhr.setRequestHeader(key, value);
-            });
-        }
-        if (setting.dataType) {
-            try {
-                xhr.responseType = setting.dataType;
-            } catch (e) {
-                xhr.responseType = "text";
-            }
-        }
-        if (setting.mimeType) {
-            xhr.overrideMimeType(setting.mimeType) ;
-        }
-        if (setting.beforeSend) {
-            setting.beforeSend(xhr);
-        }
-        if (setting.timeout) {
-            xhr.timeout = setting.timeout;
-        }
-        xhr.send(setting.data);
-
-        return xhr;
-
-        function _callCallbacks(statusCode) {
-            if (called) {
-                return;
-            }
-            called = true;
-
-            var res, context = setting.context;
-
-            if (statusCode >= 200 && statusCode < 400) {
-                res = xhr.response || xhr.responseText;
-                if (setting.dataType === "json" && tt_type(res, "string")) {
-                    res = tt_parseJSON(res);
-                }
-                if (setting.success) {
-                    setting.success.apply(context, [res, statusCode, xhr]);
-                }
-            } else {
-                if (setting.error) {
-                    setting.error.apply(context, [xhr, statusCode]);
-                }
-            }
-            if (setting.complete) {
-                setting.complete.apply(context, [xhr, statusCode]);
-            }
-            xhr = null;
-        }
-    }
-
-    /**
-     * Create an object of environmental information based on the information of the navigator
-     *
-     * Environmental information can be obtained based on the following key
-     *
-     * Decision os:         ios, android, windowsPhone
-     *
-     * Decision browsers:   mobileSafari, androidBrowser, chrome, firefox, opera, ie, other
-     *
-     * version information: (only mobileSafari androidBrowser)
-     *
-     *                      version(raw data)
-     *
-     *                      versionCode(version number of 4-digit or higher)
-     *
-     * @method tt_createEnvData
-     * @param {Navigator} navigator object
-     * @return {Object} object
-     */
-    function tt_createEnvData(nav) {
-        var res = {},
-            ua = (nav || global.navigator).userAgent.toLowerCase();
-
-        res.android = /android/.test(ua);
-        res.ios = /ip(hone|od|ad)/.test(ua);
-
-        if (!res.android && !res.ios) {
-            res.windowsPhone = /windows\sphone/.test(ua);
-            res.ie = /msie/.test(ua);
-        }
-
-        res.chrome = /(chrome|crios)/.test(ua);
-        res.firefox = /firefox/.test(ua);
-        res.opera = /opera/.test(ua);
-        res.androidBrowser = !res.chrome && res.android && /applewebkit/.test(ua);
-        res.mobileSafari = !res.chrome && res.ios && /applewebkit/.test(ua);
-
-        res.version =
-            (res.androidBrowser || res.android && res.chrome) ? ua.match(/android\s(\S.*?)\;/) :
-            (res.mobileSafari || res.ios && res.chrome) ? ua.match(/os\s(\S.*?)\s/) :
-            null;
-        res.version = res.version ?
-            res.ios ?
-                res.version[1].replace("_", ".") :
-                res.version[1] :
-            null;
-        res.versionCode = _getVersionCode(res.version);
-        res.supportTouch = "ontouchstart" in global;
-
-        return res;
-
-        function _getVersionCode(version) {
-            if (!version) {
-                return null;
-            }
-            var res, digit = 4, diff = 0;
-
-            version = version.replace(/\D/g, "");
-            diff = digit - version.length;
-
-            if (diff > 0) {
-                res = (+version) * Math.pow(10, diff);
-            } else {
-                res = +version;
-            }
-            return res;
-        }
-    }
-
-    /**
-     * Get string CSS camel case from string of CSS hyphen case
-     *
-     * @method tt_cssCamelizer
-     * @param {String} str CSS property value
-     * @return {String}
-     */
-    function tt_cssCamelizer(str) {
-        if (!str || typeof str !== "string") {
-            throw new Error("Error: argument error");
-        }
-        var res = "";
-
-        if (str[0] === "-") {
-            str = str.substr(1, str.length);
-        }
-        tt.each(str.split("-"), function(value, index) {
-            if (!index) {
-                res += value;
-                return;
-            }
-            res += value[0].toUpperCase() + value.substr(1, value.length);
-        });
-        return res;
-    }
-
-    /**
-     * Get string CSS hyphen case from string of CSS camel case
-     *
-     * @method cssHyphenizer
-     * @param {String} str CSS property value
-     * @return {String}
-     */
-    function tt_cssHyphenizer(str) {
-        if (!str || typeof str !== "string") {
-            throw new Error("Error: argument error");
-        }
-        var prefix = ["webkit", "moz", "o", "ms", "khtml"],
-            upperRe = /[A-Z]/g,
-            upperStr = str.match(upperRe),
-            res = "";
-
-        tt_each(str.split(upperRe), function(value, index) {
-            if (prefix.indexOf(value) > -1) {
-                res += "-" + value;
-                return;
-            } else if (!index) {
-                res += value;
-                return;
-            }
-            res += ("-" + upperStr.shift().toLowerCase() + value);
-        });
-        return res;
-    }
-
-    /**
-     * Get value of CSS with a prefix
-     *
-     * @method cssPrefix
-     * @param {String} value CSS value
-     * @param {Array} prefix additional prefixes list
-     * @return {Array}
-     */
-    function tt_cssPrefix(value, prefix) {
-        var res = [];
-
-        prefix = prefix || ["webkit", "moz", "o", "ms", "khtml"];
-        tt_each(prefix, function(str, index) {
-            res[index] = "-" + str + "-" + value;
-        });
-        return res;
-    }
-
-    /**
-     * Parse query string to object
-     *
-     * @method tt_query2object
-     * @param {String} query query string
-     * @return {Object} result
-     */
-    function tt_param(obj) {
-        if (!tt_type(obj, "object")) {
-            return obj;
-        }
-        var key, keys = Object.keys(obj),
-            i = 0, iz = keys.length,
-            results = [];
-
-        for (;i < iz; ++i) {
-            key = keys[i];
-            results.push(encodeURIComponent(key) + "=" + encodeURIComponent(obj[key]));
-        }
-        return results.join("&");
-    }
-
-    /**
-     * Parse string of json to json object
-     *
-     * @method tt_parseJSON
-     * @param {String} text parse target string
-     * @return {Function} Callback function
-     */
-    function tt_parseJSON(text) {
-        if (!text) {
-            return {};
-        } else if (typeof text === "object") {
-            return text;
-        }
-        // idea from twitter@uupaa
-        var obj;
-
-        try {
-            obj = JSON.parse(text);
-            return obj;
-        } catch (p_o) {}
-        try {
-            /*jshint evil: true */
-            obj = (new Function('return ' + text))();
-        } catch (o_q) {
-            throw new Error("Error: can't parse text to json");
-        }
-        return obj;
-    }
-
-    /**
-     * Returns a function and arguments hold any context
-     *
-     * @method tt_proxy
-     * @param {Function} func
-     * @param {Any} context
-     * @param {Any} [options] args
-     * @return {Function} Callback function
-     */
-    function tt_proxy() {
-        if (arguments.length < 2) {
-            throw new Error("Error: missing argument error");
-        }
-        var args = [].slice.call(arguments),
-            func = args.shift(),
-            context = args.shift(),
-            tmp;
-
-        if (typeof context === "string") {
-            tmp = func[context];
-            context = func;
-            func = tmp;
-        }
-        return function() {
-            return func.apply(context, args);
-        };
-    }
-
-    /**
-     * Parse query string to object
-     *
-     * @method tt_query2object
-     * @param {String} query query string
-     * @return {Object} result
-     */
-    function tt_query2object(query) {
-        if (!tt_type(query, "string")) {
-            return {};
-        }
-        if (query[0] === "?") {
-            query = query.substr(1, query.length);
-        }
-        var result = {},
-            pair = query.split("&"),
-            i = 0, iz = pair.length;
-
-        for (; i < iz; ++i) {
-            var k_v = pair[i].split("=");
-
-            result[k_v[0]] = k_v[1];
-        }
-        return result;
-    }
-
-    /**
-     * Create Node or tt object which involve it
-     *
-     * @method tt_tag
-     * @param {String} query query string
-     * @param {Bool} raw
-     * @return {Object} result
-     */
-    function tt_tag(name, createTT) {
-        if (!name || typeof name !== "string") {
-            throw new Error("Error: argument error");
-        }
-        var tag = document.createElement(name);
-
-        return createTT ? tt(tag) : tag;
-    }
-
-    /**
-     * Trigger event to target element
-     *
-     * @method tt_triggerEvent
-     * @param {Node} query string
-     * @param {String} query string
-     * @param {String} query string
-     * @param {Bool} query string
-     * @param {Bool} query string
-     * @return {Object} result
-     */
-    function tt_triggerEvent(node, event, type, bubbles, cancelable) {
-        if (!node || !event) {
-            throw new Error("Error: missing argument error");
-        }
-        if (!tt_type(type, "string")) {
-            type = event;
-            event = type === "click" ? "MouseEvents" : "Event";
-        }
-        var ev = document.createEvent(event);
-
-        ev.initEvent(type, bubbles || false, cancelable || false);
-        node.dispatchEvent(ev);
-    }
 
 })((this.self || global), document);
 
