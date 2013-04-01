@@ -181,8 +181,8 @@
     &#x2F;&#x2F;&#x2F;&#x2F;&#x2F;&#x2F; static methods
     tt.ajax          = tt_ajax;
     tt.createEnvData = tt_createEnvData;
-    tt.cssCamelizer  = tt_cssCamelizer;
-    tt.cssHyphenizer = tt_cssHyphenizer;
+    tt.camelizer     = tt_camelizer;
+    tt.hyphenizer    = tt_hyphenizer;
     tt.cssPrefix     = tt_cssPrefix;
     tt.each          = tt_each;
     tt.extend        = tt_extend;
@@ -559,12 +559,12 @@
     &#x2F;**
      * Get string CSS camel case from string of CSS hyphen case
      *
-     * @method tt.cssCamelizer
+     * @method tt.camelizer
      * @static
      * @param {String} str CSS property value
      * @return {String}
      *&#x2F;
-    function tt_cssCamelizer(str) {
+    function tt_camelizer(str) {
         if (!str || typeof str !== &quot;string&quot;) {
             throw new Error(&quot;Error: argument error&quot;);
         }
@@ -580,37 +580,7 @@
             }
             res += value[0].toUpperCase() + value.substr(1, value.length);
         });
-        return res;
-    }
-
-    &#x2F;**
-     * Get string CSS hyphen case from string of CSS camel case
-     *
-     * @method tt.cssHyphenizer
-     * @static
-     * @param {String} str CSS property value
-     * @return {String}
-     *&#x2F;
-    function tt_cssHyphenizer(str) {
-        if (!str || typeof str !== &quot;string&quot;) {
-            throw new Error(&quot;Error: argument error&quot;);
-        }
-        var prefix = [&quot;webkit&quot;, &quot;moz&quot;, &quot;o&quot;, &quot;ms&quot;, &quot;khtml&quot;],
-            upperRe = &#x2F;[A-Z]&#x2F;g,
-            upperStr = str.match(upperRe),
-            res = &quot;&quot;;
-
-        tt_each(str.split(upperRe), function(value, index) {
-            if (prefix.indexOf(value) &gt; -1) {
-                res += &quot;-&quot; + value;
-                return;
-            } else if (!index) {
-                res += value;
-                return;
-            }
-            res += (&quot;-&quot; + upperStr.shift().toLowerCase() + value);
-        });
-        return res;
+        return res || str;
     }
 
     &#x2F;**
@@ -630,6 +600,36 @@
             res[index] = &quot;-&quot; + str + &quot;-&quot; + value;
         });
         return res;
+    }
+
+    &#x2F;**
+     * Get string CSS hyphen case from string of CSS camel case
+     *
+     * @method tt.hyphenizer
+     * @static
+     * @param {String} str CSS property value
+     * @return {String}
+     *&#x2F;
+    function tt_hyphenizer(str) {
+        if (!str || typeof str !== &quot;string&quot;) {
+            throw new Error(&quot;Error: argument error&quot;);
+        }
+        var prefix = [&quot;webkit&quot;, &quot;moz&quot;, &quot;o&quot;, &quot;ms&quot;, &quot;khtml&quot;],
+            upperRe = &#x2F;[A-Z]&#x2F;g,
+            upperStr = str.match(upperRe),
+            res = &quot;&quot;;
+
+        tt_each(str.split(upperRe), function(value, index) {
+            if (prefix.indexOf(value) &gt; -1) {
+                res += &quot;-&quot; + value;
+                return;
+            } else if (!index) {
+                res += value;
+                return;
+            }
+            res += (&quot;-&quot; + upperStr.shift().toLowerCase() + value);
+        });
+        return res || str;
     }
 
     &#x2F;**
@@ -795,7 +795,7 @@
      * @param {String} selector selector text
      *&#x2F;
     function TTCreater(nodes, selector) {
-        var i = 0, iz;
+        var i = 0, len;
 
         &#x2F;**
          * Selector text
@@ -811,7 +811,7 @@
          * @property length
          * @type Number
          *&#x2F;
-        this.length = iz = nodes.length;
+        this.length = len = nodes.length;
 
         &#x2F;**
          * Delegate registration information of registered elements
@@ -831,8 +831,9 @@
          * @private
          *&#x2F;
         this._data = {};
-        for (; i &lt; iz; ++i) {
+        for (; len; ++i) {
             this[i] = nodes[i];
+            --len;
         }
         return this;
     }
@@ -874,10 +875,11 @@
          * @return {Object} TT object
          *&#x2F;
         each: function(fn) {
-            var i = 0, iz = this.length;
+            var i = 0, len = this.length;
 
-            for (; i &lt; iz; ++i) {
+            for (; len; ++i) {
                 fn.call(this[i], i);
+                --len;
             }
             return this;
         },
@@ -891,12 +893,13 @@
          * @return {Object} TT Object
          *&#x2F;
         match: function(fn) {
-            var i = 0, iz = this.length;
+            var i = 0, len = this.length;
 
-            for (; i &lt; iz; ++i) {
+            for (; len; ++i) {
                 if (fn.call(this[i], i)) {
                     return this[i];
                 }
+                --len;
             }
             return null;
         },
@@ -1523,11 +1526,11 @@
                         _removeProperty(key);
                         return;
                     }
-                    _setStyle(tt_cssCamelizer(key), val);
+                    _setStyle(tt_camelizer(key), val);
                 });
             } else if (mix) {
                 if (value) {
-                    _setStyle(tt_cssCamelizer(mix), value);
+                    _setStyle(tt_camelizer(mix), value);
                 } else if (value === &quot;&quot;) {
                     _removeProperty(mix);
                 } else {

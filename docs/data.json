@@ -239,7 +239,7 @@
             "line": 469,
             "description": "Get string CSS camel case from string of CSS hyphen case",
             "itemtype": "method",
-            "name": "tt.cssCamelizer",
+            "name": "tt.camelizer",
             "static": 1,
             "params": [
                 {
@@ -257,26 +257,6 @@
         {
             "file": "src/tt.js",
             "line": 496,
-            "description": "Get string CSS hyphen case from string of CSS camel case",
-            "itemtype": "method",
-            "name": "tt.cssHyphenizer",
-            "static": 1,
-            "params": [
-                {
-                    "name": "str",
-                    "description": "CSS property value",
-                    "type": "String"
-                }
-            ],
-            "return": {
-                "description": "",
-                "type": "String"
-            },
-            "class": "tt"
-        },
-        {
-            "file": "src/tt.js",
-            "line": 526,
             "description": "Get value of CSS with a prefix",
             "itemtype": "method",
             "name": "tt.cssPrefix",
@@ -296,6 +276,26 @@
             "return": {
                 "description": "",
                 "type": "Array"
+            },
+            "class": "tt"
+        },
+        {
+            "file": "src/tt.js",
+            "line": 515,
+            "description": "Get string CSS hyphen case from string of CSS camel case",
+            "itemtype": "method",
+            "name": "tt.hyphenizer",
+            "static": 1,
+            "params": [
+                {
+                    "name": "str",
+                    "description": "CSS property value",
+                    "type": "String"
+                }
+            ],
+            "return": {
+                "description": "",
+                "type": "String"
             },
             "class": "tt"
         },
@@ -497,7 +497,7 @@
         },
         {
             "file": "src/tt.js",
-            "line": 753,
+            "line": 754,
             "description": "Returns elements",
             "itemtype": "method",
             "name": "get",
@@ -516,7 +516,7 @@
         },
         {
             "file": "src/tt.js",
-            "line": 764,
+            "line": 765,
             "description": "Returns array in elements",
             "itemtype": "method",
             "name": "toArray",
@@ -528,7 +528,7 @@
         },
         {
             "file": "src/tt.js",
-            "line": 779,
+            "line": 780,
             "description": "Call function with context of NodeElement and parameter of elements index number",
             "itemtype": "method",
             "name": "each",
@@ -547,7 +547,7 @@
         },
         {
             "file": "src/tt.js",
-            "line": 795,
+            "line": 797,
             "description": "Call function with context of NodeElement and parameter of elements index number\nIf it returns true, then this function return context that matches",
             "itemtype": "method",
             "name": "match",
@@ -566,7 +566,7 @@
         },
         {
             "file": "src/tt.js",
-            "line": 814,
+            "line": 817,
             "description": "Push element(s) to TT Object",
             "itemtype": "method",
             "name": "push",
@@ -585,7 +585,7 @@
         },
         {
             "file": "src/tt.js",
-            "line": 834,
+            "line": 837,
             "description": "Get index of registered element",
             "itemtype": "method",
             "name": "indexOf",
@@ -604,7 +604,7 @@
         },
         {
             "file": "src/tt.js",
-            "line": 854,
+            "line": 857,
             "description": "Bind events to NodeElement",
             "itemtype": "method",
             "name": "on",
@@ -634,7 +634,7 @@
         },
         {
             "file": "src/tt.js",
-            "line": 872,
+            "line": 875,
             "description": "Un bind events from NodeElement",
             "itemtype": "method",
             "name": "off",
@@ -663,7 +663,7 @@
         },
         {
             "file": "src/tt.js",
-            "line": 890,
+            "line": 893,
             "description": "Bind events to NodeElement\nThis is simply wrapper of addEventListener",
             "itemtype": "method",
             "name": "bind",
@@ -693,7 +693,7 @@
         },
         {
             "file": "src/tt.js",
-            "line": 908,
+            "line": 911,
             "description": "Un bind events from NodeElement\nThis is simply wrapper of removeEventListener",
             "itemtype": "method",
             "name": "unbind",
@@ -717,7 +717,7 @@
         },
         {
             "file": "src/tt.js",
-            "line": 924,
+            "line": 927,
             "description": "Bind events to NodeElement\nTo bind the event of delegate type",
             "itemtype": "method",
             "name": "delegate",
@@ -746,7 +746,7 @@
         },
         {
             "file": "src/tt.js",
-            "line": 972,
+            "line": 975,
             "description": "Un bind events from NodeElement\nTo un bind the event of delegate type",
             "itemtype": "method",
             "name": "undelegate",
@@ -775,7 +775,7 @@
         },
         {
             "file": "src/tt.js",
-            "line": 1004,
+            "line": 1007,
             "description": "Add class name",
             "itemtype": "method",
             "name": "addClass",
@@ -794,7 +794,7 @@
         },
         {
             "file": "src/tt.js",
-            "line": 1039,
+            "line": 1042,
             "description": "Remove class name",
             "itemtype": "method",
             "name": "removeClass",
@@ -813,7 +813,7 @@
         },
         {
             "file": "src/tt.js",
-            "line": 1059,
+            "line": 1062,
             "description": "Search class name",
             "itemtype": "method",
             "name": "hasClass",
@@ -832,7 +832,7 @@
         },
         {
             "file": "src/tt.js",
-            "line": 1079,
+            "line": 1082,
             "description": "Toggle class name",
             "itemtype": "method",
             "name": "toggleClass",
@@ -856,7 +856,7 @@
         },
         {
             "file": "src/tt.js",
-            "line": 1110,
+            "line": 1113,
             "description": "Find elements under registered elements",
             "itemtype": "method",
             "name": "find",
@@ -875,7 +875,7 @@
         },
         {
             "file": "src/tt.js",
-            "line": 1126,
+            "line": 1129,
             "description": "Find NodeElement from registered elements",
             "itemtype": "method",
             "name": "contains",
@@ -894,7 +894,7 @@
         },
         {
             "file": "src/tt.js",
-            "line": 1150,
+            "line": 1153,
             "description": "Set attribute values\nGet attributes list or attribute value",
             "itemtype": "method",
             "name": "attr",
@@ -918,7 +918,7 @@
         },
         {
             "file": "src/tt.js",
-            "line": 1201,
+            "line": 1204,
             "description": "Replace html in registered elements\nor get text html in thier",
             "itemtype": "method",
             "name": "attr",
@@ -942,7 +942,7 @@
         },
         {
             "file": "src/tt.js",
-            "line": 1228,
+            "line": 1231,
             "description": "Append NodeElement or text html to registered elements",
             "itemtype": "method",
             "name": "append",
@@ -961,7 +961,7 @@
         },
         {
             "file": "src/tt.js",
-            "line": 1253,
+            "line": 1256,
             "description": "Prepend NodeElement or text html to registered elements",
             "itemtype": "method",
             "name": "prepend",
@@ -980,7 +980,7 @@
         },
         {
             "file": "src/tt.js",
-            "line": 1278,
+            "line": 1281,
             "description": "Remove elements of registered from html",
             "itemtype": "method",
             "name": "remove",
@@ -992,7 +992,7 @@
         },
         {
             "file": "src/tt.js",
-            "line": 1290,
+            "line": 1293,
             "description": "Remove child elements of registered elements",
             "itemtype": "method",
             "name": "clear",
@@ -1004,7 +1004,7 @@
         },
         {
             "file": "src/tt.js",
-            "line": 1304,
+            "line": 1307,
             "description": "Get parent element from registered elements",
             "itemtype": "method",
             "name": "parent",
@@ -1023,7 +1023,7 @@
         },
         {
             "file": "src/tt.js",
-            "line": 1330,
+            "line": 1333,
             "description": "Get parent elements of the element back in DOM tree from registered elements",
             "itemtype": "method",
             "name": "parents",
@@ -1042,7 +1042,7 @@
         },
         {
             "file": "src/tt.js",
-            "line": 1374,
+            "line": 1377,
             "description": "Get closest element from registered element with query string or target element",
             "itemtype": "method",
             "name": "closest",
@@ -1061,7 +1061,7 @@
         },
         {
             "file": "src/tt.js",
-            "line": 1405,
+            "line": 1408,
             "description": "Replace elements of registered elements",
             "itemtype": "method",
             "name": "replace",
@@ -1080,7 +1080,7 @@
         },
         {
             "file": "src/tt.js",
-            "line": 1419,
+            "line": 1422,
             "description": "Set or get css styles",
             "itemtype": "method",
             "name": "css",
@@ -1106,7 +1106,7 @@
         },
         {
             "file": "src/tt.js",
-            "line": 1465,
+            "line": 1468,
             "description": "Set or get element's dataset\nIf the array or object, data type passed to save the _data object instance",
             "itemtype": "method",
             "name": "data",
@@ -1132,7 +1132,7 @@
         },
         {
             "file": "src/tt.js",
-            "line": 1592,
+            "line": 1595,
             "description": "Show elements, if it is hide curretly",
             "itemtype": "method",
             "name": "show",
@@ -1152,7 +1152,7 @@
         },
         {
             "file": "src/tt.js",
-            "line": 1609,
+            "line": 1612,
             "description": "Hide elements, if it is show currently",
             "itemtype": "method",
             "name": "hide",
@@ -1164,7 +1164,7 @@
         },
         {
             "file": "src/tt.js",
-            "line": 1624,
+            "line": 1627,
             "description": "Trigger events for registered elements",
             "itemtype": "method",
             "name": "trigger",
@@ -1200,7 +1200,7 @@
         },
         {
             "file": "src/tt.js",
-            "line": 1641,
+            "line": 1644,
             "description": "Get offset position of registered elements\nEx.\n document.body\n +--------------------------\n |             |\n |            top\n |             v\n | -- left --> +---------+\n |             | Element |\n |             +---------+\n |",
             "itemtype": "method",
             "name": "offset",
@@ -1212,7 +1212,7 @@
         },
         {
             "file": "src/tt.js",
-            "line": 1671,
+            "line": 1674,
             "description": "Get width from registered elements",
             "itemtype": "method",
             "name": "width",
@@ -1232,7 +1232,7 @@
         },
         {
             "file": "src/tt.js",
-            "line": 1682,
+            "line": 1685,
             "description": "Get height from registered elements",
             "itemtype": "method",
             "name": "height",

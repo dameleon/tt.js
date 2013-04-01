@@ -221,17 +221,17 @@ buster.testCase("tt.js test", {
                 assert.equals(prefixed, "-" + testPrefix[index] + "-" + value);
             });
         },
-        "cssCamelizer test": function() {
+        "camelizer test": function() {
             var prop = "-webkit-tap-highlight-color";
 
-            assert.equals(tt.cssCamelizer(prop), "webkitTapHighlightColor");
-            assert.exception(function() { tt.cssCamelizer() }, "Error");
+            assert.equals(tt.camelizer(prop), "webkitTapHighlightColor");
+            assert.exception(function() { tt.camelizer() }, "Error");
         },
-        "cssHyphenizer test": function() {
+        "hyphenizer test": function() {
             var prop = "webkitTapHighlightColor";
 
-            assert.equals(tt.cssHyphenizer(prop), "-webkit-tap-highlight-color");
-            assert.exception(function() { tt.cssHyphenizer() }, "Error");
+            assert.equals(tt.hyphenizer(prop), "-webkit-tap-highlight-color");
+            assert.exception(function() { tt.hyphenizer() }, "Error");
         },
         "tag test": function() {
             var ttObj = tt.tag("div", true),

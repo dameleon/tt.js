@@ -91,8 +91,8 @@
     ////// static methods
     tt.ajax          = tt_ajax;
     tt.createEnvData = tt_createEnvData;
-    tt.cssCamelizer  = tt_cssCamelizer;
-    tt.cssHyphenizer = tt_cssHyphenizer;
+    tt.camelizer     = tt_camelizer;
+    tt.hyphenizer    = tt_hyphenizer;
     tt.cssPrefix     = tt_cssPrefix;
     tt.each          = tt_each;
     tt.extend        = tt_extend;
@@ -469,12 +469,12 @@
     /**
      * Get string CSS camel case from string of CSS hyphen case
      *
-     * @method tt.cssCamelizer
+     * @method tt.camelizer
      * @static
      * @param {String} str CSS property value
      * @return {String}
      */
-    function tt_cssCamelizer(str) {
+    function tt_camelizer(str) {
         if (!str || typeof str !== "string") {
             throw new Error("Error: argument error");
         }
@@ -490,37 +490,7 @@
             }
             res += value[0].toUpperCase() + value.substr(1, value.length);
         });
-        return res;
-    }
-
-    /**
-     * Get string CSS hyphen case from string of CSS camel case
-     *
-     * @method tt.cssHyphenizer
-     * @static
-     * @param {String} str CSS property value
-     * @return {String}
-     */
-    function tt_cssHyphenizer(str) {
-        if (!str || typeof str !== "string") {
-            throw new Error("Error: argument error");
-        }
-        var prefix = ["webkit", "moz", "o", "ms", "khtml"],
-            upperRe = /[A-Z]/g,
-            upperStr = str.match(upperRe),
-            res = "";
-
-        tt_each(str.split(upperRe), function(value, index) {
-            if (prefix.indexOf(value) > -1) {
-                res += "-" + value;
-                return;
-            } else if (!index) {
-                res += value;
-                return;
-            }
-            res += ("-" + upperStr.shift().toLowerCase() + value);
-        });
-        return res;
+        return res || str;
     }
 
     /**
@@ -540,6 +510,36 @@
             res[index] = "-" + str + "-" + value;
         });
         return res;
+    }
+
+    /**
+     * Get string CSS hyphen case from string of CSS camel case
+     *
+     * @method tt.hyphenizer
+     * @static
+     * @param {String} str CSS property value
+     * @return {String}
+     */
+    function tt_hyphenizer(str) {
+        if (!str || typeof str !== "string") {
+            throw new Error("Error: argument error");
+        }
+        var prefix = ["webkit", "moz", "o", "ms", "khtml"],
+            upperRe = /[A-Z]/g,
+            upperStr = str.match(upperRe),
+            res = "";
+
+        tt_each(str.split(upperRe), function(value, index) {
+            if (prefix.indexOf(value) > -1) {
+                res += "-" + value;
+                return;
+            } else if (!index) {
+                res += value;
+                return;
+            }
+            res += ("-" + upperStr.shift().toLowerCase() + value);
+        });
+        return res || str;
     }
 
     /**
@@ -705,7 +705,7 @@
      * @param {String} selector selector text
      */
     function TTCreater(nodes, selector) {
-        var i = 0, iz;
+        var i = 0, len;
 
         /**
          * Selector text
@@ -721,7 +721,7 @@
          * @property length
          * @type Number
          */
-        this.length = iz = nodes.length;
+        this.length = len = nodes.length;
 
         /**
          * Delegate registration information of registered elements
@@ -741,8 +741,9 @@
          * @private
          */
         this._data = {};
-        for (; i < iz; ++i) {
+        for (; len; ++i) {
             this[i] = nodes[i];
+            --len;
         }
         return this;
     }
@@ -784,10 +785,11 @@
          * @return {Object} TT object
          */
         each: function(fn) {
-            var i = 0, iz = this.length;
+            var i = 0, len = this.length;
 
-            for (; i < iz; ++i) {
+            for (; len; ++i) {
                 fn.call(this[i], i);
+                --len;
             }
             return this;
         },
@@ -801,12 +803,13 @@
          * @return {Object} TT Object
          */
         match: function(fn) {
-            var i = 0, iz = this.length;
+            var i = 0, len = this.length;
 
-            for (; i < iz; ++i) {
+            for (; len; ++i) {
                 if (fn.call(this[i], i)) {
                     return this[i];
                 }
+                --len;
             }
             return null;
         },
@@ -1433,11 +1436,11 @@
                         _removeProperty(key);
                         return;
                     }
-                    _setStyle(tt_cssCamelizer(key), val);
+                    _setStyle(tt_camelizer(key), val);
                 });
             } else if (mix) {
                 if (value) {
-                    _setStyle(tt_cssCamelizer(mix), value);
+                    _setStyle(tt_camelizer(mix), value);
                 } else if (value === "") {
                     _removeProperty(mix);
                 } else {
