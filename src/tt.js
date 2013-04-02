@@ -705,7 +705,7 @@
      * @param {String} selector selector text
      */
     function TTCreater(nodes, selector) {
-        var i = 0, len;
+        var i = 0, iz;
 
         /**
          * Selector text
@@ -721,7 +721,7 @@
          * @property length
          * @type Number
          */
-        this.length = len = nodes.length;
+        this.length = iz = nodes.length;
 
         /**
          * Delegate registration information of registered elements
@@ -740,10 +740,13 @@
          * @type Object
          * @private
          */
-        this._data = {};
-        for (; len; ++i) {
+        this._data = {
+            bindEvents: [],
+            eventsData: {}
+        };
+
+        for (; iz; ++i, --iz) {
             this[i] = nodes[i];
-            --len;
         }
         return this;
     }
@@ -785,11 +788,10 @@
          * @return {Object} TT object
          */
         each: function(fn) {
-            var i = 0, len = this.length;
+            var i = 0, iz = this.length;
 
-            for (; len; ++i) {
+            for (; iz; ++i, --iz) {
                 fn.call(this[i], i);
-                --len;
             }
             return this;
         },
@@ -803,13 +805,12 @@
          * @return {Object} TT Object
          */
         match: function(fn) {
-            var i = 0, len = this.length;
+            var i = 0, iz = this.length;
 
-            for (; len; ++i) {
+            for (; iz; ++i, --iz) {
                 if (fn.call(this[i], i)) {
                     return this[i];
                 }
-                --len;
             }
             return null;
         },
@@ -826,9 +827,10 @@
                 this[this.length] = mix;
                 ++this.length;
             } else if (tt_type(mix, ["array", "nodelist"])) {
-                for (var i = 0, iz = mix.length; i < iz; ++i) {
-                    this[this.length] = mix[i];
-                    ++this.length;
+                var i = this.length, iz = i + mix.length;
+
+                for (; iz; ++i, --iz) {
+                    this[i] = mix[i];
                 }
             }
             return this;
@@ -935,7 +937,8 @@
          * @return {Object} TT Object
          */
         delegate: function(type, target, callback) {
-            var delegate = this._delegates[type],
+            var eventsData = this.eventsData,
+                delegate = this._delegates[type],
                 listener = {
                     target: target,
                     callback: callback
@@ -945,7 +948,9 @@
                 delegate = this._delegates[type] = {};
                 delegate.listeners = [];
                 delegate.handler = function(ev) {
-                    var event, eventTarget = ev.target;
+                    var event,
+                        eventTarget = ev.target,
+                        args = arguments;
 
                     tt_match(delegate.listeners, function(listener) {
                         var match = tt(listener.target).match(function() {
@@ -957,9 +962,9 @@
 
                         if (match) {
                             if (typeof listener.callback === "function") {
-                                listener.callback.call(match, ev);
+                                listener.callback.apply(match, args);
                             } else if ("handleEvent" in listener.callback) {
-                                listener.callback.handleEvent.call(match, ev);
+                                listener.callback.handleEvent.apply(match, args);
                             }
                             return true;
                         }
@@ -1634,9 +1639,15 @@
          * @param {Bool} [options] cancelable event cancelable flag
          * @return {Object} tt object
          */
-        trigger: function(event, type, bubbles, cancelable) {
+        trigger: function() {
+            var args = [].slice.call(arguments),
+                type = args.shift();
+
+            if (args.length > 1) {
+                this._data.eventsData[type] = args;
+            }
             this.each(function() {
-                tt_triggerEvent(this, event, type, bubbles, cancelable);
+                tt_triggerEvent(this, "Event", type);
             });
             return this;
         },
