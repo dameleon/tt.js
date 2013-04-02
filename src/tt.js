@@ -81,8 +81,6 @@
                 return;
             } else if (mix instanceof TTCreater) {
                 return mix;
-            } else {
-                throw new Error("argument type error");
             }
         }
         return new TTCreater(target || [], selector);
@@ -741,7 +739,7 @@
          * @private
          */
         this._data = {
-            bindEvents: [],
+            events: {},
             eventsData: {}
         };
 
@@ -903,6 +901,11 @@
          * @return {Object} TT Object
          */
         bind: function(type, mix, capture) {
+            var events = this._data.events;
+
+            if (event) {
+            }
+
             capture = capture || false;
             this.each(function() {
                 this.addEventListener(type, mix, capture);
@@ -1647,7 +1650,7 @@
                 this._data.eventsData[type] = args;
             }
             this.each(function() {
-                tt_triggerEvent(this, "Event", type);
+                tt_triggerEvent(this, type);
             });
             return this;
         },
