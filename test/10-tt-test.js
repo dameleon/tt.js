@@ -200,9 +200,6 @@ buster.testCase("tt.js test", {
             refute.exception(function () {
                 tt('').trigger('');
             });
-            assert.exception(function () {
-                tt(document.body).trigger();
-            }, 'Error');
         },
         "cssPrefix test": function() {
             assert.isFunction(tt.cssPrefix);

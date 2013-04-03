@@ -1,4 +1,4 @@
-/** tt.js version:0.5.0 author:kei takahashi(twitter@dameleon) at:2013-04-02 */
+/** tt.js version:0.5.0 author:kei takahashi(twitter@dameleon) at:2013-04-04 */
 ;(function(global, document, undefined) {
     "use strict";
 
@@ -690,7 +690,9 @@
         }
         var ev = document.createEvent(event);
 
-        ev.initEvent(type, bubbles || false, cancelable || false);
+        ev.initEvent(type,
+                     bubbles !== undefined ? bubbles : true,
+                     cancelable !== undefined ? cancelable : true);
         node.dispatchEvent(ev);
     }
 
@@ -723,8 +725,16 @@
         this.length = iz = nodes.length;
 
         /**
-         * Delegate registration information of registered elements
+         * Event registration information of this tt object
          *
+         * @property _events
+         * @type Object
+         * @private
+         */
+        this._events = {};
+
+        /**
+         * Delegate registration information of registered elements
          *
          * @property _delegates
          * @type Object
@@ -739,10 +749,7 @@
          * @type Object
          * @private
          */
-        this._data = {
-            events: {},
-            eventsData: {}
-        };
+        this._data = {};
 
         for (; iz; ++i, --iz) {
             this[i] = nodes[i];
@@ -902,15 +909,32 @@
          * @return {Object} TT Object
          */
         bind: function(type, mix, capture) {
-            var events = this._data.events;
-
-            if (event) {
-            }
-
             capture = capture || false;
-            this.each(function() {
-                this.addEventListener(type, mix, capture);
-            }, true);
+            var self = this,
+                event = this._events[type];
+
+            if (!event) {
+                event = this._events[type] = {};
+                event.callbacks = [];
+                event.handler = function(ev) {
+                    var data = ev._tt_data,
+                        args = Array.isArray(data) ?
+                                [].concat(data) : [];
+
+                    args.unshift(ev);
+                    tt_each(event.callbacks, function(callback) {
+                        if (typeof callback === "function") {
+                            callback.apply(ev.currentTarget, args);
+                        } else if (callback && callback.handleEvent) {
+                            callback.handleEvent.apply(ev.currentTarget, args);
+                        }
+                    });
+                };
+                this.each(function() {
+                    this.addEventListener(type, event.handler, capture);
+                });
+            }
+            event.callbacks.push(mix);
             return this;
         },
 
@@ -924,9 +948,19 @@
          * @return {Object} TT Object
          */
         unbind: function(type, mix) {
-            this.each(function() {
-                this.removeEventListener(type, mix);
-            }, true);
+            var event = this._events[type],
+                index = event ?
+                        event.callbacks.indexOf(mix) : -1;
+
+            if (!event || index === -1) {
+                return;
+            }
+            event.callbacks.splice(index, 1);
+            if (!event.callbacks.length) {
+                this.each(function() {
+                    this.removeEventListener(type, event.handler);
+                });
+            }
             return this;
         },
 
@@ -941,8 +975,7 @@
          * @return {Object} TT Object
          */
         delegate: function(type, target, callback) {
-            var eventsData = this.eventsData,
-                delegate = this._delegates[type],
+            var delegate = this._delegates[type],
                 listener = {
                     target: target,
                     callback: callback
@@ -967,7 +1000,7 @@
                         if (match) {
                             if (typeof listener.callback === "function") {
                                 listener.callback.apply(match, args);
-                            } else if ("handleEvent" in listener.callback) {
+                            } else if (listener.callback.handleEvent) {
                                 listener.callback.handleEvent.apply(match, args);
                             }
                             return true;
@@ -1048,6 +1081,7 @@
                     return res.join(" ");
                 }
             },
+
         /**
          * Remove class name
          *
@@ -1645,13 +1679,15 @@
          */
         trigger: function() {
             var args = [].slice.call(arguments),
-                type = args.shift();
+                type = args.shift(),
+                ev = document.createEvent("Event");
 
+            ev.initEvent(type, true, true);
             if (args.length > 1) {
-                this._data.eventsData[type] = args;
+                ev._tt_data = args;
             }
             this.each(function() {
-                tt_triggerEvent(this, type);
+                this.dispatchEvent(ev);
             });
             return this;
         },
@@ -1708,7 +1744,6 @@
 			return this[index || 0].offsetHeight;
 		}
     };
-
 
     // globalize
     global[IDENT] = global[IDENT] || tt;
