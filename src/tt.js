@@ -733,7 +733,7 @@
         this._events = {};
 
         /**
-         * Delegate registration information of registered elements
+         * Delegate registration information of this tt object
          *
          * @property _delegates
          * @type Object
@@ -742,7 +742,7 @@
         this._delegates = {};
 
         /**
-         * Data for registered elements
+         * Data for this tt object
          *
          * @property _data
          * @type Object
@@ -1448,6 +1448,42 @@
         },
 
         /**
+         * Get child elements from registered elements
+         *
+         * @method children
+         * @param {String|Object} [mix] QueryString, NodeElement, NodeList
+         * @return {Object} tt object of matches child NodeElements
+         */
+        children: function(mix) {
+            var res = tt(),
+                target;
+
+            if (mix) {
+                target = tt(mix);
+                this.each(function() {
+                    var children = [].slice.call(this.children),
+                        iz = children.length;
+
+                    target.each(function() {
+                        var child, i;
+
+                        for (i = 0; i < iz; ++i) {
+                            child = children[i];
+                            if (this === child) {
+                                res.push(child);
+                            }
+                        }
+                    });
+                });
+            } else {
+                this.each(function() {
+                    res = res.concat([].slice.call(this.children));
+                });
+            }
+            return res;
+        },
+
+        /**
          * Replace elements of registered elements
          *
          * @method replace
@@ -1635,6 +1671,33 @@
         })(),
 
         /**
+         * Set, get "value" attributes value of registered elements
+         *
+         * @method val
+         * @param {String|Number} [value]
+         * @return {Object|String|Array} TT object, value or values list
+         */
+        val: function(value) {
+            if (value !== undefined) {
+                this.each(function() {
+                    if (this.value !== undefined) {
+                        this.value = value;
+                    }
+                });
+                return this;
+            } else {
+                var res = [];
+
+                this.each(function(index) {
+                    if (this.value !== undefined) {
+                        res[index] = this.value;
+                    }
+                });
+                return this.length > 1 ? res : res[0];
+            }
+        },
+
+        /**
          * Show elements, if it is hide curretly
          *
          * @method show
@@ -1725,7 +1788,7 @@
          * Get width from registered elements
          *
          * @method width
-         * @param {Number} [options] index number of registered elements
+         * @param {Number} [index] number of registered elements
          * @return {Number} number of element width
          */
 		width: function(index) {
@@ -1736,7 +1799,7 @@
          * Get height from registered elements
          *
          * @method height
-         * @param {Number} [options] index number of registered elements
+         * @param {Number} [index] number of registered elements
          * @return {Number} number of element height
          */
 		height: function(index) {
