@@ -474,7 +474,7 @@
      */
     function tt_camelizer(str) {
         if (!str || typeof str !== "string") {
-            throw new Error("Error: argument error");
+            throw new Error("Argument error");
         }
         var res = "";
 
@@ -520,7 +520,7 @@
      */
     function tt_hyphenizer(str) {
         if (!str || typeof str !== "string") {
-            throw new Error("Error: argument error");
+            throw new Error("Argument error");
         }
         var prefix = ["webkit", "moz", "o", "ms", "khtml"],
             upperRe = /[A-Z]/g,
@@ -588,7 +588,7 @@
             /*jshint evil: true */
             obj = (new Function('return ' + text))();
         } catch (o_q) {
-            throw new Error("Error: can't parse text to json");
+            throw new Error("Can't parse text to json");
         }
         return obj;
     }
@@ -605,7 +605,7 @@
      */
     function tt_proxy() {
         if (arguments.length < 2) {
-            throw new Error("Error: missing argument error");
+            throw new Error("Missing argument error");
         }
         var args = [].slice.call(arguments),
             func = args.shift(),
@@ -660,7 +660,7 @@
      */
     function tt_tag(name, createTT) {
         if (!name || typeof name !== "string") {
-            throw new Error("Error: argument error");
+            throw new Error("Argument error");
         }
         var tag = document.createElement(name);
 
@@ -681,7 +681,7 @@
      */
     function tt_triggerEvent(node, event, type, bubbles, cancelable) {
         if (!node || !event) {
-            throw new Error("Error: missing argument error");
+            throw new Error("Missing argument error");
         }
         if (!tt_type(type, "string")) {
             type = event;
