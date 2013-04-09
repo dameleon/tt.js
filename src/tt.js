@@ -79,11 +79,11 @@
                     loadQueue.push(mix);
                 }
                 return;
-            } else if (mix instanceof TTCreater) {
+            } else if (mix instanceof TT) {
                 return mix;
             }
         }
-        return new TTCreater(target || [], selector);
+        return new TT(target || [], selector);
     }
 
     ////// static methods
@@ -699,12 +699,12 @@
     /**
      * tt.js class creater
      *
-     * @class TTCreater
+     * @class TT
      * @constructor
      * @param {Array|NodeList} nodes NodeList or Array incorporates elements
      * @param {String} selector selector text
      */
-    function TTCreater(nodes, selector) {
+    function TT(nodes, selector) {
         var i = 0, iz;
 
         /**
@@ -756,8 +756,8 @@
         return this;
     }
 
-    tt.fn = TTCreater.prototype = {
-        constructor: TTCreater,
+    tt.fn = TT.prototype = {
+        constructor: TT,
 
         /**
          * Returns elements
@@ -1287,7 +1287,7 @@
 
 					if (mix.nodeType) {
 						this.appendChild(useClone ? mix.cloneNode(true) : mix);
-					} else if (mix instanceof TTCreater) {
+					} else if (mix instanceof TT) {
 						mix.each(function() {
 							that.appendChild(this);
 						});
@@ -1312,7 +1312,7 @@
 
 					if (mix.nodeType) {
 						this.insertBefore(useClone ? mix.cloneNode(true) : mix, this.firstChild);
-					} else if (mix instanceof TTCreater) {
+					} else if (mix instanceof TT) {
 						mix.each(function() {
 							that.insertBefore(this, that.firstChild);
 						});
