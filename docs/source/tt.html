@@ -1,17 +1,34 @@
-;(function(global, document, undefined) {
-    "use strict";
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>The source code</title>
+  <link href="../resources/prettify/prettify.css" type="text/css" rel="stylesheet" />
+  <script type="text/javascript" src="../resources/prettify/prettify.js"></script>
+  <style type="text/css">
+    .highlight { display: block; background-color: #ddd; }
+  </style>
+  <script type="text/javascript">
+    function highlight() {
+      document.getElementById(location.hash.replace(/#/, "")).className = "highlight";
+    }
+  </script>
+</head>
+<body onload="prettyPrint(); highlight();">
+  <pre class="prettyprint lang-js">;(function(global, document, undefined) {
+    &quot;use strict&quot;;
 
-    var IDENT = "tt",
-        querySelectorRe = /^(.+[\#\.\s\[\*>:,]|[\[:])/,
+    var IDENT = &quot;tt&quot;,
+        querySelectorRe = /^(.+[\#\.\s\[\*&gt;:,]|[\[:])/,
         loaded = false,
         loadQueue = [],
         env = tt_createEnvData(global.navigator),
-        domTester = document.createElement("div");
+        domTester = document.createElement(&quot;div&quot;);
 
     // call load callback queue
-    document.addEventListener("DOMContentLoaded", function() {
+    document.addEventListener(&quot;DOMContentLoaded&quot;, function() {
         loaded = true;
-        for (var i = 0, iz = loadQueue.length; i < iz; ++i) {
+        for (var i = 0, iz = loadQueue.length; i &lt; iz; ++i) {
             loadQueue[i]();
         }
     }, false);
@@ -19,31 +36,31 @@
     // for old android compatiblity
     // Object.keys shim - MDN https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/Object/keys#Compatiblity
     if (!Object.keys) {
-        Object.keys=(function(){var a=Object.prototype.hasOwnProperty,b=!{toString:null}.propertyIsEnumerable("toString"),c=["toString","toLocaleString","valueOf","hasOwnProperty","isPrototypeOf","propertyIsEnumerable","constructor"],d=c.length;return function(e){if("object"!==typeof e&&"function"!==typeof e||null===e){throw new TypeError("Object.keys called on non-object");}var f=[];for(var g in e){if(a.call(e,g)){f.push(g);}}if(b){for(var h=0;d>h;h++){if(a.call(e,c[h])){f.push(c[h]);}}}return f;};})();
+        Object.keys=(function(){var a=Object.prototype.hasOwnProperty,b=!{toString:null}.propertyIsEnumerable(&quot;toString&quot;),c=[&quot;toString&quot;,&quot;toLocaleString&quot;,&quot;valueOf&quot;,&quot;hasOwnProperty&quot;,&quot;isPrototypeOf&quot;,&quot;propertyIsEnumerable&quot;,&quot;constructor&quot;],d=c.length;return function(e){if(&quot;object&quot;!==typeof e&amp;&amp;&quot;function&quot;!==typeof e||null===e){throw new TypeError(&quot;Object.keys called on non-object&quot;);}var f=[];for(var g in e){if(a.call(e,g)){f.push(g);}}if(b){for(var h=0;d&gt;h;h++){if(a.call(e,c[h])){f.push(c[h]);}}}return f;};})();
     }
     // Array.isArray shim
     if (!Array.isArray) {
-        Array.isArray=function(a){return Object.prototype.toString.call(a)==="[object Array]";};
+        Array.isArray=function(a){return Object.prototype.toString.call(a)===&quot;[object Array]&quot;;};
     }
     // String.prototype.trim = MDN https://developer.mozilla.org/en/docs/JavaScript/Reference/Global_Objects/String/trim#Compatibility
     if (!String.prototype.trim) {
-        String.prototype.trim=function(){return this.replace(/^\s+|\s+$/g,"");};
+        String.prototype.trim=function(){return this.replace(/^\s+|\s+$/g,&quot;&quot;);};
     }
     // Node.contains shim
     if (!Node.contains) {
-        Node.contains=function(a){var b=this.compareDocumentPosition(a);return (b===0||b&Node.DOCUMENT_POSITION_CONTAINED_BY);};
+        Node.contains=function(a){var b=this.compareDocumentPosition(a);return (b===0||b&amp;Node.DOCUMENT_POSITION_CONTAINED_BY);};
     }
 
-    /**
-     * tt.js main function
+<span id='tt'>    /**
+</span>     * tt.js main function
      *
      * This function does the following arguments to be passed by
      *
      * ### CSSQueryString, HTMLElement, NodeList or its like Array, document or document.body, tt object
-     * >> Create tt class object (DOM Operator)
+     * &gt;&gt; Create tt class object (DOM Operator)
      *
      * ### Function
-     * >> If the HTML is already loaded is executed immediately, if not already loaded is executed at the timing of the DOMContentLoaded
+     * &gt;&gt; If the HTML is already loaded is executed immediately, if not already loaded is executed at the timing of the DOMContentLoaded
      *
      * @class tt
      * @param {String|Function|HTMLElement|NodeList|NodeList like Array|document|document.body} any
@@ -52,38 +69,38 @@
      */
     function tt(any, parent) {
         var target = null,
-            selector = "";
+            selector = &quot;&quot;;
 
-        if (typeof any === "string") {
+        if (typeof any === &quot;string&quot;) {
             selector = any;
             parent = parent || document;
             target = querySelectorRe.test(any) ?
                         parent.querySelectorAll(any) :
-                     any[0] === "#" ?
+                     any[0] === &quot;#&quot; ?
                         [parent.getElementById(any.substring(1, any.length))] :
-                     any[0] === "." ?
+                     any[0] === &quot;.&quot; ?
                         parent.getElementsByClassName(any.substring(1, any.length)) :
                         parent.getElementsByTagName(any);
         } else if (any) {
             if (any.nodeType === 1) {
                 target = [any];
             } else if (tt_isNodeList(any) ||
-                      (Array.isArray(any) && any.length && any[0].nodeType)) {
+                      (Array.isArray(any) &amp;&amp; any.length &amp;&amp; any[0].nodeType)) {
                 target = any;
             } else if (any === document || any === document.body) {
                 target = [document.body];
-            } else if (typeof any === "function") {
+            } else if (typeof any === &quot;function&quot;) {
                 if (loaded) {
                     any();
                 } else {
                     loadQueue.push(any);
                 }
                 return;
-            } else if (any instanceof TT) {
+            } else if (any instanceof TTCreater) {
                 return any;
             }
         }
-        return new TT(target || [], selector);
+        return new TTCreater(target || [], selector);
     }
 
     //// static methods
@@ -107,8 +124,8 @@
     tt.type          = tt_type;
 
     //// Iterate functions
-    /**
-     * Execute iterate a function from array or object
+<span id='tt-static-method-each'>    /**
+</span>     * Execute iterate a function from array or object
      *
      * @method each
      * @static
@@ -121,21 +138,21 @@
 
         if (Array.isArray(any)) {
             iz = any.length;
-            for (; i < iz; ++i) {
+            for (; i &lt; iz; ++i) {
                 fn(any[i], i);
             }
-        } else if (typeof any === "object") {
+        } else if (typeof any === &quot;object&quot;) {
             arr = Object.keys(any);
             iz = arr.length;
-            for (; i < iz; ++i) {
+            for (; i &lt; iz; ++i) {
                 key = arr[i];
                 fn(key, any[key]);
             }
         }
     }
 
-    /**
-     * Extend target object with each objects
+<span id='tt-static-method-extend'>    /**
+</span>     * Extend target object with each objects
      * If first argument is true, will be recursive copy
      *
      * @method extend
@@ -156,9 +173,9 @@
         }
         target = args[(i - 1)] || {};
 
-        for (; i < iz; ++i) {
+        for (; i &lt; iz; ++i) {
             arg = args[i];
-            if (tt_type(arg) !== "object") {
+            if (tt_type(arg) !== &quot;object&quot;) {
                 continue;
             }
             tt_each(Object.keys(arg), _extend);
@@ -166,9 +183,9 @@
         return target;
 
         function _extend(key, index) {
-            if (deep &&
-                tt_type(target[key], "object") &&
-                tt_type(arg[key], "object")) {
+            if (deep &amp;&amp;
+                tt_type(target[key], &quot;object&quot;) &amp;&amp;
+                tt_type(arg[key], &quot;object&quot;)) {
                     tt_extend(target[key], arg[key]);
             } else {
                 target[key] = arg[key];
@@ -176,8 +193,8 @@
         }
     }
 
-    /**
-     * Execute iterate a function from array or object
+<span id='tt-static-method-match'>    /**
+</span>     * Execute iterate a function from array or object
      *
      * @method match
      * @static
@@ -191,15 +208,15 @@
 
         if (Array.isArray(any)) {
             iz = any.length;
-            for (; i < iz; ++i) {
+            for (; i &lt; iz; ++i) {
                 if (fn(any[i], i)) {
                     return any[i];
                 }
             }
-        } else if (typeof any === "object") {
+        } else if (typeof any === &quot;object&quot;) {
             arr = Object.keys(any);
             iz = arr.length;
-            for (; i < iz; ++i) {
+            for (; i &lt; iz; ++i) {
                 key = arr[i];
                 if (fn(key, any[key], i)) {
                     res[key] = any[key];
@@ -212,8 +229,8 @@
 
 
     //// detect type functions
-    /**
-     * Detect array strictly
+<span id='tt-static-method-isNodeList'>    /**
+</span>     * Detect array strictly
      *
      * @method isNodeList
      * @static
@@ -223,11 +240,11 @@
     function tt_isNodeList(any) {
         var type=Object.prototype.toString.call(any);
 
-        return type === "[object NodeList]" || type === "[object HTMLCollection]";
+        return type === &quot;[object NodeList]&quot; || type === &quot;[object HTMLCollection]&quot;;
     }
 
-    /**
-     * Return target type
+<span id='tt-static-method-type'>    /**
+</span>     * Return target type
      * If matches is passed and returns result of comparing target
      *
      * @method type
@@ -237,24 +254,24 @@
      * @return {Boolean} result
      */
     function tt_type(target, matches) {
-        var res = target === null       ? "null" :
-                  target === void 0     ? "undefined" :
-                  target === global     ? "global" :
-                  target === document   ? "document" :
-                  target.nodeType       ? "node" :
-                  Array.isArray(target) ? "array" :
-                  tt_isNodeList(target) ? "nodelist" : undefined;
+        var res = target === null       ? &quot;null&quot; :
+                  target === void 0     ? &quot;undefined&quot; :
+                  target === global     ? &quot;global&quot; :
+                  target === document   ? &quot;document&quot; :
+                  target.nodeType       ? &quot;node&quot; :
+                  Array.isArray(target) ? &quot;array&quot; :
+                  tt_isNodeList(target) ? &quot;nodelist&quot; : undefined;
 
         if (!res) {
             res = typeof target;
-            if (res === "object") {
+            if (res === &quot;object&quot;) {
                 res = Object.prototype.toString.call(target).toLowerCase().match(/.*\s([a-z]*)\]/)[1];
             }
         }
         if (!matches) {
             return res;
         } else if (Array.isArray(matches)) {
-            for (var i = 0, iz = matches.length; i < iz; ++i) {
+            for (var i = 0, iz = matches.length; i &lt; iz; ++i) {
                 if (matches[i] === res) {
                     return true;
                 }
@@ -267,8 +284,8 @@
 
 
     //// useful functions
-    /**
-     * XMLHttpRequest wrapper method
+<span id='tt-static-method-ajax'>    /**
+</span>     * XMLHttpRequest wrapper method
      *
      * @method ajax
      * @static
@@ -281,12 +298,12 @@
             xhr = new XMLHttpRequest();
 
         setting = setting || {};
-        if (tt_type(any, "object")) {
+        if (tt_type(any, &quot;object&quot;)) {
             setting = any;
-        } else if (tt_type(any, "string")) {
+        } else if (tt_type(any, &quot;string&quot;)) {
             setting.url = any;
         } else {
-            throw new Error("Error: missing argument");
+            throw new Error(&quot;Error: missing argument&quot;);
         }
 
         setting = tt_extend({
@@ -294,27 +311,27 @@
             beforeSend  : null,
             cache       : true,
             complete    : null,
-            contentType : "application/x-www-form-urlencoded; charset=UTF-8",
+            contentType : &quot;application/x-www-form-urlencoded; charset=UTF-8&quot;,
             context     : document.body,
             data        : null,
-            dataType    : "text",
+            dataType    : &quot;text&quot;,
             error       : null,
             headers     : null,
             mimeType    : null,
             success     : null,
             timeout     : 0,
-            type        : "GET",
-            url         : "",
-            user        : "",
-            password    : ""
+            type        : &quot;GET&quot;,
+            url         : &quot;&quot;,
+            user        : &quot;&quot;,
+            password    : &quot;&quot;
         }, setting);
 
         setting.type = setting.type.toUpperCase();
 
-        if (setting.data && setting.type === "GET") {
+        if (setting.data &amp;&amp; setting.type === &quot;GET&quot;) {
             setting.url =
                 setting.url +
-                setting.url.indexOf("?") > -1 ? "&" : "?" +
+                setting.url.indexOf(&quot;?&quot;) &gt; -1 ? &quot;&amp;&quot; : &quot;?&quot; +
                 tt_param(setting.data);
             setting.data = null;
         } else {
@@ -337,11 +354,11 @@
                  setting.user,
                  setting.password);
 
-        if (setting.type === "POST") {
-            xhr.setRequestHeader("Content-type", setting.contentType);
-            xhr.setRequestHeader("Content-length", setting.data.length);
+        if (setting.type === &quot;POST&quot;) {
+            xhr.setRequestHeader(&quot;Content-type&quot;, setting.contentType);
+            xhr.setRequestHeader(&quot;Content-length&quot;, setting.data.length);
         }
-        if (tt_type(setting.headers, "object")) {
+        if (tt_type(setting.headers, &quot;object&quot;)) {
             tt_each(setting.headers, function(key, value) {
                 xhr.setRequestHeader(key, value);
             });
@@ -350,7 +367,7 @@
             try {
                 xhr.responseType = setting.dataType;
             } catch (e) {
-                xhr.responseType = "text";
+                xhr.responseType = &quot;text&quot;;
             }
         }
         if (setting.mimeType) {
@@ -374,9 +391,9 @@
 
             var res, context = setting.context;
 
-            if (statusCode >= 200 && statusCode < 400) {
+            if (statusCode &gt;= 200 &amp;&amp; statusCode &lt; 400) {
                 res = xhr.response || xhr.responseText;
-                if (setting.dataType === "json" && tt_type(res, "string")) {
+                if (setting.dataType === &quot;json&quot; &amp;&amp; tt_type(res, &quot;string&quot;)) {
                     res = tt_parseJSON(res);
                 }
                 if (setting.success) {
@@ -394,8 +411,8 @@
         }
     }
 
-    /**
-     * Create an object of environmental information based on the information of the navigator
+<span id='tt-static-method-createEnvData'>    /**
+</span>     * Create an object of environmental information based on the information of the navigator
      *
      * Environmental information can be obtained based on the following key
      *
@@ -421,7 +438,7 @@
         res.android = /android/.test(ua);
         res.ios = /ip(hone|od|ad)/.test(ua);
 
-        if (!res.android && !res.ios) {
+        if (!res.android &amp;&amp; !res.ios) {
             res.windowsPhone = /windows\sphone/.test(ua);
             res.ie = /msie/.test(ua);
         }
@@ -429,20 +446,20 @@
         res.chrome = /(chrome|crios)/.test(ua);
         res.firefox = /firefox/.test(ua);
         res.opera = /opera/.test(ua);
-        res.androidBrowser = !res.chrome && res.android && /applewebkit/.test(ua);
-        res.mobileSafari = !res.chrome && res.ios && /applewebkit/.test(ua);
+        res.androidBrowser = !res.chrome &amp;&amp; res.android &amp;&amp; /applewebkit/.test(ua);
+        res.mobileSafari = !res.chrome &amp;&amp; res.ios &amp;&amp; /applewebkit/.test(ua);
 
         res.version =
-            (res.androidBrowser || res.android && res.chrome) ? ua.match(/android\s(\S.*?)\;/) :
-            (res.mobileSafari || res.ios && res.chrome) ? ua.match(/os\s(\S.*?)\s/) :
+            (res.androidBrowser || res.android &amp;&amp; res.chrome) ? ua.match(/android\s(\S.*?)\;/) :
+            (res.mobileSafari || res.ios &amp;&amp; res.chrome) ? ua.match(/os\s(\S.*?)\s/) :
             null;
         res.version = res.version ?
             res.ios ?
-                res.version[1].replace("_", ".") :
+                res.version[1].replace(&quot;_&quot;, &quot;.&quot;) :
                 res.version[1] :
             null;
         res.versionCode = _getVersionCode(res.version);
-        res.supportTouch = "ontouchstart" in global;
+        res.supportTouch = &quot;ontouchstart&quot; in global;
 
         return res;
 
@@ -452,10 +469,10 @@
             }
             var res, digit = 4, diff = 0;
 
-            version = version.replace(/\D/g, "");
+            version = version.replace(/\D/g, &quot;&quot;);
             diff = digit - version.length;
 
-            if (diff > 0) {
+            if (diff &gt; 0) {
                 res = (+version) * Math.pow(10, diff);
             } else {
                 res = +version;
@@ -464,8 +481,8 @@
         }
     }
 
-    /**
-     * Get string CSS camel case from string of CSS hyphen case
+<span id='tt-static-method-camelizer'>    /**
+</span>     * Get string CSS camel case from string of CSS hyphen case
      *
      * @method camelizer
      * @static
@@ -473,15 +490,15 @@
      * @return {String}
      */
     function tt_camelizer(str) {
-        if (!str || typeof str !== "string") {
-            throw new Error("Argument error");
+        if (!str || typeof str !== &quot;string&quot;) {
+            throw new Error(&quot;Error: argument error&quot;);
         }
-        var res = "";
+        var res = &quot;&quot;;
 
-        if (str[0] === "-") {
+        if (str[0] === &quot;-&quot;) {
             str = str.substr(1, str.length);
         }
-        tt.each(str.split("-"), function(value, index) {
+        tt.each(str.split(&quot;-&quot;), function(value, index) {
             if (!index) {
                 res += value;
                 return;
@@ -491,8 +508,8 @@
         return res || str;
     }
 
-    /**
-     * Get value of CSS with a prefix
+<span id='tt-static-method-cssPrefix'>    /**
+</span>     * Get value of CSS with a prefix
      *
      * @method cssPrefix
      * @static
@@ -503,15 +520,15 @@
     function tt_cssPrefix(value, prefix) {
         var res = [];
 
-        prefix = prefix || ["webkit", "moz", "o", "ms", "khtml"];
+        prefix = prefix || [&quot;webkit&quot;, &quot;moz&quot;, &quot;o&quot;, &quot;ms&quot;, &quot;khtml&quot;];
         tt_each(prefix, function(str, index) {
-            res[index] = "-" + str + "-" + value;
+            res[index] = &quot;-&quot; + str + &quot;-&quot; + value;
         });
         return res;
     }
 
-    /**
-     * Get string CSS hyphen case from string of CSS camel case
+<span id='tt-static-method-hyphenizer'>    /**
+</span>     * Get string CSS hyphen case from string of CSS camel case
      *
      * @method hyphenizer
      * @static
@@ -519,29 +536,29 @@
      * @return {String}
      */
     function tt_hyphenizer(str) {
-        if (!str || typeof str !== "string") {
-            throw new Error("Argument error");
+        if (!str || typeof str !== &quot;string&quot;) {
+            throw new Error(&quot;Error: argument error&quot;);
         }
-        var prefix = ["webkit", "moz", "o", "ms", "khtml"],
+        var prefix = [&quot;webkit&quot;, &quot;moz&quot;, &quot;o&quot;, &quot;ms&quot;, &quot;khtml&quot;],
             upperRe = /[A-Z]/g,
             upperStr = str.match(upperRe),
-            res = "";
+            res = &quot;&quot;;
 
         tt_each(str.split(upperRe), function(value, index) {
-            if (prefix.indexOf(value) > -1) {
-                res += "-" + value;
+            if (prefix.indexOf(value) &gt; -1) {
+                res += &quot;-&quot; + value;
                 return;
             } else if (!index) {
                 res += value;
                 return;
             }
-            res += ("-" + upperStr.shift().toLowerCase() + value);
+            res += (&quot;-&quot; + upperStr.shift().toLowerCase() + value);
         });
         return res || str;
     }
 
-    /**
-     * Parse query string to object
+<span id='tt-static-method-param'>    /**
+</span>     * Parse query string to object
      *
      * @method param
      * @static
@@ -549,22 +566,22 @@
      * @return {Object} result
      */
     function tt_param(obj) {
-        if (!tt_type(obj, "object")) {
+        if (!tt_type(obj, &quot;object&quot;)) {
             return obj;
         }
         var key, keys = Object.keys(obj),
             i = 0, iz = keys.length,
             results = [];
 
-        for (;i < iz; ++i) {
+        for (;i &lt; iz; ++i) {
             key = keys[i];
-            results.push(encodeURIComponent(key) + "=" + encodeURIComponent(obj[key]));
+            results.push(encodeURIComponent(key) + &quot;=&quot; + encodeURIComponent(obj[key]));
         }
-        return results.join("&");
+        return results.join(&quot;&amp;&quot;);
     }
 
-    /**
-     * Parse string of json to json object
+<span id='tt-static-method-parseJSON'>    /**
+</span>     * Parse string of json to json object
      *
      * @method parseJSON
      * @static
@@ -574,7 +591,7 @@
     function tt_parseJSON(text) {
         if (!text) {
             return {};
-        } else if (typeof text === "object") {
+        } else if (typeof text === &quot;object&quot;) {
             return text;
         }
         // idea from twitter@uupaa
@@ -586,15 +603,15 @@
         } catch (p_o) {}
         try {
             /*jshint evil: true */
-            obj = (new Function('return ' + text))();
+            obj = (new Function(&#39;return &#39; + text))();
         } catch (o_q) {
-            throw new Error("Can't parse text to json");
+            throw new Error(&quot;Error: can&#39;t parse text to json&quot;);
         }
         return obj;
     }
 
-    /**
-     * Returns a function and arguments hold any context
+<span id='tt-static-method-proxy'>    /**
+</span>     * Returns a function and arguments hold any context
      *
      * @method proxy
      * @static
@@ -604,15 +621,15 @@
      * @return {Function} Callback function
      */
     function tt_proxy() {
-        if (arguments.length < 2) {
-            throw new Error("Missing argument error");
+        if (arguments.length &lt; 2) {
+            throw new Error(&quot;Error: missing argument error&quot;);
         }
         var args = [].slice.call(arguments),
             func = args.shift(),
             context = args.shift(),
             tmp;
 
-        if (typeof context === "string") {
+        if (typeof context === &quot;string&quot;) {
             tmp = func[context];
             context = func;
             func = tmp;
@@ -622,8 +639,8 @@
         };
     }
 
-    /**
-     * Parse query string to object
+<span id='tt-static-method-query2object'>    /**
+</span>     * Parse query string to object
      *
      * @method query2object
      * @static
@@ -631,26 +648,26 @@
      * @return {Object} result
      */
     function tt_query2object(query) {
-        if (!tt_type(query, "string")) {
+        if (!tt_type(query, &quot;string&quot;)) {
             return {};
         }
-        if (query[0] === "?") {
+        if (query[0] === &quot;?&quot;) {
             query = query.substr(1, query.length);
         }
         var result = {},
-            pair = query.split("&"),
+            pair = query.split(&quot;&amp;&quot;),
             i = 0, iz = pair.length;
 
-        for (; i < iz; ++i) {
-            var k_v = pair[i].split("=");
+        for (; i &lt; iz; ++i) {
+            var k_v = pair[i].split(&quot;=&quot;);
 
             result[k_v[0]] = k_v[1];
         }
         return result;
     }
 
-    /**
-     * Create HTMLElement or tt object which involve it
+<span id='tt-static-method-tag'>    /**
+</span>     * Create HTMLElement or tt object which involve it
      *
      * @method tag
      * @static
@@ -659,16 +676,16 @@
      * @return {HTMLElement|Object} HTMLelement or tt object
      */
     function tt_tag(name, createTT) {
-        if (!name || typeof name !== "string") {
-            throw new Error("Argument error");
+        if (!name || typeof name !== &quot;string&quot;) {
+            throw new Error(&quot;Error: argument error&quot;);
         }
         var tag = document.createElement(name);
 
         return createTT ? tt(tag) : tag;
     }
 
-    /**
-     * Trigger event to target element
+<span id='tt-static-method-triggerEvent'>    /**
+</span>     * Trigger event to target element
      *
      * @method triggerEvent
      * @static
@@ -680,11 +697,11 @@
      */
     function tt_triggerEvent(node, event, name, bubbles, cancelable) {
         if (!node || !event) {
-            throw new Error("Missing argument error");
+            throw new Error(&quot;Error: missing argument error&quot;);
         }
-        if (!tt_type(name, "string")) {
+        if (!tt_type(name, &quot;string&quot;)) {
             name = event;
-            event = name === "click" ? "MouseEvents" : "Event";
+            event = name === &quot;click&quot; ? &quot;MouseEvents&quot; : &quot;Event&quot;;
         }
         var ev = document.createEvent(event);
 
@@ -695,35 +712,35 @@
     }
 
 
-    /**
-     * tt.js class creater
+<span id='TTCreater-method-constructor'><span id='TTCreater'>    /**
+</span></span>     * tt.js class creater
      *
-     * @class TT
+     * @class TTCreater
      * @constructor
      * @param {Array|NodeList} nodes NodeList or Array incorporates elements
      * @param {String} selector selector text
      */
-    function TT(nodes, selector) {
+    function TTCreater(nodes, selector) {
         var i = 0, iz;
 
-        /**
-         * Selector text
+<span id='TTCreater-property-selector'>        /**
+</span>         * Selector text
          *
          * @property selector
          * @type String
          */
         this.selector = selector;
 
-        /**
-         * Length of registered elements
+<span id='TTCreater-property-length'>        /**
+</span>         * Length of registered elements
          *
          * @property length
          * @type Number
          */
         this.length = iz = nodes.length;
 
-        /**
-         * Event registration information of this tt object
+<span id='TTCreater-property-_events'>        /**
+</span>         * Event registration information of this tt object
          *
          * @property _events
          * @type Object
@@ -731,8 +748,8 @@
          */
         this._events = {};
 
-        /**
-         * Delegate registration information of this tt object
+<span id='TTCreater-property-_delegates'>        /**
+</span>         * Delegate registration information of this tt object
          *
          * @property _delegates
          * @type Object
@@ -740,8 +757,8 @@
          */
         this._delegates = {};
 
-        /**
-         * Data for this tt object
+<span id='TTCreater-property-_data'>        /**
+</span>         * Data for this tt object
          *
          * @property _data
          * @type Object
@@ -755,11 +772,11 @@
         return this;
     }
 
-    tt.fn = TT.prototype = {
-        constructor: TT,
+    tt.fn = TTCreater.prototype = {
+        constructor: TTCreater,
 
-        /**
-         * Returns elements
+<span id='TTCreater-method-get'>        /**
+</span>         * Returns elements
          *
          * @method get
          * @param {Number} index elements index
@@ -769,8 +786,8 @@
             return this[index || 0];
         },
 
-        /**
-         * Returns array in elements
+<span id='TTCreater-method-toArray'>        /**
+</span>         * Returns array in elements
          *
          * @method toArray
          * @return {Array} registered elements
@@ -784,11 +801,10 @@
             return arr;
         },
 
-        /**
-         * Call function with context of HTMLElement and parameter of elements index number
+<span id='TTCreater-method-each'>        /**
+</span>         * Call function with context of HTMLElement and parameter of elements index number
          *
          * @method each
-         * @chainable
          * @param {Function} fn Function to be executed repeatedly
          * @return {Object} TT object
          */
@@ -801,8 +817,8 @@
             return this;
         },
 
-        /**
-         * Call function with context of HTMLElement and parameter of elements index number
+<span id='TTCreater-method-match'>        /**
+</span>         * Call function with context of HTMLElement and parameter of elements index number
          * If it returns true, then this function return context that matches
          *
          * @method match
@@ -820,19 +836,18 @@
             return null;
         },
 
-        /**
-         * Push element(s) to TT Object
+<span id='TTCreater-method-push'>        /**
+</span>         * Push element(s) to TT Object
          *
          * @method push
-         * @chainable
          * @param {HTMLElement|NodeList|Array} any element or elements list
          * @return {Object} TT Object
          */
         push: function(any) {
-            if (any && any.nodeType) {
+            if (any &amp;&amp; any.nodeType) {
                 this[this.length] = any;
                 ++this.length;
-            } else if (tt_type(any, ["array", "nodelist"])) {
+            } else if (tt_type(any, [&quot;array&quot;, &quot;nodelist&quot;])) {
                 var i = this.length, iz = i + any.length;
 
                 for (; iz; ++i, --iz) {
@@ -842,8 +857,8 @@
             return this;
         },
 
-        /**
-         * Get index of registered element
+<span id='TTCreater-method-indexOf'>        /**
+</span>         * Get index of registered element
          *
          * @method indexOf
          * @param {HTMLElement} node serach target element
@@ -862,44 +877,47 @@
             return res;
         },
 
-        /**
-         * Bind events to HTMLElement
+<span id='TTCreater-method-on'>        /**
+</span>         * Bind events to HTMLElement
          *
          * @method on
-         * @chainable
          * @param {String} type
          * @param {String|Function} any
          * @param {Function} [options] callback
          * @return {Object} TT Object
          */
         on: function(type, any, callback) {
-            return tt_type(any, "string") ?
-                    this.delegate(type, any, callback) :
-                    this.bind(type, any);
+            if (tt_type(any, &#39;string&#39;)) {
+                this.delegate(type, any, callback);
+            } else {
+                this.bind(type, any);
+            }
+            return this;
         },
 
-        /**
-         * Un bind events from HTMLElement
+<span id='TTCreater-method-off'>        /**
+</span>         * Un bind events from HTMLElement
          *
          * @method off
-         * @chainable
          * @param {String} type
          * @param {String|Function} any
          * @param {Function} callback
          * @return {Object} TT Object
          */
         off: function(type, any, callback) {
-            return tt_type(any, "string") ?
-                    this.undelegate(type, any, callback) :
-                    this.unbind(type, any);
+            if (tt_type(any, &#39;string&#39;)) {
+                this.undelegate(type, any, callback);
+            } else {
+                this.unbind(type, any);
+            }
+            return this;
         },
 
-        /**
-         * Bind events to HTMLElement
+<span id='TTCreater-method-bind'>        /**
+</span>         * Bind events to HTMLElement
          * This is simply wrapper of addEventListener
          *
          * @method bind
-         * @chainable
          * @param {String} type
          * @param {Function|Object} callback
          * @param {Boolean} [options] capture
@@ -920,9 +938,9 @@
 
                     args.unshift(ev);
                     tt_each(event.callbacks, function(callback) {
-                        if (typeof callback === "function") {
+                        if (typeof callback === &quot;function&quot;) {
                             callback.apply(ev.currentTarget, args);
-                        } else if (callback && callback.handleEvent) {
+                        } else if (callback &amp;&amp; callback.handleEvent) {
                             callback.handleEvent.apply(ev.currentTarget, args);
                         }
                     });
@@ -935,12 +953,11 @@
             return this;
         },
 
-        /**
-         * Un bind events from HTMLElement
+<span id='TTCreater-method-unbind'>        /**
+</span>         * Un bind events from HTMLElement
          * This is simply wrapper of removeEventListener
          *
          * @method unbind
-         * @chainable
          * @param {String} type
          * @param {Function|Object} any
          * @return {Object} TT Object
@@ -950,7 +967,7 @@
                 index = event ?
                         event.callbacks.indexOf(any) : -1;
 
-            if (!event || index < 0) {
+            if (!event || index === -1) {
                 return;
             }
             event.callbacks.splice(index, 1);
@@ -962,12 +979,11 @@
             return this;
         },
 
-        /**
-         * Bind events to HTMLElement
+<span id='TTCreater-method-delegate'>        /**
+</span>         * Bind events to HTMLElement
          * To bind the event of delegate type
          *
          * @method delegate
-         * @chainable
          * @param {String} type
          * @param {String|Object} target
          * @param {Function|Object} callback
@@ -997,7 +1013,7 @@
                         });
 
                         if (match) {
-                            if (typeof listener.callback === "function") {
+                            if (typeof listener.callback === &quot;function&quot;) {
                                 listener.callback.apply(match, args);
                             } else if (listener.callback.handleEvent) {
                                 listener.callback.handleEvent.apply(match, args);
@@ -1013,12 +1029,11 @@
             return this;
         },
 
-        /**
-         * Un bind events from HTMLElement
+<span id='TTCreater-method-undelegate'>        /**
+</span>         * Un bind events from HTMLElement
          * To un bind the event of delegate type
          *
          * @method undelegate
-         * @chainable
          * @param {String} type
          * @param {String|Function} any
          * @param {Function} callback
@@ -1032,7 +1047,7 @@
                 return this;
             }
             tt_match(listeners, function(listener, index) {
-                if (listener.target === target &&
+                if (listener.target === target &amp;&amp;
                     listener.callback === callback) {
                         listeners.splice(index, 1);
                         return true;
@@ -1041,13 +1056,13 @@
             });
             if (listeners.length === 0) {
                 this.unbind(type, delegate.handler);
-                this._delegates[type] = {};
+                delegate = this._delegates[type] = {};
             }
             return this;
         },
 
-        /**
-         * Add class name
+<span id='TTCreater-method-addClass'>        /**
+</span>         * Add class name
          *
          * @method addClass
          * @param {String} classname
@@ -1067,7 +1082,7 @@
                     if (tt(this).hasClass(className)) {
                         return;
                     }
-                    if (index && stashName !== this.className) {
+                    if (index &amp;&amp; stashName !== this.className) {
                         stashName = this.className;
                         newName = _createName(stashName, className);
                     }
@@ -1075,15 +1090,15 @@
                 });
 
                 function _createName(currentName, newName) {
-                    var res = currentName.split(" ");
+                    var res = currentName.split(&quot; &quot;);
 
                     res[res.length] = newName;
-                    return res.join(" ");
+                    return res.join(&quot; &quot;);
                 }
             },
 
-        /**
-         * Remove class name
+<span id='TTCreater-method-removeClass'>        /**
+</span>         * Remove class name
          *
          * @method removeClass
          * @param {String} classname
@@ -1096,22 +1111,14 @@
                 });
             } :
             function _removeClassByClassName(className) {
-                var lastClassName, newClassName;
-
-                className = " " + className + " ";
-
+                className = &quot; &quot; + className;
                 return this.each(function() {
-                    if (this.className === lastClassName) {
-                        this.className = newClassName;
-                    } else {
-                        lastClassName = this.className;
-                        this.className = newClassName = (" " + lastClassName + " ").replace(className, " ").trim();
-                    }
+                    this.className = (&quot; &quot; + this.className).replace(className, &quot;&quot;).trim();
                 });
             },
 
-        /**
-         * Search class name
+<span id='TTCreater-method-hasClass'>        /**
+</span>         * Search class name
          *
          * @method hasClass
          * @param {String} classname
@@ -1124,14 +1131,14 @@
                 });
             } :
             function _hasClassByClassName(className) {
-                className = " " + className;
+                className = &quot; &quot; + className;
                 return this.match(function() {
-                    return (" " + this.className).indexOf(className) > -1;
+                    return (&quot; &quot; + this.className).indexOf(className) &gt; -1;
                 });
             },
 
-        /**
-         * Toggle class name
+<span id='TTCreater-method-toggleClass'>        /**
+</span>         * Toggle class name
          *
          * @method toggleClass
          * @param {String} classname
@@ -1161,8 +1168,8 @@
             return this;
         },
 
-        /**
-         * Find elements under registered elements
+<span id='TTCreater-method-find'>        /**
+</span>         * Find elements under registered elements
          *
          * @method find
          * @param {String} query
@@ -1177,8 +1184,8 @@
             return tt(res);
         },
 
-        /**
-         * Find HTMLElement from registered elements
+<span id='TTCreater-method-contains'>        /**
+</span>         * Find HTMLElement from registered elements
          *
          * @method contains
          * @param {String|Object} any QueryString, HTMLElement, NodeList
@@ -1201,8 +1208,8 @@
             return res;
         },
 
-        /**
-         * Set attribute values
+<span id='TTCreater-method-attr'>        /**
+</span>         * Set attribute values
          * Get attributes list or attribute value
          *
          * @method attr
@@ -1218,13 +1225,13 @@
                 var attrs = this[0].attributes, attr;
 
                 any = {};
-                for (var i = 0, iz = attrs.length; i < iz; ++i) {
+                for (var i = 0, iz = attrs.length; i &lt; iz; ++i) {
                     attr = attrs[i];
                     any[attr.nodeName] = attr.nodeValue;
                 }
                 return any;
             case 1:
-                if (typeof any === "object") {
+                if (typeof any === &quot;object&quot;) {
                     tt_each(any, function(key) {
                         _setAttr(key, any[key]);
                     });
@@ -1240,10 +1247,10 @@
 
             function _setAttr(key, value) {
                 if (value === undefined || value === null) {
-                    value = "";
+                    value = &quot;&quot;;
                 }
                 that.each(function() {
-                    if (value === "") {
+                    if (value === &quot;&quot;) {
                         this.removeAttribute(key);
                         return;
                     }
@@ -1252,8 +1259,8 @@
             }
         },
 
-        /**
-         * Replace html in registered elements
+<span id='TTCreater-method-html'>        /**
+</span>         * Replace html in registered elements
          * or get text html in thier
          *
          * @method html
@@ -1272,30 +1279,30 @@
                     while (this.firstChild) {
                         this.removeChild(this.firstChild);
                     }
-                    this.insertAdjacentHTML("afterbegin", any);
+                    this.insertAdjacentHTML(&quot;afterbegin&quot;, any);
                 });
             }
             return this;
         },
 
-        /**
-         * Append HTMLElement or text html to registered elements
+<span id='TTCreater-method-append'>        /**
+</span>         * Append HTMLElement or text html to registered elements
          *
          * @method append
          * @param {String|HTMLElement} any HTMLElement, Text html
          * @return {Object} TT object
          */
         append: function(any) {
-            var useClone = this.length > 1;
+            var useClone = this.length &gt; 1;
 
-            return this.each((typeof any === "string") ?
-                function() { this.insertAdjacentHTML("beforeend", any); } :
+            return this.each((typeof any === &quot;string&quot;) ?
+                function() { this.insertAdjacentHTML(&quot;beforeend&quot;, any); } :
                 function() {
 					var that = this;
 
 					if (any.nodeType) {
 						this.appendChild(useClone ? any.cloneNode(true) : any);
-					} else if (any instanceof TT) {
+					} else if (any instanceof TTCreater) {
 						any.each(function() {
 							that.appendChild(this);
 						});
@@ -1303,24 +1310,24 @@
 				});
         },
 
-        /**
-         * Prepend HTMLElement or text html to registered elements
+<span id='TTCreater-method-prepend'>        /**
+</span>         * Prepend HTMLElement or text html to registered elements
          *
          * @method prepend
          * @param {String|HTMLElement} any HTMLElement, Text html
          * @return {Object} TT object
          */
         prepend: function(any) {
-            var useClone = this.length > 1;
+            var useClone = this.length &gt; 1;
 
-            return this.each((typeof any === "string") ?
-                function() { this.insertAdjacentHTML("afterbegin", any); } :
+            return this.each((typeof any === &quot;string&quot;) ?
+                function() { this.insertAdjacentHTML(&quot;afterbegin&quot;, any); } :
 				function() {
 					var that = this;
 
 					if (any.nodeType) {
 						this.insertBefore(useClone ? any.cloneNode(true) : any, this.firstChild);
-					} else if (any instanceof TT) {
+					} else if (any instanceof TTCreater) {
 						any.each(function() {
 							that.insertBefore(this, that.firstChild);
 						});
@@ -1328,8 +1335,8 @@
 				});
         },
 
-        /**
-         * Remove elements of registered from html
+<span id='TTCreater-method-remove'>        /**
+</span>         * Remove elements of registered from html
          *
          * @method remove
          * @return {Object} TT object
@@ -1340,8 +1347,8 @@
             });
         },
 
-        /**
-         * Remove child elements of registered elements
+<span id='TTCreater-method-clear'>        /**
+</span>         * Remove child elements of registered elements
          *
          * @method clear
          * @return {Object} TT object
@@ -1354,8 +1361,8 @@
             });
         },
 
-        /**
-         * Get parent element from registered elements
+<span id='TTCreater-method-parent'>        /**
+</span>         * Get parent element from registered elements
          *
          * @method parent
          * @param {String|Object} any Query string for search elements or TT object
@@ -1368,7 +1375,7 @@
                 var target = tt(any).toArray();
 
                 this.each(function() {
-                    if (target.indexOf(this.parentNode) > -1) {
+                    if (target.indexOf(this.parentNode) &gt; -1) {
                         res.push(this.parentNode);
                     }
                 });
@@ -1380,8 +1387,8 @@
             return res;
         },
 
-        /**
-         * Get parent elements of the element back in DOM tree from registered elements
+<span id='TTCreater-method-parents'>        /**
+</span>         * Get parent elements of the element back in DOM tree from registered elements
          *
          * @method parents
          * @param {String|Object} any Query string for search elements or TT object
@@ -1398,7 +1405,7 @@
                         match = that.match(function() {
                             var pos = context.compareDocumentPosition(this);
 
-                            return (pos & Node.DOCUMENT_POSITION_CONTAINED_BY);
+                            return (pos &amp; Node.DOCUMENT_POSITION_CONTAINED_BY);
                         });
 
                     if (match) {
@@ -1424,8 +1431,8 @@
             return res;
         },
 
-        /**
-         * Get closest element from registered element with query string or target element
+<span id='TTCreater-method-closest'>        /**
+</span>         * Get closest element from registered element with query string or target element
          *
          * @method closest
          * @param {String|Object} any Query string for search elements or TT object
@@ -1443,7 +1450,7 @@
                 var element = this;
 
                 while (element) {
-                    if (target.indexOf(element) > -1) {
+                    if (target.indexOf(element) &gt; -1) {
                         if (res.indexOf(element) === -1) {
                             res.push(element);
                         }
@@ -1455,8 +1462,8 @@
             return tt(res);
         },
 
-        /**
-         * Get child elements from registered elements
+<span id='TTCreater-method-children'>        /**
+</span>         * Get child elements from registered elements
          *
          * @method children
          * @param {String|Object} [any] QueryString, HTMLElement, NodeList
@@ -1475,7 +1482,7 @@
                     target.each(function() {
                         var child, i;
 
-                        for (i = 0; i < iz; ++i) {
+                        for (i = 0; i &lt; iz; ++i) {
                             child = children[i];
                             if (this === child) {
                                 res.push(child);
@@ -1491,22 +1498,22 @@
             return res;
         },
 
-        /**
-         * Replace elements of registered elements
+<span id='TTCreater-method-replace'>        /**
+</span>         * Replace elements of registered elements
          *
          * @method replace
          * @param {String|HTMLElement} any text html or HTMLElement
          * @return {Object} TT object
          */
         replace: function(any) {
-            this.each((typeof any === "string") ?
-                function() { this.insertAdjacentHTML("beforebegin", any); } :
+            this.each((typeof any === &quot;string&quot;) ?
+                function() { this.insertAdjacentHTML(&quot;beforebegin&quot;, any); } :
                 function() { this.parentNode.insertBefore(any, this); });
             return this.remove();
         },
 
-        /**
-         * Set or get css styles
+<span id='TTCreater-method-css'>        /**
+</span>         * Set or get css styles
          *
          * @method css
          * @param {String|Object} [any] CSS property name, object of CSS style set
@@ -1516,9 +1523,9 @@
         css: function(any, value) {
             var that = this;
 
-            if (typeof any === "object") {
+            if (typeof any === &quot;object&quot;) {
                 tt_each(any, function(key, val) {
-                    if (val === "") {
+                    if (val === &quot;&quot;) {
                         _removeProperty(key);
                         return;
                     }
@@ -1527,7 +1534,7 @@
             } else if (any) {
                 if (value) {
                     _setStyle(tt_camelizer(any), value);
-                } else if (value === "") {
+                } else if (value === &quot;&quot;) {
                     _removeProperty(any);
                 } else {
                     return global.getComputedStyle(this[0]).getPropertyValue(any);
@@ -1551,8 +1558,8 @@
             }
         },
 
-        /**
-         * Set or get element's dataset
+<span id='TTCreater-method-data'>        /**
+</span>         * Set or get element&#39;s dataset
          * If the array or object, data type passed to save the _data object instance
          *
          * @method data
@@ -1573,7 +1580,7 @@
                 case 0:
                     return _getDataAttr.call(this);
                 case 1:
-                    if (typeof any === "object") {
+                    if (typeof any === &quot;object&quot;) {
                         tt_each(any, function(key, val) {
                             _setDataAttr.call(that, key, val);
                         });
@@ -1592,16 +1599,16 @@
                 var type = tt_type(val),
                     func = null;
 
-                if (val === "" ||
-                    type === "undefined" ||
-                    type === "null") {
+                if (val === &quot;&quot; ||
+                    type === &quot;undefined&quot; ||
+                    type === &quot;null&quot;) {
                         if (this._data[key]) {
                             delete this._data[key];
                             return;
                         } else {
                             func = function() { delete this.dataset[key]; };
                         }
-                } else if (type === "string" || type === "number") {
+                } else if (type === &quot;string&quot; || type === &quot;number&quot;) {
                     func = function() { this.dataset[key] = val; };
                 } else {
                     this._data[key] = val;
@@ -1635,12 +1642,12 @@
             function _setDataByAttributes(key, val) {
                 var type = tt_type(val);
 
-                if (tt_type(val, ["string", "number", "undefined", "null"])) {
-                    if (val === "" && this._data[key]) {
+                if (tt_type(val, [&quot;string&quot;, &quot;number&quot;, &quot;undefined&quot;, &quot;null&quot;])) {
+                    if (val === &quot;&quot; &amp;&amp; this._data[key]) {
                         delete this._data[key];
                         return null;
                     }
-                    this.attr("data-" + key, val);
+                    this.attr(&quot;data-&quot; + key, val);
                 } else {
                     this._data[key] = val;
                 }
@@ -1651,7 +1658,7 @@
                     return null;
                 }
                 var res = {},
-                    dataName = "data-",
+                    dataName = &quot;data-&quot;,
                     node = this[0],
                     attr, attrs = node.attributes,
                     i = 0, iz = attrs.length;
@@ -1664,9 +1671,9 @@
                     dataName += key;
                     return this.attr(dataName);
                 }
-                for (; i < iz; ++i) {
+                for (; i &lt; iz; ++i) {
                     attr = attrs[i].name;
-                    if (attr.indexOf(dataName) > -1) {
+                    if (attr.indexOf(dataName) &gt; -1) {
                         key = attr.substr(5, attr.length);
                         res[key] = attrs[i].value;
                     }
@@ -1678,8 +1685,8 @@
             }
         })(),
 
-        /**
-         * Set, get "value" attributes value of registered elements
+<span id='TTCreater-method-val'>        /**
+</span>         * Set, get &quot;value&quot; attributes value of registered elements
          *
          * @method val
          * @param {String|Number} [value]
@@ -1701,44 +1708,44 @@
                         res[index] = this.value;
                     }
                 });
-                return this.length > 1 ? res : res[0];
+                return this.length &gt; 1 ? res : res[0];
             }
         },
 
-        /**
-         * Show elements, if it is hide curretly
+<span id='TTCreater-method-show'>        /**
+</span>         * Show elements, if it is hide curretly
          *
          * @method show
          * @param {String|Object} [options] value CSS value of display property
          * @return {Object} tt object
          */
         show: function(value) {
-            var currentValue = this.css("display"),
+            var currentValue = this.css(&quot;display&quot;),
                 lastValue = this._data.lastDisplay || null;
 
-            if (currentValue !== "none") {
+            if (currentValue !== &quot;none&quot;) {
                 return;
             }
-            return this.css("display", value || lastValue || "block");
+            return this.css(&quot;display&quot;, value || lastValue || &quot;block&quot;);
         },
 
-        /**
-         * Hide elements, if it is show currently
+<span id='TTCreater-method-hide'>        /**
+</span>         * Hide elements, if it is show currently
          *
          * @method hide
          * @return {Object} tt object
          */
         hide: function() {
-            var currentValue = this.css("display");
+            var currentValue = this.css(&quot;display&quot;);
 
-            if (currentValue !== "none") {
+            if (currentValue !== &quot;none&quot;) {
                 this._data.lastDisplay = currentValue;
             }
-            return this.css("display", "none");
+            return this.css(&quot;display&quot;, &quot;none&quot;);
         },
 
-        /**
-         * Trigger events for registered elements
+<span id='TTCreater-method-trigger'>        /**
+</span>         * Trigger events for registered elements
          *
          * @method trigger
          * @chainable
@@ -1749,10 +1756,10 @@
         trigger: function(/* name[, data..] */) {
             var args = [].slice.call(arguments),
                 name = args.shift(),
-                ev = document.createEvent("Event");
+                ev = document.createEvent(&quot;Event&quot;);
 
             ev.initEvent(name, true, true);
-            if (args.length > 1) {
+            if (args.length &gt; 1) {
                 ev._tt_data = args;
             }
             this.each(function() {
@@ -1761,15 +1768,15 @@
             return this;
         },
 
-        /**
-         * Get offset position of registered elements
+<span id='TTCreater-method-offset'>        /**
+</span>         * Get offset position of registered elements
          * Ex.
          *  document.body
          *  +--------------------------
          *  |             |
          *  |            top
          *  |             v
-         *  | -- left --> +---------+
+         *  | -- left --&gt; +---------+
          *  |             | Element |
          *  |             +---------+
          *  |
@@ -1791,8 +1798,8 @@
             return this.length === 1 ? res[0] : res;
         },
 
-        /**
-         * Get width from registered elements
+<span id='TTCreater-method-width'>        /**
+</span>         * Get width from registered elements
          *
          * @method width
          * @param {Number} [index] number of registered elements
@@ -1802,8 +1809,8 @@
 			return this[index || 0].offsetWidth;
 		},
 
-        /**
-         * Get height from registered elements
+<span id='TTCreater-method-height'>        /**
+</span>         * Get height from registered elements
          *
          * @method height
          * @param {Number} [index] number of registered elements
@@ -1819,3 +1826,6 @@
 
 })((this.self || global), document);
 
+</pre>
+</body>
+</html>
