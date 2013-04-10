@@ -1,2 +1,13 @@
+node_modules/
+sample/
+src/
+stylesheets
+test/
 .local.vimrc
-node_modules
+gruntfile.js
+index.html
+package.json
+params.json
+README.md
+tt.all.js
+tt.min.js
