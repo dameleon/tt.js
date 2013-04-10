@@ -3,125 +3,182 @@
 
 tt.js is javascript library for modern smartphone browser.
 
-This library has been produced in order to edit also get a very fast operation DOM element.
+This library is intended to make lightweight, high-speed DOM manipulation.
+
+## Support platforms
+
+### Mobile browsers
+
+- iOS4+ Mobile safari, Chrome for iOS
+- Android2+ Android browser and Android4+ Chrome for Android 
+- iOS4+, Android2+ Webkit based webviews
+- Firefox for Android
+- Opera Mobile
+
+### and more
+
+Will support the most modern desktop browsers.
+
+Please note that in some cases may not work (Often in IE :p)
 
 ## Usage
 
-tt.js offers based on jQuery
+Include tt.js to html.
 
+I recommend that you include at the bottom of html.
 
 ```
-<script src="./tt.js"></script>
+<script src="tt.js"></script>
+<script src="other_script.js"></script>
+</body>
+</html>
 ```
 
-### ex. Search DOM Elements
+### Examples
 ```
-<div id="id-name">hoge</div>
-<div class="class-name">fuga</div>
-<div name="attr-name">piyo</div>
+//// HTML
 
+<div id="foo">hoge</div>
+<div class="bar">fuga</div>
+<div name="baz">piyo</div>
+
+
+//// JavaScript
 
 // Search id name
-tt("#id-name");
+tt("#foo");
 
-// Search on class name 
-tt(".class-name");
+// Search by class name 
+tt(".bar");
 
-// Search on query selector type 
-tt("div[name=attr-name]");
+// Search by query selector type 
+tt("div[name=baz]");
 
-// Search on tag name 
+// Search by tag name 
 tt("div");
+
+// Get HTMLElement
+var ttDiv = tt("div"),
+    firstDiv = ttDiv.get(0),    // or ttDiv.get(), ttDiv[0]
+    secondDiv = ttDiv.get(1);   // or ttDiv[1]
+
+// Add class name
+tt("#foo").addClass('new-class');
+
+// Bind event(by direct listen)
+tt("#foo").on("click", function() {
+    // something   
+});
+
+// Bind event(by delegate listen)
+tt(document).on("click", "#foo", function() {
+    // something    
+});
+
 ```
 
-### ex. Get Element 
-```
-<div id="id-name">hoge</div>
-<div class="class-name">fuga</div>
-<div name="attr-name">piyo</div>
-
-// tt.js provides a get method
-var idElement = tt("id-name").get();    // Get div#id-name
-var firstElement = tt("div").get(0);    // Get div#id-name Its first element of HTMLDivElement
-var secondElement = tt("div").get(1);   // Get div.class-name Its second element of HTMLDivElement
-
-// Notice: Does not work with tt.js is seen often in jQuery usage such as
-var element = $("div")[0];
-
-// It was decided not to work with tt.js for this is also the visibility of code and speed 
-```
- 
 ### and more
 
-tt.js provides the following functions and environment data,  object methods.
-You can see more information on docs or source codes.
+tt.js provides the following TTWorker class methods and tt object methods, environment data.
 
-#### object methods
+You can see more information on [documents](http://dameleon.github.io/tt.js/docs/) or source codes.
 
-- add
-- addClass
-- attr
-- bind
-- clear
-- contains
-- css
-- data
+#### TTWorker class methods
+
+##### TTWorker core and Iteration
+
 - each
 - find
 - get
-- hasClass
-- hide
-- html
-- march
-- off
-- offset
-- on
-- remove
-- removeClass
-- replace
-- show
+- indexOf
+- match
+- push
 - toArray
+
+##### Attributes & Styles
+
+- addClass
+- attr
+- css
+- data
+- hasClass
+- height
+- hide
+- offset
+- removeClass
+- show
 - toggleClass
+- val
+- width
+
+##### DOM manipulation
+
+- append
+- children
+- clear
+- closest
+- contains
+- html
+- parent
+- parents
+- prepend
+- remove
+- replace
+
+##### Events
+
+- bind
+- delegate
+- off
+- on
 - trigger
 - unbind
+- undelegate
 
-#### functions
 
+#### tt object methods
+
+- tt.ajax
+- tt.camelizer
 - tt.createEnvData
-- tt.cssCamelizer
-- tt.cssHyphenizer
 - tt.cssPrefix
 - tt.each
 - tt.extend
-- tt.isArray
+- tt.hyphenizer
 - tt.isNodeList
 - tt.match
 - tt.param
-- tt.plugin
+- tt.parseJSON
+- tt.proxy
 - tt.query2object
+- tt.tag
 - tt.triggerEvent
+- tt.type
 
-### environment data
+
+#### environment data
 
 - tt.env
 
-```
-Create an object of environmental information based on the information of the navigator
+Create an object of environmental information based on the information of the navigator.
+
 Environmental information can be obtained based on the following key
+
+```
 Decision os:         ios, android, windowsPhone
 Decision browsers:   mobileSafari, androidBrowser, chrome, firefox, opera, ie, other
 version information: (only mobileSafari androidBrowser)
                      version (raw data)
-                     versionCode (version number of the 5-digit)
+                     versionCode (version number of the 4-digit or higher)
 ```
 
 ## Benchmarks
 
-- http://jsperf.com/tt-js-id-search
-- http://jsperf.com/tt-js-class-search
-- http://jsperf.com/tt-js-add-class
-- http://jsperf.com/tt-js-add-css
-- http://jsperf.com/tt-js-add-html (html is very slow. I want you to tell me if there is a hint something.)
+- [http://jsperf.com/ttjs-bench-dom-search](http://jsperf.com/ttjs-bench-dom-search)
+- [http://jsperf.com/ttjs-add-class](http://jsperf.com/ttjs-add-class)
+- [http://jsperf.com/ttjs-add-dom](http://jsperf.com/ttjs-add-dom)
+- [http://jsperf.com/ttjs-add-html](http://jsperf.com/ttjs-add-html)
+- [http://jsperf.com/ttjs-closest](http://jsperf.com/ttjs-closest)
 
 ## Bug report and pull request
 

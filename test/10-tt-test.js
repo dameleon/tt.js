@@ -28,7 +28,7 @@ buster.testCase("tt.js test", {
             assert.equals(tt(".fixture-class").length, 5);
         },
         "tag named search": function() {
-            assert.equals(tt("div").length, 6);
+            assert.equals(tt("div").length, document.getElementsByTagName('div').length);
         },
         "use querySelectorAll search": function() {
             assert.equals(tt('[data-role="fixture-data"]').length, 5);
@@ -56,7 +56,7 @@ buster.testCase("tt.js test", {
             assert.equals(tt.type(document.getElementsByTagName('html')), 'nodelist');
             assert.equals(tt.type({}), 'object');
             assert.equals(tt.type(tt()), 'object');
-            assert.equals(tt.type(new Date), 'date');
+            assert.equals(tt.type(new Date()), 'date');
             assert(tt.type(new RegExp(''), ['regexp', 'function']));
             assert.equals(tt.type(1234), 'number');
             assert.equals(tt.type('1234'), 'string');
@@ -315,24 +315,27 @@ buster.testCase("tt.js test", {
         },
         "tt.ajax html test": function() {
             var that = this,
-                dfd = when.defer();
+                dfd = when.defer(),
+                isCompatible = this.isPhantomjs ||
+                               (tt.env.androidBrowser && tt.env.versionCode < 5000) ||
+                               (tt.env.mobileSafari && tt.env.versionCode < 6000);
 
-            // phantomjs, before android 2.3 is not supported dataType="document"
-            if (this.isPhantomjs || (tt.env.android && tt.env.versionCode < 3000)) {
-                tt.ajax({
-                    beforeSend  : null,
-                    cache       : true,
-                    complete    : null,
-                    context     : document.body,
-                    data        : null,
-                    dataType    : "text",
-                    error       : null,
-                    success     : function(res) {
-                        assert(res);
-                        dfd.resolver.resolve();
-                    },
-                    url         : buster.env.contextPath + "/html",
-                });
+            // phantomjs, before android 2.3 and before iOS 5.1 is not supported dataType="document"
+            if (isCompatible) {
+                    tt.ajax({
+                        beforeSend  : null,
+                        cache       : true,
+                        complete    : null,
+                        context     : document.body,
+                        data        : null,
+                        dataType    : "text",
+                        error       : null,
+                        success     : function(res) {
+                            assert(res);
+                            dfd.resolver.resolve();
+                        },
+                        url         : buster.env.contextPath + "/html",
+                    });
             } else {
                 tt.ajax({
                     beforeSend  : null,
@@ -343,7 +346,7 @@ buster.testCase("tt.js test", {
                     dataType    : this.isPhantomjs ? "text" : "document",
                     error       : null,
                     success     : function(res) {
-                        if (that.isPhantomjs) {
+                        if (isCompatible) {
                             assert(res);
                         } else {
                             assert(res.body.textContent, "success");
@@ -393,7 +396,7 @@ buster.testCase("tt.js test", {
                     dfd.resolver.resolve();
                 },
                 success     : null,
-                url         : "http:://anothor_aaaaaaaaaadomain.com/not_found",
+                url         : "http:://undefined.com/not_found",
                 timeout     : 100
             });
 

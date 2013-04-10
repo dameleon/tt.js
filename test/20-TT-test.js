@@ -3,12 +3,20 @@ buster.testCase("tt.js test", {
         this.fixtures = {
             'id': document.getElementById('fixture-id'),
             'klass': document.getElementsByClassName('fixture-class'),
-            'data': document.querySelectorAll('[data-role="fixture-data"]')
+            'data': document.querySelectorAll('[data-role="fixture-data"]'),
+            'container': document.getElementsByClassName('fixture-container')[0],
+            'child': document.getElementsByClassName('fixture-child')[0],
+            'grandchild': document.getElementsByClassName('fixture-grandchild')[0],
+            'input': document.getElementsByClassName('fixture-input')[0]
         };
         this.tts = {
             'id': tt('#fixture-id'),
             'klass': tt('.fixture-class'),
-            'data': tt('[data-role="fixture-data"]')
+            'data': tt('[data-role="fixture-data"]'),
+            'container': tt('.fixture-container'),
+            'child': tt('.fixture-child'),
+            'grandchild': tt('.fixture-grandchild'),
+            'input': tt('.fixture-input')
         };
     },
     "get test": function() {
@@ -33,7 +41,7 @@ buster.testCase("tt.js test", {
         });
         assert.equals(res.length, this.fixtures.klass.length);
     },
-    "match": function() {
+    "match test": function() {
         var self = this, res;
 
         res = this.tts.klass.match(function(index) {
@@ -44,47 +52,57 @@ buster.testCase("tt.js test", {
         assert.equals(res.nodeType, 1);
         assert.equals(res, this.fixtures.klass[2]);
     },
-    "on test": function() {
-        var spy = sinon.spy();
+    "push test": function() {
+        var tts = tt(),
+            div = document.createElement("div");
 
-        this.tts.id.on("onhoge", spy, false);
-        tt.triggerEvent(this.fixtures.id, "onhoge", false, true);
-
-        assert.calledOnce(spy);
-
-        this.tts.id.off("onhoge", spy);
+        tts.push(div);
+        assert.equals(tts.length, 1);
+        tts.push([div.cloneNode(true), div.cloneNode(true)]);
+        assert.equals(tts.length, 3);
+        tts.each(function() {
+            assert.equals(this.nodeName.toLowerCase(), "div");
+        });
     },
-    "off test": function() {
-        var spy = sinon.spy();
+    "indexOf test": function() {
+        var index = this.tts.klass.indexOf(this.fixtures.klass[2]);
 
-        this.tts.id.on("onhoge", spy, false);
-        this.tts.id.off("onhoge", spy);
-
-        tt.triggerEvent(this.fixtures.id, "onhoge", false, true);
-
-        refute.calledOnce(spy);
+        assert.equals(this.tts.klass.indexOf(), -1);
+        assert.equals(index, 2);
     },
-    "bind test": function() {
-        var spy = sinon.spy();
+    "event on,off test": {
+        "bind type test": function() {
+            var spy;
 
-        this.tts.id.bind("onhoge", spy, false);
-        tt.triggerEvent(this.fixtures.id, "onhoge", false, true);
+            // on test
+            spy = sinon.spy();
+            this.tts.id.on("onhoge", spy, false);
+            tt.triggerEvent(this.fixtures.id, "onhoge");
+            assert.calledOnce(spy);
 
-        assert.calledOnce(spy);
+            // off test
+            spy = sinon.spy();
+            this.tts.id.off("onhoge", spy);
+            tt.triggerEvent(this.fixtures.id, "onhoge");
+            refute.calledOnce(spy);
+        },
+        "delegate type test": function() {
+            var body = tt(document),
+                spy;
 
-        this.tts.id.unbind("onhoge", spy);
+            // on test
+            spy = sinon.spy();
+            body.on("onhoge", "#fixture-id", spy);
+            tt.triggerEvent(this.fixtures.id, "onhoge");
+            assert.calledOnce(spy);
+
+            // off test
+            spy = sinon.spy();
+            body.off("onhoge", "#fixture-id", spy);
+            tt.triggerEvent(this.fixtures.id, "onhoge");
+            refute.calledOnce(spy);
+        }
     },
-    "unbind test": function() {
-        var spy = sinon.spy();
-
-        this.tts.id.bind("onhoge", spy, false);
-        this.tts.id.unbind("onhoge", spy);
-
-        tt.triggerEvent(this.fixtures.id, "onhoge", false, true);
-
-        refute.calledOnce(spy);
-    },
-    // delegate, undelegate
     "addClass test": function() {
         var className = "added";
 
@@ -136,7 +154,7 @@ buster.testCase("tt.js test", {
     "find test": function() {
         assert.equals(tt(document.body).find('.fixture-class').length, 5);
     },
-    "contain test": function() {
+    "contains test": function() {
         assert(tt(document.body).contains("#fixture-id").length);
         refute(tt(document.body).contains(".notfound").length);
     },
@@ -210,6 +228,39 @@ buster.testCase("tt.js test", {
         this.tts.id.clear();
         assert.equals(this.fixtures.id.innerHTML, "");
     },
+    "parent test": function() {
+        assert.equals(
+            this.tts.grandchild.parent().get(),
+            this.fixtures.child);
+        assert.equals(
+            this.tts.grandchild.parent('.fixture-child').get(),
+            this.fixtures.child);
+        refute(this.tts.child.parent('.notfound').length);
+    },
+    "parents test": function() {
+        assert.equals(
+            this.tts.grandchild.parents().length,
+            5);
+        assert.equals(
+            this.tts.grandchild.parents('.fixture-container').get(),
+            this.fixtures.container);
+        refute(this.tts.grandchild.parents('.nothound').length);
+    },
+    "closest test": function() {
+        assert.equals(
+            this.tts.grandchild.closest('.fixture-container').get(),
+            this.fixtures.container);
+        refute(this.tts.id.closest().length);
+    },
+    "children test": function() {
+        assert.equals(
+            tt(document).children().length,
+            document.body.children.length);
+        assert.equals(
+            tt(document).children('.fixture-container').get(),
+            this.fixtures.container);
+        refute(tt(document).children('.notfound').length);
+    },
     "css test": function() {
         assert.equals(this.tts.id.css("display"), "block");
 
@@ -241,6 +292,10 @@ buster.testCase("tt.js test", {
         // reset
         this.tts.klass.data('role', 'fixture-data');
         this.tts.klass.data('tmp', '');
+    },
+    "val test": function() {
+        this.tts.input.val("hoge");
+        assert.equals(this.tts.input.val(), "hoge");
     },
     "show test": function() {
         this.fixtures.id.style.display = "none";
