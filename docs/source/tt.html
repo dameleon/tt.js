@@ -96,11 +96,11 @@
                     loadQueue.push(any);
                 }
                 return;
-            } else if (any instanceof TTCreater) {
+            } else if (any instanceof TTWorker) {
                 return any;
             }
         }
-        return new TTCreater(target || [], selector);
+        return new TTWorker(target || [], selector);
     }
 
     //// static methods
@@ -491,7 +491,7 @@
      */
     function tt_camelizer(str) {
         if (!str || typeof str !== &quot;string&quot;) {
-            throw new Error(&quot;Error: argument error&quot;);
+            throw new Error(&quot;Argument error&quot;);
         }
         var res = &quot;&quot;;
 
@@ -537,7 +537,7 @@
      */
     function tt_hyphenizer(str) {
         if (!str || typeof str !== &quot;string&quot;) {
-            throw new Error(&quot;Error: argument error&quot;);
+            throw new Error(&quot;Argument error&quot;);
         }
         var prefix = [&quot;webkit&quot;, &quot;moz&quot;, &quot;o&quot;, &quot;ms&quot;, &quot;khtml&quot;],
             upperRe = /[A-Z]/g,
@@ -605,7 +605,7 @@
             /*jshint evil: true */
             obj = (new Function(&#39;return &#39; + text))();
         } catch (o_q) {
-            throw new Error(&quot;Error: can&#39;t parse text to json&quot;);
+            throw new Error(&quot;Can&#39;t parse text to json&quot;);
         }
         return obj;
     }
@@ -622,7 +622,7 @@
      */
     function tt_proxy() {
         if (arguments.length &lt; 2) {
-            throw new Error(&quot;Error: missing argument error&quot;);
+            throw new Error(&quot;Missing argument error&quot;);
         }
         var args = [].slice.call(arguments),
             func = args.shift(),
@@ -677,7 +677,7 @@
      */
     function tt_tag(name, createTT) {
         if (!name || typeof name !== &quot;string&quot;) {
-            throw new Error(&quot;Error: argument error&quot;);
+            throw new Error(&quot;Argument error&quot;);
         }
         var tag = document.createElement(name);
 
@@ -697,7 +697,7 @@
      */
     function tt_triggerEvent(node, event, name, bubbles, cancelable) {
         if (!node || !event) {
-            throw new Error(&quot;Error: missing argument error&quot;);
+            throw new Error(&quot;Missing argument error&quot;);
         }
         if (!tt_type(name, &quot;string&quot;)) {
             name = event;
@@ -712,18 +712,18 @@
     }
 
 
-<span id='TTCreater-method-constructor'><span id='TTCreater'>    /**
+<span id='TTWorker-method-constructor'><span id='TTWorker'>    /**
 </span></span>     * tt.js class creater
      *
-     * @class TTCreater
+     * @class TTWorker
      * @constructor
      * @param {Array|NodeList} nodes NodeList or Array incorporates elements
      * @param {String} selector selector text
      */
-    function TTCreater(nodes, selector) {
+    function TTWorker(nodes, selector) {
         var i = 0, iz;
 
-<span id='TTCreater-property-selector'>        /**
+<span id='TTWorker-property-selector'>        /**
 </span>         * Selector text
          *
          * @property selector
@@ -731,7 +731,7 @@
          */
         this.selector = selector;
 
-<span id='TTCreater-property-length'>        /**
+<span id='TTWorker-property-length'>        /**
 </span>         * Length of registered elements
          *
          * @property length
@@ -739,7 +739,7 @@
          */
         this.length = iz = nodes.length;
 
-<span id='TTCreater-property-_events'>        /**
+<span id='TTWorker-property-_events'>        /**
 </span>         * Event registration information of this tt object
          *
          * @property _events
@@ -748,7 +748,7 @@
          */
         this._events = {};
 
-<span id='TTCreater-property-_delegates'>        /**
+<span id='TTWorker-property-_delegates'>        /**
 </span>         * Delegate registration information of this tt object
          *
          * @property _delegates
@@ -757,7 +757,7 @@
          */
         this._delegates = {};
 
-<span id='TTCreater-property-_data'>        /**
+<span id='TTWorker-property-_data'>        /**
 </span>         * Data for this tt object
          *
          * @property _data
@@ -772,10 +772,10 @@
         return this;
     }
 
-    tt.fn = TTCreater.prototype = {
-        constructor: TTCreater,
+    tt.fn = TTWorker.prototype = {
+        constructor: TTWorker,
 
-<span id='TTCreater-method-get'>        /**
+<span id='TTWorker-method-get'>        /**
 </span>         * Returns elements
          *
          * @method get
@@ -786,7 +786,7 @@
             return this[index || 0];
         },
 
-<span id='TTCreater-method-toArray'>        /**
+<span id='TTWorker-method-toArray'>        /**
 </span>         * Returns array in elements
          *
          * @method toArray
@@ -801,12 +801,13 @@
             return arr;
         },
 
-<span id='TTCreater-method-each'>        /**
+<span id='TTWorker-method-each'>        /**
 </span>         * Call function with context of HTMLElement and parameter of elements index number
          *
          * @method each
+         * @chainable
          * @param {Function} fn Function to be executed repeatedly
-         * @return {Object} TT object
+         * @return {Object} TTWorker object
          */
         each: function(fn) {
             var i = 0, iz = this.length;
@@ -817,13 +818,13 @@
             return this;
         },
 
-<span id='TTCreater-method-match'>        /**
+<span id='TTWorker-method-match'>        /**
 </span>         * Call function with context of HTMLElement and parameter of elements index number
          * If it returns true, then this function return context that matches
          *
          * @method match
          * @param {Function} fn Function to be executed repeatedly
-         * @return {Object} TT Object
+         * @return {Object} TTWorker Object
          */
         match: function(fn) {
             var i = 0, iz = this.length;
@@ -836,12 +837,13 @@
             return null;
         },
 
-<span id='TTCreater-method-push'>        /**
-</span>         * Push element(s) to TT Object
+<span id='TTWorker-method-push'>        /**
+</span>         * Push element(s) to TTWorker Object
          *
          * @method push
+         * @chainable
          * @param {HTMLElement|NodeList|Array} any element or elements list
-         * @return {Object} TT Object
+         * @return {Object} TTWorker Object
          */
         push: function(any) {
             if (any &amp;&amp; any.nodeType) {
@@ -857,7 +859,7 @@
             return this;
         },
 
-<span id='TTCreater-method-indexOf'>        /**
+<span id='TTWorker-method-indexOf'>        /**
 </span>         * Get index of registered element
          *
          * @method indexOf
@@ -877,51 +879,48 @@
             return res;
         },
 
-<span id='TTCreater-method-on'>        /**
+<span id='TTWorker-method-on'>        /**
 </span>         * Bind events to HTMLElement
          *
          * @method on
+         * @chainable
          * @param {String} type
          * @param {String|Function} any
          * @param {Function} [options] callback
-         * @return {Object} TT Object
+         * @return {Object} TTWorker Object
          */
         on: function(type, any, callback) {
-            if (tt_type(any, &#39;string&#39;)) {
-                this.delegate(type, any, callback);
-            } else {
-                this.bind(type, any);
-            }
-            return this;
+            return tt_type(any, &quot;string&quot;) ?
+                    this.delegate(type, any, callback) :
+                    this.bind(type, any);
         },
 
-<span id='TTCreater-method-off'>        /**
+<span id='TTWorker-method-off'>        /**
 </span>         * Un bind events from HTMLElement
          *
          * @method off
+         * @chainable
          * @param {String} type
          * @param {String|Function} any
          * @param {Function} callback
-         * @return {Object} TT Object
+         * @return {Object} TTWorker Object
          */
         off: function(type, any, callback) {
-            if (tt_type(any, &#39;string&#39;)) {
-                this.undelegate(type, any, callback);
-            } else {
-                this.unbind(type, any);
-            }
-            return this;
+            return tt_type(any, &quot;string&quot;) ?
+                    this.undelegate(type, any, callback) :
+                    this.unbind(type, any);
         },
 
-<span id='TTCreater-method-bind'>        /**
+<span id='TTWorker-method-bind'>        /**
 </span>         * Bind events to HTMLElement
          * This is simply wrapper of addEventListener
          *
          * @method bind
+         * @chainable
          * @param {String} type
          * @param {Function|Object} callback
          * @param {Boolean} [options] capture
-         * @return {Object} TT Object
+         * @return {Object} TTWorker Object
          */
         bind: function(type, any, capture) {
             capture = capture || false;
@@ -953,21 +952,22 @@
             return this;
         },
 
-<span id='TTCreater-method-unbind'>        /**
+<span id='TTWorker-method-unbind'>        /**
 </span>         * Un bind events from HTMLElement
          * This is simply wrapper of removeEventListener
          *
          * @method unbind
+         * @chainable
          * @param {String} type
          * @param {Function|Object} any
-         * @return {Object} TT Object
+         * @return {Object} TTWorker Object
          */
         unbind: function(type, any) {
             var event = this._events[type],
                 index = event ?
                         event.callbacks.indexOf(any) : -1;
 
-            if (!event || index === -1) {
+            if (!event || index &lt; 0) {
                 return;
             }
             event.callbacks.splice(index, 1);
@@ -979,15 +979,16 @@
             return this;
         },
 
-<span id='TTCreater-method-delegate'>        /**
+<span id='TTWorker-method-delegate'>        /**
 </span>         * Bind events to HTMLElement
          * To bind the event of delegate type
          *
          * @method delegate
+         * @chainable
          * @param {String} type
          * @param {String|Object} target
          * @param {Function|Object} callback
-         * @return {Object} TT Object
+         * @return {Object} TTWorker Object
          */
         delegate: function(type, target, callback) {
             var delegate = this._delegates[type],
@@ -1029,15 +1030,16 @@
             return this;
         },
 
-<span id='TTCreater-method-undelegate'>        /**
+<span id='TTWorker-method-undelegate'>        /**
 </span>         * Un bind events from HTMLElement
          * To un bind the event of delegate type
          *
          * @method undelegate
+         * @chainable
          * @param {String} type
          * @param {String|Function} any
          * @param {Function} callback
-         * @return {Object} TT Object
+         * @return {Object} TTWorker Object
          */
         undelegate: function(type, target, callback) {
             var delegate = this._delegates[type],
@@ -1056,17 +1058,17 @@
             });
             if (listeners.length === 0) {
                 this.unbind(type, delegate.handler);
-                delegate = this._delegates[type] = {};
+                this._delegates[type] = {};
             }
             return this;
         },
 
-<span id='TTCreater-method-addClass'>        /**
+<span id='TTWorker-method-addClass'>        /**
 </span>         * Add class name
          *
          * @method addClass
          * @param {String} classname
-         * @return {Object} TT object
+         * @return {Object} TTWorker object
          */
         addClass: domTester.classList ?
             function(className) {
@@ -1097,12 +1099,12 @@
                 }
             },
 
-<span id='TTCreater-method-removeClass'>        /**
+<span id='TTWorker-method-removeClass'>        /**
 </span>         * Remove class name
          *
          * @method removeClass
          * @param {String} classname
-         * @return {Object} TT object
+         * @return {Object} TTWorker object
          */
         removeClass: domTester.classList ?
             function _removeClassByClassList(className) {
@@ -1111,18 +1113,26 @@
                 });
             } :
             function _removeClassByClassName(className) {
-                className = &quot; &quot; + className;
+                var lastClassName, newClassName;
+
+                className = &quot; &quot; + className + &quot; &quot;;
+
                 return this.each(function() {
-                    this.className = (&quot; &quot; + this.className).replace(className, &quot;&quot;).trim();
+                    if (this.className === lastClassName) {
+                        this.className = newClassName;
+                    } else {
+                        lastClassName = this.className;
+                        this.className = newClassName = (&quot; &quot; + lastClassName + &quot; &quot;).replace(className, &quot; &quot;).trim();
+                    }
                 });
             },
 
-<span id='TTCreater-method-hasClass'>        /**
+<span id='TTWorker-method-hasClass'>        /**
 </span>         * Search class name
          *
          * @method hasClass
          * @param {String} classname
-         * @return {Object} TT object
+         * @return {Object} TTWorker object
          */
         hasClass: domTester.classList ?
             function _hasClassByClassList(className) {
@@ -1137,13 +1147,13 @@
                 });
             },
 
-<span id='TTCreater-method-toggleClass'>        /**
+<span id='TTWorker-method-toggleClass'>        /**
 </span>         * Toggle class name
          *
          * @method toggleClass
          * @param {String} classname
          * @param {Boolean} strict
-         * @return {Object} TT object
+         * @return {Object} TTWorker object
          */
         toggleClass: function(className, strict) {
             var that = this;
@@ -1168,12 +1178,12 @@
             return this;
         },
 
-<span id='TTCreater-method-find'>        /**
+<span id='TTWorker-method-find'>        /**
 </span>         * Find elements under registered elements
          *
          * @method find
          * @param {String} query
-         * @return {Object} TT object
+         * @return {Object} TTWorker object
          */
         find: function(query) {
             var res = [];
@@ -1184,7 +1194,7 @@
             return tt(res);
         },
 
-<span id='TTCreater-method-contains'>        /**
+<span id='TTWorker-method-contains'>        /**
 </span>         * Find HTMLElement from registered elements
          *
          * @method contains
@@ -1208,7 +1218,7 @@
             return res;
         },
 
-<span id='TTCreater-method-attr'>        /**
+<span id='TTWorker-method-attr'>        /**
 </span>         * Set attribute values
          * Get attributes list or attribute value
          *
@@ -1259,7 +1269,7 @@
             }
         },
 
-<span id='TTCreater-method-html'>        /**
+<span id='TTWorker-method-html'>        /**
 </span>         * Replace html in registered elements
          * or get text html in thier
          *
@@ -1285,12 +1295,12 @@
             return this;
         },
 
-<span id='TTCreater-method-append'>        /**
+<span id='TTWorker-method-append'>        /**
 </span>         * Append HTMLElement or text html to registered elements
          *
          * @method append
          * @param {String|HTMLElement} any HTMLElement, Text html
-         * @return {Object} TT object
+         * @return {Object} TTWorker object
          */
         append: function(any) {
             var useClone = this.length &gt; 1;
@@ -1302,7 +1312,7 @@
 
 					if (any.nodeType) {
 						this.appendChild(useClone ? any.cloneNode(true) : any);
-					} else if (any instanceof TTCreater) {
+					} else if (any instanceof TTWorker) {
 						any.each(function() {
 							that.appendChild(this);
 						});
@@ -1310,12 +1320,12 @@
 				});
         },
 
-<span id='TTCreater-method-prepend'>        /**
+<span id='TTWorker-method-prepend'>        /**
 </span>         * Prepend HTMLElement or text html to registered elements
          *
          * @method prepend
          * @param {String|HTMLElement} any HTMLElement, Text html
-         * @return {Object} TT object
+         * @return {Object} TTWorker object
          */
         prepend: function(any) {
             var useClone = this.length &gt; 1;
@@ -1327,7 +1337,7 @@
 
 					if (any.nodeType) {
 						this.insertBefore(useClone ? any.cloneNode(true) : any, this.firstChild);
-					} else if (any instanceof TTCreater) {
+					} else if (any instanceof TTWorker) {
 						any.each(function() {
 							that.insertBefore(this, that.firstChild);
 						});
@@ -1335,11 +1345,11 @@
 				});
         },
 
-<span id='TTCreater-method-remove'>        /**
+<span id='TTWorker-method-remove'>        /**
 </span>         * Remove elements of registered from html
          *
          * @method remove
-         * @return {Object} TT object
+         * @return {Object} TTWorker object
          */
         remove: function() {
             return this.each(function() {
@@ -1347,11 +1357,11 @@
             });
         },
 
-<span id='TTCreater-method-clear'>        /**
+<span id='TTWorker-method-clear'>        /**
 </span>         * Remove child elements of registered elements
          *
          * @method clear
-         * @return {Object} TT object
+         * @return {Object} TTWorker object
          */
         clear: function() {
             return this.each(function() {
@@ -1361,12 +1371,12 @@
             });
         },
 
-<span id='TTCreater-method-parent'>        /**
+<span id='TTWorker-method-parent'>        /**
 </span>         * Get parent element from registered elements
          *
          * @method parent
-         * @param {String|Object} any Query string for search elements or TT object
-         * @return {Object} TT object
+         * @param {String|Object} any Query string for search elements or TTWorker object
+         * @return {Object} TTWorker object
          */
         parent: function(any) {
             var res = tt();
@@ -1387,12 +1397,12 @@
             return res;
         },
 
-<span id='TTCreater-method-parents'>        /**
+<span id='TTWorker-method-parents'>        /**
 </span>         * Get parent elements of the element back in DOM tree from registered elements
          *
          * @method parents
-         * @param {String|Object} any Query string for search elements or TT object
-         * @return {Object} TT object
+         * @param {String|Object} any Query string for search elements or TTWorker object
+         * @return {Object} TTWorker object
          */
         parents: function(any) {
             var that = this,
@@ -1431,12 +1441,12 @@
             return res;
         },
 
-<span id='TTCreater-method-closest'>        /**
+<span id='TTWorker-method-closest'>        /**
 </span>         * Get closest element from registered element with query string or target element
          *
          * @method closest
-         * @param {String|Object} any Query string for search elements or TT object
-         * @return {Object} TT object
+         * @param {String|Object} any Query string for search elements or TTWorker object
+         * @return {Object} TTWorker object
          */
         closest: function(any) {
             var res = [],
@@ -1462,7 +1472,7 @@
             return tt(res);
         },
 
-<span id='TTCreater-method-children'>        /**
+<span id='TTWorker-method-children'>        /**
 </span>         * Get child elements from registered elements
          *
          * @method children
@@ -1498,12 +1508,12 @@
             return res;
         },
 
-<span id='TTCreater-method-replace'>        /**
+<span id='TTWorker-method-replace'>        /**
 </span>         * Replace elements of registered elements
          *
          * @method replace
          * @param {String|HTMLElement} any text html or HTMLElement
-         * @return {Object} TT object
+         * @return {Object} TTWorker object
          */
         replace: function(any) {
             this.each((typeof any === &quot;string&quot;) ?
@@ -1512,7 +1522,7 @@
             return this.remove();
         },
 
-<span id='TTCreater-method-css'>        /**
+<span id='TTWorker-method-css'>        /**
 </span>         * Set or get css styles
          *
          * @method css
@@ -1558,7 +1568,7 @@
             }
         },
 
-<span id='TTCreater-method-data'>        /**
+<span id='TTWorker-method-data'>        /**
 </span>         * Set or get element&#39;s dataset
          * If the array or object, data type passed to save the _data object instance
          *
@@ -1685,12 +1695,12 @@
             }
         })(),
 
-<span id='TTCreater-method-val'>        /**
+<span id='TTWorker-method-val'>        /**
 </span>         * Set, get &quot;value&quot; attributes value of registered elements
          *
          * @method val
          * @param {String|Number} [value]
-         * @return {Object|String|Array} TT object, value or values list
+         * @return {Object|String|Array} TTWorker object, value or values list
          */
         val: function(value) {
             if (value !== undefined) {
@@ -1712,7 +1722,7 @@
             }
         },
 
-<span id='TTCreater-method-show'>        /**
+<span id='TTWorker-method-show'>        /**
 </span>         * Show elements, if it is hide curretly
          *
          * @method show
@@ -1729,7 +1739,7 @@
             return this.css(&quot;display&quot;, value || lastValue || &quot;block&quot;);
         },
 
-<span id='TTCreater-method-hide'>        /**
+<span id='TTWorker-method-hide'>        /**
 </span>         * Hide elements, if it is show currently
          *
          * @method hide
@@ -1744,7 +1754,7 @@
             return this.css(&quot;display&quot;, &quot;none&quot;);
         },
 
-<span id='TTCreater-method-trigger'>        /**
+<span id='TTWorker-method-trigger'>        /**
 </span>         * Trigger events for registered elements
          *
          * @method trigger
@@ -1768,7 +1778,7 @@
             return this;
         },
 
-<span id='TTCreater-method-offset'>        /**
+<span id='TTWorker-method-offset'>        /**
 </span>         * Get offset position of registered elements
          * Ex.
          *  document.body
@@ -1798,7 +1808,7 @@
             return this.length === 1 ? res[0] : res;
         },
 
-<span id='TTCreater-method-width'>        /**
+<span id='TTWorker-method-width'>        /**
 </span>         * Get width from registered elements
          *
          * @method width
@@ -1809,7 +1819,7 @@
 			return this[index || 0].offsetWidth;
 		},
 
-<span id='TTCreater-method-height'>        /**
+<span id='TTWorker-method-height'>        /**
 </span>         * Get height from registered elements
          *
          * @method height

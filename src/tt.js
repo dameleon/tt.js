@@ -79,11 +79,11 @@
                     loadQueue.push(any);
                 }
                 return;
-            } else if (any instanceof TT) {
+            } else if (any instanceof TTWorker) {
                 return any;
             }
         }
-        return new TT(target || [], selector);
+        return new TTWorker(target || [], selector);
     }
 
     //// static methods
@@ -698,12 +698,12 @@
     /**
      * tt.js class creater
      *
-     * @class TT
+     * @class TTWorker
      * @constructor
      * @param {Array|NodeList} nodes NodeList or Array incorporates elements
      * @param {String} selector selector text
      */
-    function TT(nodes, selector) {
+    function TTWorker(nodes, selector) {
         var i = 0, iz;
 
         /**
@@ -755,8 +755,8 @@
         return this;
     }
 
-    tt.fn = TT.prototype = {
-        constructor: TT,
+    tt.fn = TTWorker.prototype = {
+        constructor: TTWorker,
 
         /**
          * Returns elements
@@ -790,7 +790,7 @@
          * @method each
          * @chainable
          * @param {Function} fn Function to be executed repeatedly
-         * @return {Object} TT object
+         * @return {Object} TTWorker object
          */
         each: function(fn) {
             var i = 0, iz = this.length;
@@ -807,7 +807,7 @@
          *
          * @method match
          * @param {Function} fn Function to be executed repeatedly
-         * @return {Object} TT Object
+         * @return {Object} TTWorker Object
          */
         match: function(fn) {
             var i = 0, iz = this.length;
@@ -821,12 +821,12 @@
         },
 
         /**
-         * Push element(s) to TT Object
+         * Push element(s) to TTWorker Object
          *
          * @method push
          * @chainable
          * @param {HTMLElement|NodeList|Array} any element or elements list
-         * @return {Object} TT Object
+         * @return {Object} TTWorker Object
          */
         push: function(any) {
             if (any && any.nodeType) {
@@ -870,7 +870,7 @@
          * @param {String} type
          * @param {String|Function} any
          * @param {Function} [options] callback
-         * @return {Object} TT Object
+         * @return {Object} TTWorker Object
          */
         on: function(type, any, callback) {
             return tt_type(any, "string") ?
@@ -886,7 +886,7 @@
          * @param {String} type
          * @param {String|Function} any
          * @param {Function} callback
-         * @return {Object} TT Object
+         * @return {Object} TTWorker Object
          */
         off: function(type, any, callback) {
             return tt_type(any, "string") ?
@@ -903,7 +903,7 @@
          * @param {String} type
          * @param {Function|Object} callback
          * @param {Boolean} [options] capture
-         * @return {Object} TT Object
+         * @return {Object} TTWorker Object
          */
         bind: function(type, any, capture) {
             capture = capture || false;
@@ -943,7 +943,7 @@
          * @chainable
          * @param {String} type
          * @param {Function|Object} any
-         * @return {Object} TT Object
+         * @return {Object} TTWorker Object
          */
         unbind: function(type, any) {
             var event = this._events[type],
@@ -971,7 +971,7 @@
          * @param {String} type
          * @param {String|Object} target
          * @param {Function|Object} callback
-         * @return {Object} TT Object
+         * @return {Object} TTWorker Object
          */
         delegate: function(type, target, callback) {
             var delegate = this._delegates[type],
@@ -1022,7 +1022,7 @@
          * @param {String} type
          * @param {String|Function} any
          * @param {Function} callback
-         * @return {Object} TT Object
+         * @return {Object} TTWorker Object
          */
         undelegate: function(type, target, callback) {
             var delegate = this._delegates[type],
@@ -1051,7 +1051,7 @@
          *
          * @method addClass
          * @param {String} classname
-         * @return {Object} TT object
+         * @return {Object} TTWorker object
          */
         addClass: domTester.classList ?
             function(className) {
@@ -1087,7 +1087,7 @@
          *
          * @method removeClass
          * @param {String} classname
-         * @return {Object} TT object
+         * @return {Object} TTWorker object
          */
         removeClass: domTester.classList ?
             function _removeClassByClassList(className) {
@@ -1115,7 +1115,7 @@
          *
          * @method hasClass
          * @param {String} classname
-         * @return {Object} TT object
+         * @return {Object} TTWorker object
          */
         hasClass: domTester.classList ?
             function _hasClassByClassList(className) {
@@ -1136,7 +1136,7 @@
          * @method toggleClass
          * @param {String} classname
          * @param {Boolean} strict
-         * @return {Object} TT object
+         * @return {Object} TTWorker object
          */
         toggleClass: function(className, strict) {
             var that = this;
@@ -1166,7 +1166,7 @@
          *
          * @method find
          * @param {String} query
-         * @return {Object} TT object
+         * @return {Object} TTWorker object
          */
         find: function(query) {
             var res = [];
@@ -1283,7 +1283,7 @@
          *
          * @method append
          * @param {String|HTMLElement} any HTMLElement, Text html
-         * @return {Object} TT object
+         * @return {Object} TTWorker object
          */
         append: function(any) {
             var useClone = this.length > 1;
@@ -1295,7 +1295,7 @@
 
 					if (any.nodeType) {
 						this.appendChild(useClone ? any.cloneNode(true) : any);
-					} else if (any instanceof TT) {
+					} else if (any instanceof TTWorker) {
 						any.each(function() {
 							that.appendChild(this);
 						});
@@ -1308,7 +1308,7 @@
          *
          * @method prepend
          * @param {String|HTMLElement} any HTMLElement, Text html
-         * @return {Object} TT object
+         * @return {Object} TTWorker object
          */
         prepend: function(any) {
             var useClone = this.length > 1;
@@ -1320,7 +1320,7 @@
 
 					if (any.nodeType) {
 						this.insertBefore(useClone ? any.cloneNode(true) : any, this.firstChild);
-					} else if (any instanceof TT) {
+					} else if (any instanceof TTWorker) {
 						any.each(function() {
 							that.insertBefore(this, that.firstChild);
 						});
@@ -1332,7 +1332,7 @@
          * Remove elements of registered from html
          *
          * @method remove
-         * @return {Object} TT object
+         * @return {Object} TTWorker object
          */
         remove: function() {
             return this.each(function() {
@@ -1344,7 +1344,7 @@
          * Remove child elements of registered elements
          *
          * @method clear
-         * @return {Object} TT object
+         * @return {Object} TTWorker object
          */
         clear: function() {
             return this.each(function() {
@@ -1358,8 +1358,8 @@
          * Get parent element from registered elements
          *
          * @method parent
-         * @param {String|Object} any Query string for search elements or TT object
-         * @return {Object} TT object
+         * @param {String|Object} any Query string for search elements or TTWorker object
+         * @return {Object} TTWorker object
          */
         parent: function(any) {
             var res = tt();
@@ -1384,8 +1384,8 @@
          * Get parent elements of the element back in DOM tree from registered elements
          *
          * @method parents
-         * @param {String|Object} any Query string for search elements or TT object
-         * @return {Object} TT object
+         * @param {String|Object} any Query string for search elements or TTWorker object
+         * @return {Object} TTWorker object
          */
         parents: function(any) {
             var that = this,
@@ -1428,8 +1428,8 @@
          * Get closest element from registered element with query string or target element
          *
          * @method closest
-         * @param {String|Object} any Query string for search elements or TT object
-         * @return {Object} TT object
+         * @param {String|Object} any Query string for search elements or TTWorker object
+         * @return {Object} TTWorker object
          */
         closest: function(any) {
             var res = [],
@@ -1496,7 +1496,7 @@
          *
          * @method replace
          * @param {String|HTMLElement} any text html or HTMLElement
-         * @return {Object} TT object
+         * @return {Object} TTWorker object
          */
         replace: function(any) {
             this.each((typeof any === "string") ?
@@ -1683,7 +1683,7 @@
          *
          * @method val
          * @param {String|Number} [value]
-         * @return {Object|String|Array} TT object, value or values list
+         * @return {Object|String|Array} TTWorker object, value or values list
          */
         val: function(value) {
             if (value !== undefined) {

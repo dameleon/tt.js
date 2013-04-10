@@ -11,7 +11,7 @@ buster.testCase("tt.js test", {
             var tts = tt("");
 
             assert.equals(typeof tts, "object");
-            assert.equals(tts.constructor.name, "TTCreater");
+            assert.equals(tts.constructor.name, "TTWorker");
         },
         "tt loaded function": function() {
             var spy = sinon.spy();
