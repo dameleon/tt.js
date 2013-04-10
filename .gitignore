@@ -1,7 +1,6 @@
 node_modules/
 sample/
 src/
-stylesheets
 test/
 .local.vimrc
 gruntfile.js
