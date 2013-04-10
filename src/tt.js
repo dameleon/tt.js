@@ -375,7 +375,11 @@
             var res, context = setting.context;
 
             if (statusCode >= 200 && statusCode < 400) {
-                res = xhr.response || xhr.responseText;
+                try {
+                    res = xhr.response || xhr.responseText;
+                } catch (e) {
+                    res = xhr.responseText;
+                }
                 if (setting.dataType === "json" && tt_type(res, "string")) {
                     res = tt_parseJSON(res);
                 }
@@ -833,10 +837,11 @@
                 this[this.length] = any;
                 ++this.length;
             } else if (tt_type(any, ["array", "nodelist"])) {
-                var i = this.length, iz = i + any.length;
+                var i = 0, iz = any.length;
 
                 for (; iz; ++i, --iz) {
-                    this[i] = any[i];
+                    this[this.length] = any[i];
+                    ++this.length;
                 }
             }
             return this;
@@ -1408,13 +1413,13 @@
             } else {
                 res = [];
                 this.match(function() {
-                    var parent;
+                    var parent = this;
 
-                    while ((parent = this.parentNode) !== null) {
-                        if (res.indexOf(parent) === -1) {
+                    while ((parent = parent.parentNode) !== null) {
+                        if (res.indexOf(parent) < 0) {
                             res.push(parent);
                         } else {
-                            break;
+                            return true;
                         }
                     }
                     return false;
@@ -1463,10 +1468,11 @@
          * @return {Object} tt object of matches child HTMLElements
          */
         children: function(any) {
-            var res = tt(),
+            var res,
                 target;
 
             if (any) {
+                res = tt();
                 target = tt(any);
                 this.each(function() {
                     var children = [].slice.call(this.children),
@@ -1484,9 +1490,11 @@
                     });
                 });
             } else {
+                res = [];
                 this.each(function() {
                     res = res.concat([].slice.call(this.children));
                 });
+                res = tt(res);
             }
             return res;
         },
@@ -1552,8 +1560,8 @@
         },
 
         /**
-         * Set or get element's dataset
-         * If the array or object, data type passed to save the _data object instance
+         * Set or get elements dataset
+         * If the array or object, data type passed to save the _data object of instance
          *
          * @method data
          * @param {String|Object} [any] CSS property name, object of CSS style set
