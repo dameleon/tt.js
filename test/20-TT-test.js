@@ -58,7 +58,7 @@ buster.testCase("tt.js test", {
 
         tts.push(div);
         assert.equals(tts.length, 1);
-        tts.push([div.cloneNode(), div.cloneNode()]);
+        tts.push([div.cloneNode(true), div.cloneNode(true)]);
         assert.equals(tts.length, 3);
         tts.each(function() {
             assert.equals(this.nodeName.toLowerCase(), "div");

@@ -1,4 +1,4 @@
-/** tt.js version:0.5.0 author:kei takahashi(twitter@dameleon) at:2013-04-10 */
+/** tt.js version:1.0.0 author:kei takahashi(twitter@dameleon) at:2013-04-10 */
 ;(function(global, document, undefined) {
     "use strict";
 
@@ -40,11 +40,13 @@
      *
      * This function does the following arguments to be passed by
      *
-     * ### CSSQueryString, HTMLElement, NodeList or its like Array, document or document.body, tt object
-     * >> Create tt class object (DOM Operator)
+     * **CSSQueryString, HTMLElement, NodeList or its like Array, document or document.body, tt object**
      *
-     * ### Function
-     * >> If the HTML is already loaded is executed immediately, if not already loaded is executed at the timing of the DOMContentLoaded
+     * Create tt class object (DOM Operator)
+     *
+     * **Function**
+     *
+     * If the HTML is already loaded is executed immediately, if not already loaded is executed at the timing of the DOMContentLoaded
      *
      * @class tt
      * @param {String|Function|HTMLElement|NodeList|NodeList like Array|document|document.body} any
@@ -701,7 +703,7 @@
 
 
     /**
-     * tt.js class creater
+     * Create TTWorker object class
      *
      * @class TTWorker
      * @constructor
