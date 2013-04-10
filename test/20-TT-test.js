@@ -264,7 +264,7 @@ buster.testCase("tt.js test", {
         var spy = sinon.spy();
 
         this.fixtures.id.addEventListener("onhoge", spy, false);
-        this.tts.id.trigger("Event", "onhoge", false, true);
+        this.tts.id.trigger("onhoge");
 
         assert.calledOnce(spy);
     },

@@ -1,4 +1,4 @@
-/** tt.js version:0.5.0 author:kei takahashi(twitter@dameleon) at:2013-03-27 */
+/** tt.js version:0.5.0 author:kei takahashi(twitter@dameleon) at:2013-04-07 */
 ;(function(global, document, undefined) {
     "use strict";
 
@@ -82,8 +82,6 @@
                 return;
             } else if (mix instanceof TTCreater) {
                 return mix;
-            } else {
-                throw new Error("argument type error");
             }
         }
         return new TTCreater(target || [], selector);
@@ -92,8 +90,8 @@
     ////// static methods
     tt.ajax          = tt_ajax;
     tt.createEnvData = tt_createEnvData;
-    tt.cssCamelizer  = tt_cssCamelizer;
-    tt.cssHyphenizer = tt_cssHyphenizer;
+    tt.camelizer     = tt_camelizer;
+    tt.hyphenizer    = tt_hyphenizer;
     tt.cssPrefix     = tt_cssPrefix;
     tt.each          = tt_each;
     tt.extend        = tt_extend;
@@ -470,12 +468,12 @@
     /**
      * Get string CSS camel case from string of CSS hyphen case
      *
-     * @method tt.cssCamelizer
+     * @method tt.camelizer
      * @static
      * @param {String} str CSS property value
      * @return {String}
      */
-    function tt_cssCamelizer(str) {
+    function tt_camelizer(str) {
         if (!str || typeof str !== "string") {
             throw new Error("Error: argument error");
         }
@@ -491,37 +489,7 @@
             }
             res += value[0].toUpperCase() + value.substr(1, value.length);
         });
-        return res;
-    }
-
-    /**
-     * Get string CSS hyphen case from string of CSS camel case
-     *
-     * @method tt.cssHyphenizer
-     * @static
-     * @param {String} str CSS property value
-     * @return {String}
-     */
-    function tt_cssHyphenizer(str) {
-        if (!str || typeof str !== "string") {
-            throw new Error("Error: argument error");
-        }
-        var prefix = ["webkit", "moz", "o", "ms", "khtml"],
-            upperRe = /[A-Z]/g,
-            upperStr = str.match(upperRe),
-            res = "";
-
-        tt_each(str.split(upperRe), function(value, index) {
-            if (prefix.indexOf(value) > -1) {
-                res += "-" + value;
-                return;
-            } else if (!index) {
-                res += value;
-                return;
-            }
-            res += ("-" + upperStr.shift().toLowerCase() + value);
-        });
-        return res;
+        return res || str;
     }
 
     /**
@@ -541,6 +509,36 @@
             res[index] = "-" + str + "-" + value;
         });
         return res;
+    }
+
+    /**
+     * Get string CSS hyphen case from string of CSS camel case
+     *
+     * @method tt.hyphenizer
+     * @static
+     * @param {String} str CSS property value
+     * @return {String}
+     */
+    function tt_hyphenizer(str) {
+        if (!str || typeof str !== "string") {
+            throw new Error("Error: argument error");
+        }
+        var prefix = ["webkit", "moz", "o", "ms", "khtml"],
+            upperRe = /[A-Z]/g,
+            upperStr = str.match(upperRe),
+            res = "";
+
+        tt_each(str.split(upperRe), function(value, index) {
+            if (prefix.indexOf(value) > -1) {
+                res += "-" + value;
+                return;
+            } else if (!index) {
+                res += value;
+                return;
+            }
+            res += ("-" + upperStr.shift().toLowerCase() + value);
+        });
+        return res || str;
     }
 
     /**
@@ -692,7 +690,9 @@
         }
         var ev = document.createEvent(event);
 
-        ev.initEvent(type, bubbles || false, cancelable || false);
+        ev.initEvent(type,
+                     bubbles !== undefined ? bubbles : true,
+                     cancelable !== undefined ? cancelable : true);
         node.dispatchEvent(ev);
     }
 
@@ -725,8 +725,16 @@
         this.length = iz = nodes.length;
 
         /**
-         * Delegate registration information of registered elements
+         * Event registration information of this tt object
          *
+         * @property _events
+         * @type Object
+         * @private
+         */
+        this._events = {};
+
+        /**
+         * Delegate registration information of this tt object
          *
          * @property _delegates
          * @type Object
@@ -735,14 +743,15 @@
         this._delegates = {};
 
         /**
-         * Data for registered elements
+         * Data for this tt object
          *
          * @property _data
          * @type Object
          * @private
          */
         this._data = {};
-        for (; i < iz; ++i) {
+
+        for (; iz; ++i, --iz) {
             this[i] = nodes[i];
         }
         return this;
@@ -787,7 +796,7 @@
         each: function(fn) {
             var i = 0, iz = this.length;
 
-            for (; i < iz; ++i) {
+            for (; iz; ++i, --iz) {
                 fn.call(this[i], i);
             }
             return this;
@@ -804,7 +813,7 @@
         match: function(fn) {
             var i = 0, iz = this.length;
 
-            for (; i < iz; ++i) {
+            for (; iz; ++i, --iz) {
                 if (fn.call(this[i], i)) {
                     return this[i];
                 }
@@ -824,9 +833,10 @@
                 this[this.length] = mix;
                 ++this.length;
             } else if (tt_type(mix, ["array", "nodelist"])) {
-                for (var i = 0, iz = mix.length; i < iz; ++i) {
-                    this[this.length] = mix[i];
-                    ++this.length;
+                var i = this.length, iz = i + mix.length;
+
+                for (; iz; ++i, --iz) {
+                    this[i] = mix[i];
                 }
             }
             return this;
@@ -900,9 +910,31 @@
          */
         bind: function(type, mix, capture) {
             capture = capture || false;
-            this.each(function() {
-                this.addEventListener(type, mix, capture);
-            }, true);
+            var self = this,
+                event = this._events[type];
+
+            if (!event) {
+                event = this._events[type] = {};
+                event.callbacks = [];
+                event.handler = function(ev) {
+                    var data = ev._tt_data,
+                        args = Array.isArray(data) ?
+                                [].concat(data) : [];
+
+                    args.unshift(ev);
+                    tt_each(event.callbacks, function(callback) {
+                        if (typeof callback === "function") {
+                            callback.apply(ev.currentTarget, args);
+                        } else if (callback && callback.handleEvent) {
+                            callback.handleEvent.apply(ev.currentTarget, args);
+                        }
+                    });
+                };
+                this.each(function() {
+                    this.addEventListener(type, event.handler, capture);
+                });
+            }
+            event.callbacks.push(mix);
             return this;
         },
 
@@ -916,9 +948,19 @@
          * @return {Object} TT Object
          */
         unbind: function(type, mix) {
-            this.each(function() {
-                this.removeEventListener(type, mix);
-            }, true);
+            var event = this._events[type],
+                index = event ?
+                        event.callbacks.indexOf(mix) : -1;
+
+            if (!event || index === -1) {
+                return;
+            }
+            event.callbacks.splice(index, 1);
+            if (!event.callbacks.length) {
+                this.each(function() {
+                    this.removeEventListener(type, event.handler);
+                });
+            }
             return this;
         },
 
@@ -943,7 +985,9 @@
                 delegate = this._delegates[type] = {};
                 delegate.listeners = [];
                 delegate.handler = function(ev) {
-                    var event, eventTarget = ev.target;
+                    var event,
+                        eventTarget = ev.target,
+                        args = arguments;
 
                     tt_match(delegate.listeners, function(listener) {
                         var match = tt(listener.target).match(function() {
@@ -955,9 +999,9 @@
 
                         if (match) {
                             if (typeof listener.callback === "function") {
-                                listener.callback.call(match, ev);
-                            } else if ("handleEvent" in listener.callback) {
-                                listener.callback.handleEvent.call(match, ev);
+                                listener.callback.apply(match, args);
+                            } else if (listener.callback.handleEvent) {
+                                listener.callback.handleEvent.apply(match, args);
                             }
                             return true;
                         }
@@ -1037,6 +1081,7 @@
                     return res.join(" ");
                 }
             },
+
         /**
          * Remove class name
          *
@@ -1404,6 +1449,42 @@
         },
 
         /**
+         * Get child elements from registered elements
+         *
+         * @method children
+         * @param {String|Object} [mix] QueryString, NodeElement, NodeList
+         * @return {Object} tt object of matches child NodeElements
+         */
+        children: function(mix) {
+            var res = tt(),
+                target;
+
+            if (mix) {
+                target = tt(mix);
+                this.each(function() {
+                    var children = [].slice.call(this.children),
+                        iz = children.length;
+
+                    target.each(function() {
+                        var child, i;
+
+                        for (i = 0; i < iz; ++i) {
+                            child = children[i];
+                            if (this === child) {
+                                res.push(child);
+                            }
+                        }
+                    });
+                });
+            } else {
+                this.each(function() {
+                    res = res.concat([].slice.call(this.children));
+                });
+            }
+            return res;
+        },
+
+        /**
          * Replace elements of registered elements
          *
          * @method replace
@@ -1434,11 +1515,11 @@
                         _removeProperty(key);
                         return;
                     }
-                    _setStyle(tt_cssCamelizer(key), val);
+                    _setStyle(tt_camelizer(key), val);
                 });
             } else if (mix) {
                 if (value) {
-                    _setStyle(tt_cssCamelizer(mix), value);
+                    _setStyle(tt_camelizer(mix), value);
                 } else if (value === "") {
                     _removeProperty(mix);
                 } else {
@@ -1591,6 +1672,33 @@
         })(),
 
         /**
+         * Set, get "value" attributes value of registered elements
+         *
+         * @method val
+         * @param {String|Number} [value]
+         * @return {Object|String|Array} TT object, value or values list
+         */
+        val: function(value) {
+            if (value !== undefined) {
+                this.each(function() {
+                    if (this.value !== undefined) {
+                        this.value = value;
+                    }
+                });
+                return this;
+            } else {
+                var res = [];
+
+                this.each(function(index) {
+                    if (this.value !== undefined) {
+                        res[index] = this.value;
+                    }
+                });
+                return this.length > 1 ? res : res[0];
+            }
+        },
+
+        /**
          * Show elements, if it is hide curretly
          *
          * @method show
@@ -1632,9 +1740,17 @@
          * @param {Bool} [options] cancelable event cancelable flag
          * @return {Object} tt object
          */
-        trigger: function(event, type, bubbles, cancelable) {
+        trigger: function() {
+            var args = [].slice.call(arguments),
+                type = args.shift(),
+                ev = document.createEvent("Event");
+
+            ev.initEvent(type, true, true);
+            if (args.length > 1) {
+                ev._tt_data = args;
+            }
             this.each(function() {
-                tt_triggerEvent(this, event, type, bubbles, cancelable);
+                this.dispatchEvent(ev);
             });
             return this;
         },
@@ -1673,7 +1789,7 @@
          * Get width from registered elements
          *
          * @method width
-         * @param {Number} [options] index number of registered elements
+         * @param {Number} [index] number of registered elements
          * @return {Number} number of element width
          */
 		width: function(index) {
@@ -1684,14 +1800,13 @@
          * Get height from registered elements
          *
          * @method height
-         * @param {Number} [options] index number of registered elements
+         * @param {Number} [index] number of registered elements
          * @return {Number} number of element height
          */
 		height: function(index) {
 			return this[index || 0].offsetHeight;
 		}
     };
-
 
     // globalize
     global[IDENT] = global[IDENT] || tt;

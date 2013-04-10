@@ -11,7 +11,7 @@ buster.testCase("tt.js test", {
             var tts = tt("");
 
             assert.equals(typeof tts, "object");
-            assert.equals(tts.constructor.name, "TTCreater");
+            assert.equals(tts.constructor.name, "TTWorker");
         },
         "tt loaded function": function() {
             var spy = sinon.spy();
@@ -200,9 +200,6 @@ buster.testCase("tt.js test", {
             refute.exception(function () {
                 tt('').trigger('');
             });
-            assert.exception(function () {
-                tt(document.body).trigger();
-            }, 'Error');
         },
         "cssPrefix test": function() {
             assert.isFunction(tt.cssPrefix);
@@ -221,17 +218,17 @@ buster.testCase("tt.js test", {
                 assert.equals(prefixed, "-" + testPrefix[index] + "-" + value);
             });
         },
-        "cssCamelizer test": function() {
+        "camelizer test": function() {
             var prop = "-webkit-tap-highlight-color";
 
-            assert.equals(tt.cssCamelizer(prop), "webkitTapHighlightColor");
-            assert.exception(function() { tt.cssCamelizer() }, "Error");
+            assert.equals(tt.camelizer(prop), "webkitTapHighlightColor");
+            assert.exception(function() { tt.camelizer() }, "Error");
         },
-        "cssHyphenizer test": function() {
+        "hyphenizer test": function() {
             var prop = "webkitTapHighlightColor";
 
-            assert.equals(tt.cssHyphenizer(prop), "-webkit-tap-highlight-color");
-            assert.exception(function() { tt.cssHyphenizer() }, "Error");
+            assert.equals(tt.hyphenizer(prop), "-webkit-tap-highlight-color");
+            assert.exception(function() { tt.hyphenizer() }, "Error");
         },
         "tag test": function() {
             var ttObj = tt.tag("div", true),

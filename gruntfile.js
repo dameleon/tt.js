@@ -38,22 +38,19 @@ module.exports = function(grunt) {
                 undef: true,
                 validthis: true,
                 browser: true,
-                browser: true,
                 globals: {
                     global: true,
                     tt: true
                 }
             }
         },
-        yuidoc: {
-            compile: {
-                name: '<%= pkg.name %>',
-                description: '<%= pkg.description %>',
-                version: '<%= pkg.version %>',
-                url: '<%= pkg.url %>',
+        jsduck: {
+            main: {
+                src: ['src/tt.js'],
+                dest: 'docs',
                 options: {
-                    paths: 'src/',
-                    outdir: 'docs'
+                    'title': '<%= pkg.title %>',
+                    'external': 'Any'
                 }
             }
         }
@@ -63,8 +60,9 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-contrib-concat');
     grunt.loadNpmTasks('grunt-buster');
-    grunt.loadNpmTasks('grunt-contrib-yuidoc');
+    grunt.loadNpmTasks('grunt-jsduck');
 
     grunt.registerTask('test', ['jshint', 'buster']);
-    grunt.registerTask('default', ['jshint', 'buster', 'concat', 'uglify', 'yuidoc']);
+    grunt.registerTask('document', ['jsduck']);
+    grunt.registerTask('default', ['jshint', 'buster', 'concat', 'uglify']);
 };

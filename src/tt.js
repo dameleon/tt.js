@@ -39,60 +39,58 @@
      *
      * This function does the following arguments to be passed by
      *
-     * ### CSSQueryString, NodeElement, NodeList or its like Array, document or document.body, tt object
+     * ### CSSQueryString, HTMLElement, NodeList or its like Array, document or document.body, tt object
      * >> Create tt class object (DOM Operator)
      *
      * ### Function
      * >> If the HTML is already loaded is executed immediately, if not already loaded is executed at the timing of the DOMContentLoaded
      *
      * @class tt
-     * @param {String|Function|Node|NodeList|NodeList like Array|document|document.body} mix
-     * @param {Node} [options] parent If first params is String, sets the parent of the search target
+     * @param {String|Function|HTMLElement|NodeList|NodeList like Array|document|document.body} any
+     * @param {HTMLElement} [options] parent If first params is String, sets the parent of the search target
      * @return {Object|undefined} Return tt object of if first params is Function return undefined
      */
-    function tt(mix, parent) {
+    function tt(any, parent) {
         var target = null,
             selector = "";
 
-        if (typeof mix === "string") {
-            selector = mix;
+        if (typeof any === "string") {
+            selector = any;
             parent = parent || document;
-            target = querySelectorRe.test(mix) ?
-                        parent.querySelectorAll(mix) :
-                     mix[0] === "#" ?
-                        [parent.getElementById(mix.substring(1, mix.length))] :
-                     mix[0] === "." ?
-                        parent.getElementsByClassName(mix.substring(1, mix.length)) :
-                        parent.getElementsByTagName(mix);
-        } else if (mix) {
-            if (mix.nodeType === 1) {
-                target = [mix];
-            } else if (tt_isNodeList(mix) ||
-                      (Array.isArray(mix) && mix.length && mix[0].nodeType)) {
-                target = mix;
-            } else if (mix === document || mix === document.body) {
+            target = querySelectorRe.test(any) ?
+                        parent.querySelectorAll(any) :
+                     any[0] === "#" ?
+                        [parent.getElementById(any.substring(1, any.length))] :
+                     any[0] === "." ?
+                        parent.getElementsByClassName(any.substring(1, any.length)) :
+                        parent.getElementsByTagName(any);
+        } else if (any) {
+            if (any.nodeType === 1) {
+                target = [any];
+            } else if (tt_isNodeList(any) ||
+                      (Array.isArray(any) && any.length && any[0].nodeType)) {
+                target = any;
+            } else if (any === document || any === document.body) {
                 target = [document.body];
-            } else if (typeof mix === "function") {
+            } else if (typeof any === "function") {
                 if (loaded) {
-                    mix();
+                    any();
                 } else {
-                    loadQueue.push(mix);
+                    loadQueue.push(any);
                 }
                 return;
-            } else if (mix instanceof TTCreater) {
-                return mix;
-            } else {
-                throw new Error("argument type error");
+            } else if (any instanceof TTWorker) {
+                return any;
             }
         }
-        return new TTCreater(target || [], selector);
+        return new TTWorker(target || [], selector);
     }
 
-    ////// static methods
+    //// static methods
     tt.ajax          = tt_ajax;
     tt.createEnvData = tt_createEnvData;
-    tt.cssCamelizer  = tt_cssCamelizer;
-    tt.cssHyphenizer = tt_cssHyphenizer;
+    tt.camelizer     = tt_camelizer;
+    tt.hyphenizer    = tt_hyphenizer;
     tt.cssPrefix     = tt_cssPrefix;
     tt.each          = tt_each;
     tt.extend        = tt_extend;
@@ -112,26 +110,26 @@
     /**
      * Execute iterate a function from array or object
      *
-     * @method tt.each
+     * @method each
      * @static
-     * @param {Array|Object} mix target to pass to a function
+     * @param {Array|Object} any target to pass to a function
      * @param {Function} fn function to execute iteratively
      */
-    function tt_each(mix, fn) {
+    function tt_each(any, fn) {
         var arr, key,
             i = 0, iz;
 
-        if (Array.isArray(mix)) {
-            iz = mix.length;
+        if (Array.isArray(any)) {
+            iz = any.length;
             for (; i < iz; ++i) {
-                fn(mix[i], i);
+                fn(any[i], i);
             }
-        } else if (typeof mix === "object") {
-            arr = Object.keys(mix);
+        } else if (typeof any === "object") {
+            arr = Object.keys(any);
             iz = arr.length;
             for (; i < iz; ++i) {
                 key = arr[i];
-                fn(key, mix[key]);
+                fn(key, any[key]);
             }
         }
     }
@@ -140,9 +138,9 @@
      * Extend target object with each objects
      * If first argument is true, will be recursive copy
      *
-     * @method tt.extend
+     * @method extend
      * @static
-     * @param {Object|Bool} any first target object or deep flag
+     * @param {Object|Boolean} any first target object or deep flag
      * @param {Object} [options] override objects
      * @return {Object} result object
      */
@@ -181,30 +179,30 @@
     /**
      * Execute iterate a function from array or object
      *
-     * @method tt.match
+     * @method match
      * @static
-     * @param {Array|Object} mix target to pass to a function
+     * @param {Array|Object} any target to pass to a function
      * @param {Function} fn function to execute iteratively
      */
-    function tt_match(mix, fn) {
+    function tt_match(any, fn) {
         var arr,
             key, res = {},
             i = 0, iz;
 
-        if (Array.isArray(mix)) {
-            iz = mix.length;
+        if (Array.isArray(any)) {
+            iz = any.length;
             for (; i < iz; ++i) {
-                if (fn(mix[i], i)) {
-                    return mix[i];
+                if (fn(any[i], i)) {
+                    return any[i];
                 }
             }
-        } else if (typeof mix === "object") {
-            arr = Object.keys(mix);
+        } else if (typeof any === "object") {
+            arr = Object.keys(any);
             iz = arr.length;
             for (; i < iz; ++i) {
                 key = arr[i];
-                if (fn(key, mix[key], i)) {
-                    res[key] = mix[key];
+                if (fn(key, any[key], i)) {
+                    res[key] = any[key];
                     return res;
                 }
             }
@@ -217,13 +215,13 @@
     /**
      * Detect array strictly
      *
-     * @method tt.isNodeList
+     * @method isNodeList
      * @static
      * @param {Any} target detect target
-     * @return {Bool} result
+     * @return {Boolean} result
      */
-    function tt_isNodeList(mix) {
-        var type=Object.prototype.toString.call(mix);
+    function tt_isNodeList(any) {
+        var type=Object.prototype.toString.call(any);
 
         return type === "[object NodeList]" || type === "[object HTMLCollection]";
     }
@@ -232,11 +230,11 @@
      * Return target type
      * If matches is passed and returns result of comparing target
      *
-     * @method tt.type
+     * @method type
      * @static
      * @param {Any} target judgment target
      * @param {String|Array} matches List, or string type to be compared
-     * @return {Bool} result
+     * @return {Boolean} result
      */
     function tt_type(target, matches) {
         var res = target === null       ? "null" :
@@ -272,21 +270,21 @@
     /**
      * XMLHttpRequest wrapper method
      *
-     * @method tt.ajax
+     * @method ajax
      * @static
-     * @param {String|Object} mix request url or setting object
+     * @param {String|Object} any request url or setting object
      * @param {Object} [options] setting setting object
      * @return {Object} XMLHttpRequest object
      */
-    function tt_ajax(mix, setting) {
+    function tt_ajax(any, setting) {
         var called = false,
             xhr = new XMLHttpRequest();
 
         setting = setting || {};
-        if (tt_type(mix, "object")) {
-            setting = mix;
-        } else if (tt_type(mix, "string")) {
-            setting.url = mix;
+        if (tt_type(any, "object")) {
+            setting = any;
+        } else if (tt_type(any, "string")) {
+            setting.url = any;
         } else {
             throw new Error("Error: missing argument");
         }
@@ -411,9 +409,9 @@
      *
      *                      versionCode(version number of 4-digit or higher)
      *
-     * @method tt.createEnvData
+     * @method createEnvData
      * @static
-     * @param {Navigator} navigator object
+     * @param {Object} navigator global.navigator object
      * @return {Object} object
      */
     function tt_createEnvData(nav) {
@@ -469,14 +467,14 @@
     /**
      * Get string CSS camel case from string of CSS hyphen case
      *
-     * @method tt.cssCamelizer
+     * @method camelizer
      * @static
      * @param {String} str CSS property value
      * @return {String}
      */
-    function tt_cssCamelizer(str) {
+    function tt_camelizer(str) {
         if (!str || typeof str !== "string") {
-            throw new Error("Error: argument error");
+            throw new Error("Argument error");
         }
         var res = "";
 
@@ -490,43 +488,13 @@
             }
             res += value[0].toUpperCase() + value.substr(1, value.length);
         });
-        return res;
-    }
-
-    /**
-     * Get string CSS hyphen case from string of CSS camel case
-     *
-     * @method tt.cssHyphenizer
-     * @static
-     * @param {String} str CSS property value
-     * @return {String}
-     */
-    function tt_cssHyphenizer(str) {
-        if (!str || typeof str !== "string") {
-            throw new Error("Error: argument error");
-        }
-        var prefix = ["webkit", "moz", "o", "ms", "khtml"],
-            upperRe = /[A-Z]/g,
-            upperStr = str.match(upperRe),
-            res = "";
-
-        tt_each(str.split(upperRe), function(value, index) {
-            if (prefix.indexOf(value) > -1) {
-                res += "-" + value;
-                return;
-            } else if (!index) {
-                res += value;
-                return;
-            }
-            res += ("-" + upperStr.shift().toLowerCase() + value);
-        });
-        return res;
+        return res || str;
     }
 
     /**
      * Get value of CSS with a prefix
      *
-     * @method tt.cssPrefix
+     * @method cssPrefix
      * @static
      * @param {String} value CSS value
      * @param {Array} prefix additional prefixes list
@@ -543,9 +511,39 @@
     }
 
     /**
+     * Get string CSS hyphen case from string of CSS camel case
+     *
+     * @method hyphenizer
+     * @static
+     * @param {String} str CSS property value
+     * @return {String}
+     */
+    function tt_hyphenizer(str) {
+        if (!str || typeof str !== "string") {
+            throw new Error("Argument error");
+        }
+        var prefix = ["webkit", "moz", "o", "ms", "khtml"],
+            upperRe = /[A-Z]/g,
+            upperStr = str.match(upperRe),
+            res = "";
+
+        tt_each(str.split(upperRe), function(value, index) {
+            if (prefix.indexOf(value) > -1) {
+                res += "-" + value;
+                return;
+            } else if (!index) {
+                res += value;
+                return;
+            }
+            res += ("-" + upperStr.shift().toLowerCase() + value);
+        });
+        return res || str;
+    }
+
+    /**
      * Parse query string to object
      *
-     * @method tt.query2object
+     * @method param
      * @static
      * @param {String} query query string
      * @return {Object} result
@@ -568,7 +566,7 @@
     /**
      * Parse string of json to json object
      *
-     * @method tt.parseJSON
+     * @method parseJSON
      * @static
      * @param {String} text parse target string
      * @return {Function} Callback function
@@ -590,7 +588,7 @@
             /*jshint evil: true */
             obj = (new Function('return ' + text))();
         } catch (o_q) {
-            throw new Error("Error: can't parse text to json");
+            throw new Error("Can't parse text to json");
         }
         return obj;
     }
@@ -598,7 +596,7 @@
     /**
      * Returns a function and arguments hold any context
      *
-     * @method tt.proxy
+     * @method proxy
      * @static
      * @param {Function} func
      * @param {Any} context
@@ -607,7 +605,7 @@
      */
     function tt_proxy() {
         if (arguments.length < 2) {
-            throw new Error("Error: missing argument error");
+            throw new Error("Missing argument error");
         }
         var args = [].slice.call(arguments),
             func = args.shift(),
@@ -627,7 +625,7 @@
     /**
      * Parse query string to object
      *
-     * @method tt.query2object
+     * @method query2object
      * @static
      * @param {String} query query string
      * @return {Object} result
@@ -652,17 +650,17 @@
     }
 
     /**
-     * Create Node or tt object which involve it
+     * Create HTMLElement or tt object which involve it
      *
-     * @method tt.tag
+     * @method tag
      * @static
-     * @param {String} query query string
-     * @param {Bool} raw
-     * @return {Object} result
+     * @param {String} name tag name
+     * @param {Boolean} [createTT] If pass to true, return new tt object with element
+     * @return {HTMLElement|Object} HTMLelement or tt object
      */
     function tt_tag(name, createTT) {
         if (!name || typeof name !== "string") {
-            throw new Error("Error: argument error");
+            throw new Error("Argument error");
         }
         var tag = document.createElement(name);
 
@@ -672,26 +670,27 @@
     /**
      * Trigger event to target element
      *
-     * @method tt.triggerEvent
+     * @method triggerEvent
      * @static
-     * @param {Node} query string
-     * @param {String} query string
-     * @param {String} query string
-     * @param {Bool} query string
-     * @param {Bool} query string
-     * @return {Object} result
+     * @param {HTMLElement} node target HTMLElement
+     * @param {String} event event type string
+     * @param {String} name event name
+     * @param {Boolean} [bubbles] bubbling flag
+     * @param {Boolean} [cancelable] cancelable flag
      */
-    function tt_triggerEvent(node, event, type, bubbles, cancelable) {
+    function tt_triggerEvent(node, event, name, bubbles, cancelable) {
         if (!node || !event) {
-            throw new Error("Error: missing argument error");
+            throw new Error("Missing argument error");
         }
-        if (!tt_type(type, "string")) {
-            type = event;
-            event = type === "click" ? "MouseEvents" : "Event";
+        if (!tt_type(name, "string")) {
+            name = event;
+            event = name === "click" ? "MouseEvents" : "Event";
         }
         var ev = document.createEvent(event);
 
-        ev.initEvent(type, bubbles || false, cancelable || false);
+        ev.initEvent(name,
+                     bubbles !== undefined ? bubbles : true,
+                     cancelable !== undefined ? cancelable : true);
         node.dispatchEvent(ev);
     }
 
@@ -699,12 +698,12 @@
     /**
      * tt.js class creater
      *
-     * @class TTCreater
+     * @class TTWorker
      * @constructor
      * @param {Array|NodeList} nodes NodeList or Array incorporates elements
      * @param {String} selector selector text
      */
-    function TTCreater(nodes, selector) {
+    function TTWorker(nodes, selector) {
         var i = 0, iz;
 
         /**
@@ -724,8 +723,16 @@
         this.length = iz = nodes.length;
 
         /**
-         * Delegate registration information of registered elements
+         * Event registration information of this tt object
          *
+         * @property _events
+         * @type Object
+         * @private
+         */
+        this._events = {};
+
+        /**
+         * Delegate registration information of this tt object
          *
          * @property _delegates
          * @type Object
@@ -734,28 +741,29 @@
         this._delegates = {};
 
         /**
-         * Data for registered elements
+         * Data for this tt object
          *
          * @property _data
          * @type Object
          * @private
          */
         this._data = {};
-        for (; i < iz; ++i) {
+
+        for (; iz; ++i, --iz) {
             this[i] = nodes[i];
         }
         return this;
     }
 
-    tt.fn = TTCreater.prototype = {
-        constructor: TTCreater,
+    tt.fn = TTWorker.prototype = {
+        constructor: TTWorker,
 
         /**
          * Returns elements
          *
          * @method get
          * @param {Number} index elements index
-         * @return {NodeElement} registered NodeElement
+         * @return {HTMLElement} one of registered HTMLElement
          */
         get: function(index) {
             return this[index || 0];
@@ -777,33 +785,34 @@
         },
 
         /**
-         * Call function with context of NodeElement and parameter of elements index number
+         * Call function with context of HTMLElement and parameter of elements index number
          *
          * @method each
+         * @chainable
          * @param {Function} fn Function to be executed repeatedly
-         * @return {Object} TT object
+         * @return {Object} TTWorker object
          */
         each: function(fn) {
             var i = 0, iz = this.length;
 
-            for (; i < iz; ++i) {
+            for (; iz; ++i, --iz) {
                 fn.call(this[i], i);
             }
             return this;
         },
 
         /**
-         * Call function with context of NodeElement and parameter of elements index number
+         * Call function with context of HTMLElement and parameter of elements index number
          * If it returns true, then this function return context that matches
          *
          * @method match
          * @param {Function} fn Function to be executed repeatedly
-         * @return {Object} TT Object
+         * @return {Object} TTWorker Object
          */
         match: function(fn) {
             var i = 0, iz = this.length;
 
-            for (; i < iz; ++i) {
+            for (; iz; ++i, --iz) {
                 if (fn.call(this[i], i)) {
                     return this[i];
                 }
@@ -812,20 +821,22 @@
         },
 
         /**
-         * Push element(s) to TT Object
+         * Push element(s) to TTWorker Object
          *
          * @method push
-         * @param {Node|NodeList|Array} mix element or elements list
-         * @return {Object} TT Object
+         * @chainable
+         * @param {HTMLElement|NodeList|Array} any element or elements list
+         * @return {Object} TTWorker Object
          */
-        push: function(mix) {
-            if (mix && mix.nodeType) {
-                this[this.length] = mix;
+        push: function(any) {
+            if (any && any.nodeType) {
+                this[this.length] = any;
                 ++this.length;
-            } else if (tt_type(mix, ["array", "nodelist"])) {
-                for (var i = 0, iz = mix.length; i < iz; ++i) {
-                    this[this.length] = mix[i];
-                    ++this.length;
+            } else if (tt_type(any, ["array", "nodelist"])) {
+                var i = this.length, iz = i + any.length;
+
+                for (; iz; ++i, --iz) {
+                    this[i] = any[i];
                 }
             }
             return this;
@@ -835,7 +846,7 @@
          * Get index of registered element
          *
          * @method indexOf
-         * @param {Node} node serach target element
+         * @param {HTMLElement} node serach target element
          * @return {Number} index number
          */
         indexOf: function(node) {
@@ -852,84 +863,115 @@
         },
 
         /**
-         * Bind events to NodeElement
+         * Bind events to HTMLElement
          *
          * @method on
+         * @chainable
          * @param {String} type
-         * @param {String|Function} mix
+         * @param {String|Function} any
          * @param {Function} [options] callback
-         * @return {Object} TT Object
+         * @return {Object} TTWorker Object
          */
-        on: function(type, mix, callback) {
-            if (tt_type(mix, 'string')) {
-                this.delegate(type, mix, callback);
-            } else {
-                this.bind(type, mix);
-            }
-            return this;
+        on: function(type, any, callback) {
+            return tt_type(any, "string") ?
+                    this.delegate(type, any, callback) :
+                    this.bind(type, any);
         },
 
         /**
-         * Un bind events from NodeElement
+         * Un bind events from HTMLElement
          *
          * @method off
+         * @chainable
          * @param {String} type
-         * @param {String|Function} mix
+         * @param {String|Function} any
          * @param {Function} callback
-         * @return {Object} TT Object
+         * @return {Object} TTWorker Object
          */
-        off: function(type, mix, callback) {
-            if (tt_type(mix, 'string')) {
-                this.undelegate(type, mix, callback);
-            } else {
-                this.unbind(type, mix);
-            }
-            return this;
+        off: function(type, any, callback) {
+            return tt_type(any, "string") ?
+                    this.undelegate(type, any, callback) :
+                    this.unbind(type, any);
         },
 
         /**
-         * Bind events to NodeElement
+         * Bind events to HTMLElement
          * This is simply wrapper of addEventListener
          *
          * @method bind
+         * @chainable
          * @param {String} type
          * @param {Function|Object} callback
-         * @param {Bool} [options] capture
-         * @return {Object} TT Object
+         * @param {Boolean} [options] capture
+         * @return {Object} TTWorker Object
          */
-        bind: function(type, mix, capture) {
+        bind: function(type, any, capture) {
             capture = capture || false;
-            this.each(function() {
-                this.addEventListener(type, mix, capture);
-            }, true);
+            var self = this,
+                event = this._events[type];
+
+            if (!event) {
+                event = this._events[type] = {};
+                event.callbacks = [];
+                event.handler = function(ev) {
+                    var data = ev._tt_data,
+                        args = Array.isArray(data) ?
+                                [].concat(data) : [];
+
+                    args.unshift(ev);
+                    tt_each(event.callbacks, function(callback) {
+                        if (typeof callback === "function") {
+                            callback.apply(ev.currentTarget, args);
+                        } else if (callback && callback.handleEvent) {
+                            callback.handleEvent.apply(ev.currentTarget, args);
+                        }
+                    });
+                };
+                this.each(function() {
+                    this.addEventListener(type, event.handler, capture);
+                });
+            }
+            event.callbacks.push(any);
             return this;
         },
 
         /**
-         * Un bind events from NodeElement
+         * Un bind events from HTMLElement
          * This is simply wrapper of removeEventListener
          *
          * @method unbind
+         * @chainable
          * @param {String} type
-         * @param {Function|Object} mix
-         * @return {Object} TT Object
+         * @param {Function|Object} any
+         * @return {Object} TTWorker Object
          */
-        unbind: function(type, mix) {
-            this.each(function() {
-                this.removeEventListener(type, mix);
-            }, true);
+        unbind: function(type, any) {
+            var event = this._events[type],
+                index = event ?
+                        event.callbacks.indexOf(any) : -1;
+
+            if (!event || index < 0) {
+                return;
+            }
+            event.callbacks.splice(index, 1);
+            if (!event.callbacks.length) {
+                this.each(function() {
+                    this.removeEventListener(type, event.handler);
+                });
+            }
             return this;
         },
 
         /**
-         * Bind events to NodeElement
+         * Bind events to HTMLElement
          * To bind the event of delegate type
          *
          * @method delegate
+         * @chainable
          * @param {String} type
          * @param {String|Object} target
          * @param {Function|Object} callback
-         * @return {Object} TT Object
+         * @return {Object} TTWorker Object
          */
         delegate: function(type, target, callback) {
             var delegate = this._delegates[type],
@@ -942,7 +984,9 @@
                 delegate = this._delegates[type] = {};
                 delegate.listeners = [];
                 delegate.handler = function(ev) {
-                    var event, eventTarget = ev.target;
+                    var event,
+                        eventTarget = ev.target,
+                        args = arguments;
 
                     tt_match(delegate.listeners, function(listener) {
                         var match = tt(listener.target).match(function() {
@@ -954,9 +998,9 @@
 
                         if (match) {
                             if (typeof listener.callback === "function") {
-                                listener.callback.call(match, ev);
-                            } else if ("handleEvent" in listener.callback) {
-                                listener.callback.handleEvent.call(match, ev);
+                                listener.callback.apply(match, args);
+                            } else if (listener.callback.handleEvent) {
+                                listener.callback.handleEvent.apply(match, args);
                             }
                             return true;
                         }
@@ -970,14 +1014,15 @@
         },
 
         /**
-         * Un bind events from NodeElement
+         * Un bind events from HTMLElement
          * To un bind the event of delegate type
          *
          * @method undelegate
+         * @chainable
          * @param {String} type
-         * @param {String|Function} mix
+         * @param {String|Function} any
          * @param {Function} callback
-         * @return {Object} TT Object
+         * @return {Object} TTWorker Object
          */
         undelegate: function(type, target, callback) {
             var delegate = this._delegates[type],
@@ -996,7 +1041,7 @@
             });
             if (listeners.length === 0) {
                 this.unbind(type, delegate.handler);
-                delegate = this._delegates[type] = {};
+                this._delegates[type] = {};
             }
             return this;
         },
@@ -1006,7 +1051,7 @@
          *
          * @method addClass
          * @param {String} classname
-         * @return {Object} TT object
+         * @return {Object} TTWorker object
          */
         addClass: domTester.classList ?
             function(className) {
@@ -1036,12 +1081,13 @@
                     return res.join(" ");
                 }
             },
+
         /**
          * Remove class name
          *
          * @method removeClass
          * @param {String} classname
-         * @return {Object} TT object
+         * @return {Object} TTWorker object
          */
         removeClass: domTester.classList ?
             function _removeClassByClassList(className) {
@@ -1050,9 +1096,17 @@
                 });
             } :
             function _removeClassByClassName(className) {
-                className = " " + className;
+                var lastClassName, newClassName;
+
+                className = " " + className + " ";
+
                 return this.each(function() {
-                    this.className = (" " + this.className).replace(className, "").trim();
+                    if (this.className === lastClassName) {
+                        this.className = newClassName;
+                    } else {
+                        lastClassName = this.className;
+                        this.className = newClassName = (" " + lastClassName + " ").replace(className, " ").trim();
+                    }
                 });
             },
 
@@ -1061,7 +1115,7 @@
          *
          * @method hasClass
          * @param {String} classname
-         * @return {Object} TT object
+         * @return {Object} TTWorker object
          */
         hasClass: domTester.classList ?
             function _hasClassByClassList(className) {
@@ -1081,8 +1135,8 @@
          *
          * @method toggleClass
          * @param {String} classname
-         * @param {Bool} strict
-         * @return {Object} TT object
+         * @param {Boolean} strict
+         * @return {Object} TTWorker object
          */
         toggleClass: function(className, strict) {
             var that = this;
@@ -1112,7 +1166,7 @@
          *
          * @method find
          * @param {String} query
-         * @return {Object} TT object
+         * @return {Object} TTWorker object
          */
         find: function(query) {
             var res = [];
@@ -1124,15 +1178,15 @@
         },
 
         /**
-         * Find NodeElement from registered elements
+         * Find HTMLElement from registered elements
          *
          * @method contains
-         * @param {String|Object} mix QueryString, NodeElement, NodeList
-         * @return {Node} matches NodeElement
+         * @param {String|Object} any QueryString, HTMLElement, NodeList
+         * @return {HTMLElement} matches HTMLElement
          */
-        contains: function(mix) {
+        contains: function(any) {
             var res = tt(),
-                target = tt(mix);
+                target = tt(any);
 
             this.each(function() {
                 var context = this,
@@ -1152,34 +1206,34 @@
          * Get attributes list or attribute value
          *
          * @method attr
-         * @param {String} mix QueryString, NodeElement, NodeList
-         * @param {String|Object} mix QueryString, NodeElement, NodeList
+         * @param {String} any QueryString, HTMLElement, NodeList
+         * @param {String|Object} value QueryString, HTMLElement, NodeList
          * @return {Object|String} Key-value object of attributes or attribute value
          */
-        attr: function(mix, value) {
+        attr: function(any, value) {
             var that = this;
 
             switch (arguments.length) {
             case 0:
                 var attrs = this[0].attributes, attr;
 
-                mix = {};
+                any = {};
                 for (var i = 0, iz = attrs.length; i < iz; ++i) {
                     attr = attrs[i];
-                    mix[attr.nodeName] = attr.nodeValue;
+                    any[attr.nodeName] = attr.nodeValue;
                 }
-                return mix;
+                return any;
             case 1:
-                if (typeof mix === "object") {
-                    tt_each(mix, function(key) {
-                        _setAttr(key, mix[key]);
+                if (typeof any === "object") {
+                    tt_each(any, function(key) {
+                        _setAttr(key, any[key]);
                     });
                 } else {
-                    return this[0].getAttribute(mix);
+                    return this[0].getAttribute(any);
                 }
                 break;
             case 2:
-                _setAttr(mix, value);
+                _setAttr(any, value);
                 break;
             }
             return this;
@@ -1202,48 +1256,47 @@
          * Replace html in registered elements
          * or get text html in thier
          *
-         * @method attr
-         * @param {String} mix QueryString, NodeElement, NodeList
-         * @param {String|Object} mix QueryString, NodeElement, NodeList
+         * @method html
+         * @param {String|HTMLElement} [any] HTMLText, HTMLElement
          * @return {Object|String} Key-value object of attributes or attribute value
          */
-        html: function(mix) {
-            if (mix === undefined || mix === null) {
+        html: function(any) {
+            if (any === undefined || any === null) {
                 return this[0].innerHTML;
             }
 
-            if (mix.nodeType) {
-                this.clear().append(mix);
+            if (any.nodeType) {
+                this.clear().append(any);
             } else {
                 this.each(function() {
                     while (this.firstChild) {
                         this.removeChild(this.firstChild);
                     }
-                    this.insertAdjacentHTML("afterbegin", mix);
+                    this.insertAdjacentHTML("afterbegin", any);
                 });
             }
             return this;
         },
 
         /**
-         * Append NodeElement or text html to registered elements
+         * Append HTMLElement or text html to registered elements
          *
          * @method append
-         * @param {String|Node} mix NodeElement, Text html
-         * @return {Object} TT object
+         * @param {String|HTMLElement} any HTMLElement, Text html
+         * @return {Object} TTWorker object
          */
-        append: function(mix) {
+        append: function(any) {
             var useClone = this.length > 1;
 
-            return this.each((typeof mix === "string") ?
-                function() { this.insertAdjacentHTML("beforeend", mix); } :
+            return this.each((typeof any === "string") ?
+                function() { this.insertAdjacentHTML("beforeend", any); } :
                 function() {
 					var that = this;
 
-					if (mix.nodeType) {
-						this.appendChild(useClone ? mix.cloneNode(true) : mix);
-					} else if (mix instanceof TTCreater) {
-						mix.each(function() {
+					if (any.nodeType) {
+						this.appendChild(useClone ? any.cloneNode(true) : any);
+					} else if (any instanceof TTWorker) {
+						any.each(function() {
 							that.appendChild(this);
 						});
 					}
@@ -1251,24 +1304,24 @@
         },
 
         /**
-         * Prepend NodeElement or text html to registered elements
+         * Prepend HTMLElement or text html to registered elements
          *
          * @method prepend
-         * @param {String|Node} mix NodeElement, Text html
-         * @return {Object} TT object
+         * @param {String|HTMLElement} any HTMLElement, Text html
+         * @return {Object} TTWorker object
          */
-        prepend: function(mix) {
+        prepend: function(any) {
             var useClone = this.length > 1;
 
-            return this.each((typeof mix === "string") ?
-                function() { this.insertAdjacentHTML("afterbegin", mix); } :
+            return this.each((typeof any === "string") ?
+                function() { this.insertAdjacentHTML("afterbegin", any); } :
 				function() {
 					var that = this;
 
-					if (mix.nodeType) {
-						this.insertBefore(useClone ? mix.cloneNode(true) : mix, this.firstChild);
-					} else if (mix instanceof TTCreater) {
-						mix.each(function() {
+					if (any.nodeType) {
+						this.insertBefore(useClone ? any.cloneNode(true) : any, this.firstChild);
+					} else if (any instanceof TTWorker) {
+						any.each(function() {
 							that.insertBefore(this, that.firstChild);
 						});
 					}
@@ -1279,7 +1332,7 @@
          * Remove elements of registered from html
          *
          * @method remove
-         * @return {Object} TT object
+         * @return {Object} TTWorker object
          */
         remove: function() {
             return this.each(function() {
@@ -1291,7 +1344,7 @@
          * Remove child elements of registered elements
          *
          * @method clear
-         * @return {Object} TT object
+         * @return {Object} TTWorker object
          */
         clear: function() {
             return this.each(function() {
@@ -1305,14 +1358,14 @@
          * Get parent element from registered elements
          *
          * @method parent
-         * @param {String|Object} mix Query string for search elements or TT object
-         * @return {Object} TT object
+         * @param {String|Object} any Query string for search elements or TTWorker object
+         * @return {Object} TTWorker object
          */
-        parent: function(mix) {
+        parent: function(any) {
             var res = tt();
 
-            if (mix) {
-                var target = tt(mix).toArray();
+            if (any) {
+                var target = tt(any).toArray();
 
                 this.each(function() {
                     if (target.indexOf(this.parentNode) > -1) {
@@ -1331,16 +1384,16 @@
          * Get parent elements of the element back in DOM tree from registered elements
          *
          * @method parents
-         * @param {String|Object} mix Query string for search elements or TT object
-         * @return {Object} TT object
+         * @param {String|Object} any Query string for search elements or TTWorker object
+         * @return {Object} TTWorker object
          */
-        parents: function(mix) {
+        parents: function(any) {
             var that = this,
                 res;
 
-            if (mix) {
+            if (any) {
                 res = tt();
-                tt(mix).each(function() {
+                tt(any).each(function() {
                     var context = this,
                         match = that.match(function() {
                             var pos = context.compareDocumentPosition(this);
@@ -1375,17 +1428,17 @@
          * Get closest element from registered element with query string or target element
          *
          * @method closest
-         * @param {String|Object} mix Query string for search elements or TT object
-         * @return {Object} TT object
+         * @param {String|Object} any Query string for search elements or TTWorker object
+         * @return {Object} TTWorker object
          */
-        closest: function(mix) {
+        closest: function(any) {
             var res = [],
                 target;
 
-            if (!mix) {
+            if (!any) {
                 return tt();
             }
-            target = tt(mix).toArray();
+            target = tt(any).toArray();
             this.each(function() {
                 var element = this;
 
@@ -1403,16 +1456,52 @@
         },
 
         /**
+         * Get child elements from registered elements
+         *
+         * @method children
+         * @param {String|Object} [any] QueryString, HTMLElement, NodeList
+         * @return {Object} tt object of matches child HTMLElements
+         */
+        children: function(any) {
+            var res = tt(),
+                target;
+
+            if (any) {
+                target = tt(any);
+                this.each(function() {
+                    var children = [].slice.call(this.children),
+                        iz = children.length;
+
+                    target.each(function() {
+                        var child, i;
+
+                        for (i = 0; i < iz; ++i) {
+                            child = children[i];
+                            if (this === child) {
+                                res.push(child);
+                            }
+                        }
+                    });
+                });
+            } else {
+                this.each(function() {
+                    res = res.concat([].slice.call(this.children));
+                });
+            }
+            return res;
+        },
+
+        /**
          * Replace elements of registered elements
          *
          * @method replace
-         * @param {String|Node} mix text html or NodeElement
-         * @return {Object} TT object
+         * @param {String|HTMLElement} any text html or HTMLElement
+         * @return {Object} TTWorker object
          */
-        replace: function(mix) {
-            this.each((typeof mix === "string") ?
-                function() { this.insertAdjacentHTML("beforebegin", mix); } :
-                function() { this.parentNode.insertBefore(mix, this); });
+        replace: function(any) {
+            this.each((typeof any === "string") ?
+                function() { this.insertAdjacentHTML("beforebegin", any); } :
+                function() { this.parentNode.insertBefore(any, this); });
             return this.remove();
         },
 
@@ -1420,28 +1509,28 @@
          * Set or get css styles
          *
          * @method css
-         * @param {String|Object} [options] mix CSS property name, object of CSS style set
-         * @param {String|Number} [options] value CSS style value
-         * @return {String|Number|CSSStyleDeclaration}
+         * @param {String|Object} [any] CSS property name, object of CSS style set
+         * @param {String|Number} [value] CSS style value
+         * @return {String|Number|Object} css style value or CSSStyleDeclaration object
          */
-        css: function(mix, value) {
+        css: function(any, value) {
             var that = this;
 
-            if (typeof mix === "object") {
-                tt_each(mix, function(key, val) {
+            if (typeof any === "object") {
+                tt_each(any, function(key, val) {
                     if (val === "") {
                         _removeProperty(key);
                         return;
                     }
-                    _setStyle(tt_cssCamelizer(key), val);
+                    _setStyle(tt_camelizer(key), val);
                 });
-            } else if (mix) {
+            } else if (any) {
                 if (value) {
-                    _setStyle(tt_cssCamelizer(mix), value);
+                    _setStyle(tt_camelizer(any), value);
                 } else if (value === "") {
-                    _removeProperty(mix);
+                    _removeProperty(any);
                 } else {
-                    return global.getComputedStyle(this[0]).getPropertyValue(mix);
+                    return global.getComputedStyle(this[0]).getPropertyValue(any);
                 }
             } else {
                 return global.getComputedStyle(this[0]);
@@ -1467,16 +1556,16 @@
          * If the array or object, data type passed to save the _data object instance
          *
          * @method data
-         * @param {String|Object} [options] mix CSS property name, object of CSS style set
-         * @param {String|Number} [options] value CSS style value
-         * @return {String|Number|CSSStyleDeclaration}
+         * @param {String|Object} [any] CSS property name, object of CSS style set
+         * @param {String|Number} [value] CSS style value
+         * @return {String|Number|Object} data value or data values object
          */
         data: (function() {
             var cond = domTester.dataset,
                 _getDataAttr = cond ? _getDataByDataset : _getDataByAttributes,
                 _setDataAttr = cond ? _setDataByDataset : _setDataByAttributes;
 
-            return function (mix, value) {
+            return function (any, value) {
                 var that = this,
                     key;
 
@@ -1484,17 +1573,17 @@
                 case 0:
                     return _getDataAttr.call(this);
                 case 1:
-                    if (typeof mix === "object") {
-                        tt_each(mix, function(key, val) {
+                    if (typeof any === "object") {
+                        tt_each(any, function(key, val) {
                             _setDataAttr.call(that, key, val);
                         });
                         return this;
                     } else {
-                        return _getDataAttr.call(this, mix);
+                        return _getDataAttr.call(this, any);
                     }
                     break;
                 case 2:
-                    _setDataAttr.call(this, mix, value);
+                    _setDataAttr.call(this, any, value);
                     return this;
                 }
             };
@@ -1590,6 +1679,33 @@
         })(),
 
         /**
+         * Set, get "value" attributes value of registered elements
+         *
+         * @method val
+         * @param {String|Number} [value]
+         * @return {Object|String|Array} TTWorker object, value or values list
+         */
+        val: function(value) {
+            if (value !== undefined) {
+                this.each(function() {
+                    if (this.value !== undefined) {
+                        this.value = value;
+                    }
+                });
+                return this;
+            } else {
+                var res = [];
+
+                this.each(function(index) {
+                    if (this.value !== undefined) {
+                        res[index] = this.value;
+                    }
+                });
+                return this.length > 1 ? res : res[0];
+            }
+        },
+
+        /**
          * Show elements, if it is hide curretly
          *
          * @method show
@@ -1625,15 +1741,22 @@
          * Trigger events for registered elements
          *
          * @method trigger
-         * @param {String} event event name
-         * @param {String} type event type name
-         * @param {Bool} [options] bubbles event bubbling flag
-         * @param {Bool} [options] cancelable event cancelable flag
+         * @chainable
+         * @param {String} name event type name
+         * @param {String} [data..] Data to pass to event
          * @return {Object} tt object
          */
-        trigger: function(event, type, bubbles, cancelable) {
+        trigger: function(/* name[, data..] */) {
+            var args = [].slice.call(arguments),
+                name = args.shift(),
+                ev = document.createEvent("Event");
+
+            ev.initEvent(name, true, true);
+            if (args.length > 1) {
+                ev._tt_data = args;
+            }
             this.each(function() {
-                tt_triggerEvent(this, event, type, bubbles, cancelable);
+                this.dispatchEvent(ev);
             });
             return this;
         },
@@ -1672,7 +1795,7 @@
          * Get width from registered elements
          *
          * @method width
-         * @param {Number} [options] index number of registered elements
+         * @param {Number} [index] number of registered elements
          * @return {Number} number of element width
          */
 		width: function(index) {
@@ -1683,14 +1806,13 @@
          * Get height from registered elements
          *
          * @method height
-         * @param {Number} [options] index number of registered elements
+         * @param {Number} [index] number of registered elements
          * @return {Number} number of element height
          */
 		height: function(index) {
 			return this[index || 0].offsetHeight;
 		}
     };
-
 
     // globalize
     global[IDENT] = global[IDENT] || tt;
