@@ -402,5 +402,9 @@ buster.testCase("tt.js test", {
 
             return dfd.promise;
         },
+        "tt.toArray test": function() {
+            assert(Array.isArray(tt.toArray(arguments)));
+            assert(Array.isArray(tt.toArray(document.getElementsByTagName("div"))));
+        }
     }
 });

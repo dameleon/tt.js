@@ -105,6 +105,7 @@
     tt.proxy         = tt_proxy;
     tt.query2object  = tt_query2object;
     tt.tag           = tt_tag;
+    tt.toArray       = tt_toArray;
     tt.triggerEvent  = tt_triggerEvent;
     tt.type          = tt_type;
 
@@ -147,7 +148,7 @@
      * @return {Object} result object
      */
     function tt_extend() {
-        var args = [].slice.call(arguments),
+        var args = tt_toArray(arguments),
             i = 1, iz = args.length,
             deep = false,
             arg, target;
@@ -606,14 +607,14 @@
      * @static
      * @param {Function} func
      * @param {Any} context
-     * @param {Any} [options] args
+     * @param {Any} [args]
      * @return {Function} Callback function
      */
     function tt_proxy() {
         if (arguments.length < 2) {
             throw new Error("Missing argument error");
         }
-        var args = [].slice.call(arguments),
+        var args = tt_toArray(arguments),
             func = args.shift(),
             context = args.shift(),
             tmp;
@@ -624,7 +625,7 @@
             func = tmp;
         }
         return function() {
-            return func.apply(context, args);
+            return func.apply(context, args.concat(tt_toArray(arguments)));
         };
     }
 
@@ -671,6 +672,18 @@
         var tag = document.createElement(name);
 
         return createTT ? tt(tag) : tag;
+    }
+
+    /**
+     * Convert Array like objects to Array
+     *
+     * @method toArray
+     * @static
+     * @param {Any} Array like objects
+     * @return {Array}
+     */
+    function tt_toArray(target) {
+        return [].slice.call(target);
     }
 
     /**
@@ -1477,7 +1490,7 @@
                 res = tt();
                 target = tt(any);
                 this.each(function() {
-                    var children = [].slice.call(this.children),
+                    var children = tt_toArray(this.children),
                         iz = children.length;
 
                     target.each(function() {
@@ -1494,7 +1507,7 @@
             } else {
                 res = [];
                 this.each(function() {
-                    res = res.concat([].slice.call(this.children));
+                    res = res.concat(tt_toArray(this.children));
                 });
                 res = tt(res);
             }
@@ -1576,8 +1589,7 @@
                 _setDataAttr = cond ? _setDataByDataset : _setDataByAttributes;
 
             return function (any, value) {
-                var that = this,
-                    key;
+                var that = this;
 
                 switch (arguments.length) {
                 case 0:
@@ -1585,15 +1597,20 @@
                 case 1:
                     if (typeof any === "object") {
                         tt_each(any, function(key, val) {
-                            _setDataAttr.call(that, key, val);
+                            _setDataAttr.call(that,
+                                              tt_hyphenizer(key),
+                                              val);
                         });
                         return this;
                     } else {
-                        return _getDataAttr.call(this, any);
+                        return _getDataAttr.call(this,
+                                                 tt_hyphenizer(any));
                     }
                     break;
                 case 2:
-                    _setDataAttr.call(this, any, value);
+                    _setDataAttr.call(this,
+                                      tt_hyphenizer(any),
+                                      value);
                     return this;
                 }
             };
@@ -1609,9 +1626,11 @@
                             delete this._data[key];
                             return;
                         } else {
+                            key = tt_camelizer(key);
                             func = function() { delete this.dataset[key]; };
                         }
                 } else if (type === "string" || type === "number") {
+                    key = tt_camelizer(key);
                     func = function() { this.dataset[key] = val; };
                 } else {
                     this._data[key] = val;
@@ -1624,33 +1643,41 @@
                 if (!this[0]) {
                     return null;
                 }
-                var node = this[0],
+                var that = this,
+                    node = this[0],
                     res = {};
 
                 if (key) {
                     if (this._data[key]) {
                         return this._data[key] || null;
                     } else {
-                        return node.dataset[key] || null;
+                        return node.dataset[tt_camelizer(key)] || null;
                     }
                 } else {
                     tt_each(node.dataset, function(key, val) {
-                        res[key] = val;
+                        key = tt_hyphenizer(key);
+                        res[key] = that._data[key] !== undefined ?
+                            that._data[key] : val;
                     });
-                    tt_extend(res, this._data);
                 }
                 return res;
             }
 
             function _setDataByAttributes(key, val) {
-                var type = tt_type(val);
+                var dataName = "data-",
+                    type = tt_type(val);
 
-                if (tt_type(val, ["string", "number", "undefined", "null"])) {
-                    if (val === "" && this._data[key]) {
-                        delete this._data[key];
-                        return null;
-                    }
-                    this.attr("data-" + key, val);
+                if (val === "" ||
+                    type === "undefined" ||
+                    type === "null") {
+                        if (this._data[key]) {
+                            delete this._data[key];
+                            return;
+                        }
+                        this.attr(dataName + key, null);
+                } else if (type === "string" ||
+                           type === "number") {
+                    this.attr(dataName + key, val);
                 } else {
                     this._data[key] = val;
                 }
@@ -1671,8 +1698,7 @@
                 } else if (this._data[key]) {
                     return this._data[key];
                 } else if (key) {
-                    dataName += key;
-                    return this.attr(dataName);
+                    return this.attr(dataName + key);
                 }
                 for (; i < iz; ++i) {
                     attr = attrs[i].name;
@@ -1757,7 +1783,7 @@
          * @return {Object} tt object
          */
         trigger: function(/* name[, data..] */) {
-            var args = [].slice.call(arguments),
+            var args = tt_toArray(arguments),
                 name = args.shift(),
                 ev = document.createEvent("Event");
 
