@@ -49,7 +49,7 @@
      *
      * @class tt
      * @param {String|Function|HTMLElement|NodeList|NodeList like Array|document|document.body} any
-     * @param {HTMLElement} [options] parent If first params is String, sets the parent of the search target
+     * @param {HTMLElement} [parent] If first params is String, sets the parent of the search target
      * @return {Object|undefined} Return tt object of if first params is Function return undefined
      */
     function tt(any, parent) {
@@ -144,7 +144,7 @@
      * @method extend
      * @static
      * @param {Object|Boolean} any first target object or deep flag
-     * @param {Object} [options] override objects
+     * @param {Object} [override...] objects
      * @return {Object} result object
      */
     function tt_extend() {
@@ -236,7 +236,7 @@
      * @method type
      * @static
      * @param {Any} target judgment target
-     * @param {String|Array} matches List, or string type to be compared
+     * @param {String|Array} [matches] List, or string type to be compared
      * @return {Boolean} result
      */
     function tt_type(target, matches) {
@@ -276,7 +276,23 @@
      * @method ajax
      * @static
      * @param {String|Object} any request url or setting object
-     * @param {Object} [options] setting setting object
+     * @param {Object} [setting] setting object
+     * @param {Boolean} [setting.async] flag of async load
+     * @param {Function} [setting.beforeSend]
+     * @param {Function} [setting.complete]
+     * @param {String} [setting.contentType]
+     * @param {HTMLElement} [setting.context]
+     * @param {Object} [setting.data]
+     * @param {String} [setting.dataType]
+     * @param {Function} [setting.error]
+     * @param {Object} [setting.headers]
+     * @param {String} [setting.mimeType]
+     * @param {Boolean} [setting.success]
+     * @param {Number} [setting.timeout]
+     * @param {String} [setting.type]
+     * @param {String} [setting.url]
+     * @param {String} [setting.usar]
+     * @param {String} [setting.password]
      * @return {Object} XMLHttpRequest object
      */
     function tt_ajax(any, setting) {
@@ -295,7 +311,6 @@
         setting = tt_extend({
             async       : true,
             beforeSend  : null,
-            cache       : true,
             complete    : null,
             contentType : "application/x-www-form-urlencoded; charset=UTF-8",
             context     : document.body,
@@ -504,7 +519,7 @@
      * @method cssPrefix
      * @static
      * @param {String} value CSS value
-     * @param {Array} prefix additional prefixes list
+     * @param {Array} [prefix] additional prefixes list
      * @return {Array}
      */
     function tt_cssPrefix(value, prefix) {
@@ -889,7 +904,7 @@
          * @chainable
          * @param {String} type
          * @param {String|Function} any
-         * @param {Function} [options] callback
+         * @param {Function} [callback]
          * @return {Object} TTWorker Object
          */
         on: function(type, any, callback) {
@@ -905,7 +920,7 @@
          * @chainable
          * @param {String} type
          * @param {String|Function} any
-         * @param {Function} callback
+         * @param {Function} [callback]
          * @return {Object} TTWorker Object
          */
         off: function(type, any, callback) {
@@ -922,7 +937,7 @@
          * @chainable
          * @param {String} type
          * @param {Function|Object} callback
-         * @param {Boolean} [options] capture
+         * @param {Boolean} [capture]
          * @return {Object} TTWorker Object
          */
         bind: function(type, any, capture) {
