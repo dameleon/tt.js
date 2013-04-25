@@ -985,14 +985,19 @@
                 index = event ?
                         event.callbacks.indexOf(any) : -1;
 
-            if (!event || index < 0) {
-                return;
+            if (!event) {
+                return this;
+            } else if (any === undefined) {
+                event.callbacks.splice(0, event.callbacks.length);
+            } else {
+                event.callbacks.splice(index, 1);
             }
-            event.callbacks.splice(index, 1);
+
             if (!event.callbacks.length) {
                 this.each(function() {
                     this.removeEventListener(type, event.handler);
                 });
+                this._events[type] = undefined;
             }
             return this;
         },
@@ -1005,14 +1010,14 @@
          * @chainable
          * @param {String} type
          * @param {String|Object} target
-         * @param {Function|Object} callback
+         * @param {Function|Object} any
          * @return {Object} TTWorker Object
          */
-        delegate: function(type, target, callback) {
+        delegate: function(type, target, any) {
             var delegate = this._delegates[type],
                 listener = {
                     target: target,
-                    callback: callback
+                    callback: any
                 };
 
             if (!delegate) {
@@ -1059,24 +1064,32 @@
          * @param {Function} callback
          * @return {Object} TTWorker Object
          */
-        undelegate: function(type, target, callback) {
+        undelegate: function(type, target, any) {
             var delegate = this._delegates[type],
                 listeners = delegate.listeners;
 
             if (!listeners || listeners.length === 0) {
                 return this;
-            }
-            tt_match(listeners, function(listener, index) {
-                if (listener.target === target &&
-                    listener.callback === callback) {
+            } else if (any === undefined) {
+                tt_each(listeners, function(listener, index) {
+                    if (listener.target === target) {
                         listeners.splice(index, 1);
-                        return true;
-                }
-                return false;
-            });
-            if (listeners.length === 0) {
+                    }
+                });
+            } else {
+                tt_match(listeners, function(listener, index) {
+                    if (listener.target === target &&
+                        listener.callback === any) {
+                            listeners.splice(index, 1);
+                            return true;
+                    }
+                    return false;
+                });
+            }
+
+            if (!listeners.length) {
                 this.unbind(type, delegate.handler);
-                this._delegates[type] = {};
+                this._delegates[type] = undefined;
             }
             return this;
         },

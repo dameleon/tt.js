@@ -88,19 +88,51 @@ buster.testCase("tt.js test", {
         },
         "delegate type test": function() {
             var body = tt(document),
-                spy;
+                spy = sinon.spy();
 
             // on test
-            spy = sinon.spy();
             body.on("onhoge", "#fixture-id", spy);
             tt.triggerEvent(this.fixtures.id, "onhoge");
             assert.calledOnce(spy);
 
             // off test
-            spy = sinon.spy();
             body.off("onhoge", "#fixture-id", spy);
             tt.triggerEvent(this.fixtures.id, "onhoge");
-            refute.calledOnce(spy);
+            assert.calledOnce(spy);
+        },
+        "rebind test": function() {
+            var spy = sinon.spy();
+
+            this.tts.id.on("onhoge", spy);
+            tt.triggerEvent(this.fixtures.id, "onhoge");
+            assert.calledOnce(spy);
+
+            this.tts.id.off("onhoge", spy);
+            tt.triggerEvent(this.fixtures.id, "onhoge");
+            assert.calledOnce(spy);
+
+            this.tts.id.on("onhoge", spy);
+            tt.triggerEvent(this.fixtures.id, "onhoge");
+            assert.calledTwice(spy);
+        },
+        "redelegate test": function() {
+            var body = tt(document),
+                spy = sinon.spy();
+
+            // on test
+            body.on("onhoge", "#fixture-id", spy);
+            tt.triggerEvent(this.fixtures.id, "onhoge");
+            assert.calledOnce(spy);
+
+            // off test
+            body.off("onhoge", "#fixture-id", spy);
+            tt.triggerEvent(this.fixtures.id, "onhoge");
+            assert.calledOnce(spy);
+
+            // on test
+            body.on("onhoge", "#fixture-id", spy);
+            tt.triggerEvent(this.fixtures.id, "onhoge");
+            assert.calledTwice(spy);
         }
     },
     "addClass test": function() {
