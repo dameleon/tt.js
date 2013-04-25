@@ -2,7 +2,7 @@
   "name": "tt",
   "title": "tt.js",
   "description": "JavaScript library for fast DOM operations",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "homepage": "",
   "author": {
     "name": "kei takahashi(twitter@dameleon)"

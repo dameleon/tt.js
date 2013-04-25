@@ -1,4 +1,4 @@
-/** tt.js version:1.0.1 author:kei takahashi(twitter@dameleon) at:2013-04-12 */
+/** tt.js version:1.0.2 author:kei takahashi(twitter@dameleon) at:2013-04-25 */
 ;(function(global, document, undefined) {
     "use strict";
 
@@ -50,7 +50,7 @@
      *
      * @class tt
      * @param {String|Function|HTMLElement|NodeList|NodeList like Array|document|document.body} any
-     * @param {HTMLElement} [options] parent If first params is String, sets the parent of the search target
+     * @param {HTMLElement} [parent] If first params is String, sets the parent of the search target
      * @return {Object|undefined} Return tt object of if first params is Function return undefined
      */
     function tt(any, parent) {
@@ -145,7 +145,7 @@
      * @method extend
      * @static
      * @param {Object|Boolean} any first target object or deep flag
-     * @param {Object} [options] override objects
+     * @param {Object} [override...] objects
      * @return {Object} result object
      */
     function tt_extend() {
@@ -237,7 +237,7 @@
      * @method type
      * @static
      * @param {Any} target judgment target
-     * @param {String|Array} matches List, or string type to be compared
+     * @param {String|Array} [matches] List, or string type to be compared
      * @return {Boolean} result
      */
     function tt_type(target, matches) {
@@ -277,7 +277,23 @@
      * @method ajax
      * @static
      * @param {String|Object} any request url or setting object
-     * @param {Object} [options] setting setting object
+     * @param {Object} [setting] setting object
+     * @param {Boolean} [setting.async] flag of async load
+     * @param {Function} [setting.beforeSend]
+     * @param {Function} [setting.complete]
+     * @param {String} [setting.contentType]
+     * @param {HTMLElement} [setting.context]
+     * @param {Object} [setting.data]
+     * @param {String} [setting.dataType]
+     * @param {Function} [setting.error]
+     * @param {Object} [setting.headers]
+     * @param {String} [setting.mimeType]
+     * @param {Boolean} [setting.success]
+     * @param {Number} [setting.timeout]
+     * @param {String} [setting.type]
+     * @param {String} [setting.url]
+     * @param {String} [setting.usar]
+     * @param {String} [setting.password]
      * @return {Object} XMLHttpRequest object
      */
     function tt_ajax(any, setting) {
@@ -296,7 +312,6 @@
         setting = tt_extend({
             async       : true,
             beforeSend  : null,
-            cache       : true,
             complete    : null,
             contentType : "application/x-www-form-urlencoded; charset=UTF-8",
             context     : document.body,
@@ -505,7 +520,7 @@
      * @method cssPrefix
      * @static
      * @param {String} value CSS value
-     * @param {Array} prefix additional prefixes list
+     * @param {Array} [prefix] additional prefixes list
      * @return {Array}
      */
     function tt_cssPrefix(value, prefix) {
@@ -890,7 +905,7 @@
          * @chainable
          * @param {String} type
          * @param {String|Function} any
-         * @param {Function} [options] callback
+         * @param {Function} [callback]
          * @return {Object} TTWorker Object
          */
         on: function(type, any, callback) {
@@ -906,7 +921,7 @@
          * @chainable
          * @param {String} type
          * @param {String|Function} any
-         * @param {Function} callback
+         * @param {Function} [callback]
          * @return {Object} TTWorker Object
          */
         off: function(type, any, callback) {
@@ -923,7 +938,7 @@
          * @chainable
          * @param {String} type
          * @param {Function|Object} callback
-         * @param {Boolean} [options] capture
+         * @param {Boolean} [capture]
          * @return {Object} TTWorker Object
          */
         bind: function(type, any, capture) {
@@ -971,14 +986,19 @@
                 index = event ?
                         event.callbacks.indexOf(any) : -1;
 
-            if (!event || index < 0) {
-                return;
+            if (!event) {
+                return this;
+            } else if (any === undefined) {
+                event.callbacks.splice(0, event.callbacks.length);
+            } else {
+                event.callbacks.splice(index, 1);
             }
-            event.callbacks.splice(index, 1);
+
             if (!event.callbacks.length) {
                 this.each(function() {
                     this.removeEventListener(type, event.handler);
                 });
+                this._events[type] = undefined;
             }
             return this;
         },
@@ -991,14 +1011,14 @@
          * @chainable
          * @param {String} type
          * @param {String|Object} target
-         * @param {Function|Object} callback
+         * @param {Function|Object} any
          * @return {Object} TTWorker Object
          */
-        delegate: function(type, target, callback) {
+        delegate: function(type, target, any) {
             var delegate = this._delegates[type],
                 listener = {
                     target: target,
-                    callback: callback
+                    callback: any
                 };
 
             if (!delegate) {
@@ -1045,24 +1065,32 @@
          * @param {Function} callback
          * @return {Object} TTWorker Object
          */
-        undelegate: function(type, target, callback) {
+        undelegate: function(type, target, any) {
             var delegate = this._delegates[type],
                 listeners = delegate.listeners;
 
             if (!listeners || listeners.length === 0) {
                 return this;
-            }
-            tt_match(listeners, function(listener, index) {
-                if (listener.target === target &&
-                    listener.callback === callback) {
+            } else if (any === undefined) {
+                tt_each(listeners, function(listener, index) {
+                    if (listener.target === target) {
                         listeners.splice(index, 1);
-                        return true;
-                }
-                return false;
-            });
-            if (listeners.length === 0) {
+                    }
+                });
+            } else {
+                tt_match(listeners, function(listener, index) {
+                    if (listener.target === target &&
+                        listener.callback === any) {
+                            listeners.splice(index, 1);
+                            return true;
+                    }
+                    return false;
+                });
+            }
+
+            if (!listeners.length) {
                 this.unbind(type, delegate.handler);
-                this._delegates[type] = {};
+                this._delegates[type] = undefined;
             }
             return this;
         },
