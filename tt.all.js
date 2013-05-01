@@ -1,4 +1,4 @@
-/** tt.js version:1.0.2 author:kei takahashi(twitter@dameleon) at:2013-04-25 */
+/** tt.js version:1.0.2 author:kei takahashi(twitter@dameleon) at:2013-05-01 */
 ;(function(global, document, undefined) {
     "use strict";
 
@@ -1093,6 +1093,23 @@
                 this._delegates[type] = undefined;
             }
             return this;
+        },
+
+        /**
+         * @method one
+         * @chainable
+         * @param {String} type
+         * @param {Function} fn
+         * @return {Object} TTWorker Object
+         */
+        one: function(type, fn) {
+            var that = this,
+                callback = function(ev) {
+                    that.unbind(type, fn);
+                    fn(ev);
+                };
+
+            return this.bind(type, callback);
         },
 
         /**

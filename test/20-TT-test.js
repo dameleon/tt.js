@@ -133,6 +133,17 @@ buster.testCase("tt.js test", {
             body.on("onhoge", "#fixture-id", spy);
             tt.triggerEvent(this.fixtures.id, "onhoge");
             assert.calledTwice(spy);
+        },
+        "one test": function() {
+            var body = tt(document),
+                spy = sinon.spy();
+
+            this.tts.id.one("onhoge", spy);
+            tt.triggerEvent(this.fixtures.id, "onhoge");
+            assert.calledOnce(spy);
+
+            tt.triggerEvent(this.fixtures.id, "onhoge");
+            assert.calledOnce(spy);
         }
     },
     "addClass test": function() {

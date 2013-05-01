@@ -1095,6 +1095,23 @@
         },
 
         /**
+         * @method one
+         * @chainable
+         * @param {String} type
+         * @param {Function} fn
+         * @return {Object} TTWorker Object
+         */
+        one: function(type, fn) {
+            var that = this,
+                callback = function(ev) {
+                    that.unbind(type, fn);
+                    fn(ev);
+                };
+
+            return this.bind(type, callback);
+        },
+
+        /**
          * Add class name
          *
          * @method addClass
