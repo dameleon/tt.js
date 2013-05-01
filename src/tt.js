@@ -1353,9 +1353,7 @@
         append: function(any) {
             var useClone = this.length > 1;
 
-            return this.each((typeof any === "string") ?
-                function() { this.insertAdjacentHTML("beforeend", any); } :
-                function() {
+            return this.each(function() {
 					var that = this;
 
 					if (any.nodeType) {
