@@ -1351,19 +1351,12 @@
          * @return {Object} TTWorker object
          */
         append: function(any) {
-            var useClone = this.length > 1;
+            var i = 0, iz = this.length;
 
-            return this.each(function() {
-					var that = this;
-
-					if (any.nodeType) {
-						this.appendChild(useClone ? any.cloneNode(true) : any);
-					} else if (any instanceof TTWorker) {
-						any.each(function() {
-							that.appendChild(this);
-						});
-					}
-				});
+            for (; iz; ++i, --iz) {
+                this[i].appendChild(any);
+            }
+            return this;
         },
 
         /**
@@ -1831,7 +1824,7 @@
                 ev = document.createEvent("Event");
 
             ev.initEvent(name, true, true);
-            if (args.length > 1) {
+            if (args.length) {
                 ev._tt_data = args;
             }
             this.each(function() {
