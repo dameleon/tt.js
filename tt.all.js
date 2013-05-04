@@ -1,4 +1,4 @@
-/** tt.js version:1.0.1 author:kei takahashi(twitter@dameleon) at:2013-04-12 */
+/** tt.js version:1.0.1 author:kei takahashi(twitter@dameleon) at:2013-05-05 */
 ;(function(global, document, undefined) {
     "use strict";
 
@@ -769,7 +769,7 @@
          */
         this._data = {};
 
-        for (; iz; ++i, --iz) {
+        for (; i < iz; ++i) {
             this[i] = nodes[i];
         }
         return this;
@@ -815,7 +815,7 @@
         each: function(fn) {
             var i = 0, iz = this.length;
 
-            for (; iz; ++i, --iz) {
+            for (; i < iz; ++i) {
                 fn.call(this[i], i);
             }
             return this;
@@ -832,7 +832,7 @@
         match: function(fn) {
             var i = 0, iz = this.length;
 
-            for (; iz; ++i, --iz) {
+            for (; i < iz; ++i) {
                 if (fn.call(this[i], i)) {
                     return this[i];
                 }
@@ -855,7 +855,7 @@
             } else if (tt_type(any, ["array", "nodelist"])) {
                 var i = 0, iz = any.length;
 
-                for (; iz; ++i, --iz) {
+                for (; i < iz; ++i) {
                     this[this.length] = any[i];
                     ++this.length;
                 }
@@ -1285,16 +1285,18 @@
             if (any === undefined || any === null) {
                 return this[0].innerHTML;
             }
+            var node, i = 0, iz = this.length;
 
             if (any.nodeType) {
                 this.clear().append(any);
             } else {
-                this.each(function() {
-                    while (this.firstChild) {
-                        this.removeChild(this.firstChild);
+                for (; i < iz; ++i) {
+                    node = this[i];
+                    while (node.firstChild) {
+                        node.removeChild(node.firstChild);
                     }
-                    this.insertAdjacentHTML("afterbegin", any);
-                });
+                    node.insertAdjacentHTML("afterbegin", any);
+                }
             }
             return this;
         },
@@ -1303,50 +1305,49 @@
          * Append HTMLElement or text html to registered elements
          *
          * @method append
-         * @param {String|HTMLElement} any HTMLElement, Text html
+         * @param {HTMLElement} children HTMLElement
          * @return {Object} TTWorker object
          */
-        append: function(any) {
-            var useClone = this.length > 1;
+        append: function(children) {
+            var that = this,
+                i = 0, iz = that.length,
+                useClone = iz > 1;
 
-            return this.each((typeof any === "string") ?
-                function() { this.insertAdjacentHTML("beforeend", any); } :
-                function() {
-					var that = this;
-
-					if (any.nodeType) {
-						this.appendChild(useClone ? any.cloneNode(true) : any);
-					} else if (any instanceof TTWorker) {
-						any.each(function() {
-							that.appendChild(this);
-						});
-					}
-				});
+            if (children.nodeType) {
+                for (; i < iz; ++i) {
+                    that[i].appendChild(useClone ? children.cloneNode(true) : children);
+                }
+            } else if (children instanceof TTWorker) {
+                children.each(function() {
+                    that.appendChild(this);
+                });
+            }
+            return this;
         },
 
         /**
          * Prepend HTMLElement or text html to registered elements
          *
          * @method prepend
-         * @param {String|HTMLElement} any HTMLElement, Text html
+         * @param {HTMLElement} children HTMLElement
          * @return {Object} TTWorker object
          */
-        prepend: function(any) {
-            var useClone = this.length > 1;
+        prepend: function(children) {
+            var that = this,
+                node, i = 0, iz = that.length,
+                useClone = iz > 1;
 
-            return this.each((typeof any === "string") ?
-                function() { this.insertAdjacentHTML("afterbegin", any); } :
-				function() {
-					var that = this;
-
-					if (any.nodeType) {
-						this.insertBefore(useClone ? any.cloneNode(true) : any, this.firstChild);
-					} else if (any instanceof TTWorker) {
-						any.each(function() {
-							that.insertBefore(this, that.firstChild);
-						});
-					}
-				});
+            if (children.nodeType) {
+                for (; i < iz; ++i) {
+                    node = that[i];
+                    node.insertBefore(useClone ? children.cloneNode(true) : children, node.firstChild);
+                }
+            } else if (children instanceof TTWorker) {
+                children.each(function() {
+                    that.insertBefore(this, that.firstChild);
+                });
+            }
+            return this;
         },
 
         /**
@@ -1356,9 +1357,13 @@
          * @return {Object} TTWorker object
          */
         remove: function() {
-            return this.each(function() {
-                this.parentNode.removeChild(this);
-            });
+            var node, i = 0, iz = this.length;
+
+            for (; i < iz; ++i) {
+                node = this[i];
+                node.parentNode.removeChild(node);
+            }
+            return this;
         },
 
         /**
@@ -1368,11 +1373,15 @@
          * @return {Object} TTWorker object
          */
         clear: function() {
-            return this.each(function() {
-                while (this.firstChild) {
-                    this.removeChild(this.firstChild);
+            var node, i = 0, iz = this.length;
+
+            for (; i < iz; ++i) {
+                node = this[i];
+                while (node.firstChild) {
+                    node.removeChild(node.firstChild);
                 }
-            });
+            }
+            return this;
         },
 
         /**
@@ -1383,20 +1392,22 @@
          * @return {Object} TTWorker object
          */
         parent: function(any) {
-            var res = tt();
+            var res = tt(),
+                node, i = 0, iz = this.length;
 
             if (any) {
                 var target = tt(any).toArray();
 
-                this.each(function() {
-                    if (target.indexOf(this.parentNode) > -1) {
-                        res.push(this.parentNode);
+                for (; i < iz; ++i) {
+                    node = this[i];
+                    if (target.indexOf(node.parentNode) > -1) {
+                        res.push(node.parentNode);
                     }
-                });
+                }
             } else {
-                this.each(function() {
-                    res.push(this.parentNode);
-                });
+                for (; i < iz; ++i) {
+                    res.push(this[i].parentNode);
+                }
             }
             return res;
         },
@@ -1454,25 +1465,26 @@
          */
         closest: function(any) {
             var res = [],
-                target;
+                target,
+                node, i = 0, iz = this.length;
 
             if (!any) {
                 return tt();
             }
             target = tt(any).toArray();
-            this.each(function() {
-                var element = this;
+            for (; i < iz; ++i) {
+                node = this[i];
 
-                while (element) {
-                    if (target.indexOf(element) > -1) {
-                        if (res.indexOf(element) === -1) {
-                            res.push(element);
+                while (node) {
+                    if (target.indexOf(node) > -1) {
+                        if (res.indexOf(node) === -1) {
+                            res.push(node);
                         }
                         break;
                     }
-                    element = element.parentNode;
+                    node = node.parentNode;
                 }
-            });
+            }
             return tt(res);
         },
 
@@ -1484,32 +1496,32 @@
          * @return {Object} tt object of matches child HTMLElements
          */
         children: function(any) {
-            var res,
-                target;
+            var res, target, children,
+                i = 0, iz = this.length, jz;
 
             if (any) {
                 res = tt();
                 target = tt(any);
-                this.each(function() {
-                    var children = tt_toArray(this.children),
-                        iz = children.length;
+                for (; i < iz; ++i) {
+                    children = tt_toArray(this[i].children);
+                    jz = children.length;
 
                     target.each(function() {
-                        var child, i;
+                        var child, j = 0;
 
-                        for (i = 0; i < iz; ++i) {
-                            child = children[i];
+                        for (; j < jz; ++j) {
+                            child = children[j];
                             if (this === child) {
                                 res.push(child);
                             }
                         }
                     });
-                });
+                }
             } else {
                 res = [];
-                this.each(function() {
-                    res = res.concat(tt_toArray(this.children));
-                });
+                for (; i < iz; ++i) {
+                    res = res.concat(tt_toArray(this[i].children));
+                }
                 res = tt(res);
             }
             return res;
@@ -1523,10 +1535,16 @@
          * @return {Object} TTWorker object
          */
         replace: function(any) {
-            this.each((typeof any === "string") ?
-                function() { this.insertAdjacentHTML("beforebegin", any); } :
-                function() { this.parentNode.insertBefore(any, this); });
-            return this.remove();
+            var that = this,
+                i = 0, iz = that.length,
+                func = (typeof any === "string") ?
+                    function(node) { node.insertAdjacentHTML("beforebegin", any); } :
+                    function(node) { node.parentNode.insertBefore(any, node); };
+
+            for (; i < iz; ++i) {
+                func(that[i]);
+            }
+            return that.remove();
         },
 
         /**
@@ -1554,24 +1572,28 @@
                 } else if (value === "") {
                     _removeProperty(any);
                 } else {
-                    return global.getComputedStyle(this[0]).getPropertyValue(any);
+                    return global.getComputedStyle(that[0]).getPropertyValue(any);
                 }
             } else {
-                return global.getComputedStyle(this[0]);
+                return global.getComputedStyle(that[0]);
             }
 
             return this;
 
             function _removeProperty(prop) {
-                that.each(function() {
-                    this.style.removeProperty(prop);
-                });
+                var i = 0, iz = that.length;
+
+                for (; i < iz; ++i) {
+                    that[i].style.removeProperty(prop);
+                }
             }
 
             function _setStyle(prop, val) {
-                that.each(function() {
-                    this.style[prop] = val;
-                });
+                var i = 0, iz = that.length;
+
+                for (; i < iz; ++i) {
+                    that[i].style[prop] = val;
+                }
             }
         },
 
@@ -1594,7 +1616,7 @@
 
                 switch (arguments.length) {
                 case 0:
-                    return _getDataAttr.call(this);
+                    return _getDataAttr.call(that);
                 case 1:
                     if (typeof any === "object") {
                         tt_each(any, function(key, val) {
@@ -1602,23 +1624,24 @@
                                               tt_hyphenizer(key),
                                               val);
                         });
-                        return this;
+                        return that;
                     } else {
-                        return _getDataAttr.call(this,
+                        return _getDataAttr.call(that,
                                                  tt_hyphenizer(any));
                     }
                     break;
                 case 2:
-                    _setDataAttr.call(this,
+                    _setDataAttr.call(that,
                                       tt_hyphenizer(any),
                                       value);
-                    return this;
+                    return that;
                 }
             };
 
             function _setDataByDataset(key, val) {
                 var type = tt_type(val),
-                    func = null;
+                    func = null,
+                    i = 0, iz = this.length;
 
                 if (val === "" ||
                     type === "undefined" ||
@@ -1628,16 +1651,19 @@
                             return;
                         } else {
                             key = tt_camelizer(key);
-                            func = function() { delete this.dataset[key]; };
+                            for (; i < iz; ++i) {
+                                delete this[i].dataset[key];
+                            }
                         }
                 } else if (type === "string" || type === "number") {
                     key = tt_camelizer(key);
-                    func = function() { this.dataset[key] = val; };
+                    for (; i < iz; ++i) {
+                        this[i].dataset[key] = val;
+                    }
                 } else {
                     this._data[key] = val;
                     return;
                 }
-                this.each(func);
             }
 
             function _getDataByDataset(key) {
@@ -1645,12 +1671,12 @@
                     return null;
                 }
                 var that = this,
-                    node = this[0],
+                    node = that[0],
                     res = {};
 
                 if (key) {
-                    if (this._data[key]) {
-                        return this._data[key] || null;
+                    if (that._data[key]) {
+                        return that._data[key] || null;
                     } else {
                         return node.dataset[tt_camelizer(key)] || null;
                     }
@@ -1723,21 +1749,25 @@
          * @return {Object|String|Array} TTWorker object, value or values list
          */
         val: function(value) {
+            var node, i = 0, iz = this.length;
+
             if (value !== undefined) {
-                this.each(function() {
-                    if (this.value !== undefined) {
-                        this.value = value;
+                for (; i < iz; ++i) {
+                    node = this[i];
+                    if (node.value !== undefined) {
+                        node.value = value;
                     }
-                });
+                }
                 return this;
             } else {
                 var res = [];
 
-                this.each(function(index) {
-                    if (this.value !== undefined) {
-                        res[index] = this.value;
+                for (; i < iz; ++i) {
+                    node = this[i];
+                    if (node.value !== undefined) {
+                        res[i] = node.value;
                     }
-                });
+                }
                 return this.length > 1 ? res : res[0];
             }
         },
@@ -1786,15 +1816,16 @@
         trigger: function(/* name[, data..] */) {
             var args = tt_toArray(arguments),
                 name = args.shift(),
-                ev = document.createEvent("Event");
+                ev = document.createEvent("Event"),
+                i = 0, iz = this.length;
 
             ev.initEvent(name, true, true);
             if (args.length > 1) {
                 ev._tt_data = args;
             }
-            this.each(function() {
-                this.dispatchEvent(ev);
-            });
+            for (; i < iz; ++i) {
+                this[i].dispatchEvent(ev);
+            }
             return this;
         },
 
@@ -1815,16 +1846,18 @@
          * @return {Object|Array} {left: Number, top: Number} or their array
          */
         offset: function() {
-            var res = [];
+            var res = [],
+                i = 0, iz = this.length;
 
-            this.each(function(index) {
-                var offset = this.getBoundingClientRect();
+            for (; i < iz; ++i) {
+                var offset = this[i].getBoundingClientRect();
 
-                res[index] = {
+                res[i] = {
                     left: offset.left + global.pageXOffset,
                     top: offset.top + global.pageYOffset
                 };
-            });
+            }
+
             return this.length === 1 ? res[0] : res;
         },
 
@@ -1835,9 +1868,9 @@
          * @param {Number} [index] number of registered elements
          * @return {Number} number of element width
          */
-		width: function(index) {
-			return this[index || 0].offsetWidth;
-		},
+        width: function(index) {
+            return this[index || 0].offsetWidth;
+        },
 
         /**
          * Get height from registered elements
@@ -1846,9 +1879,9 @@
          * @param {Number} [index] number of registered elements
          * @return {Number} number of element height
          */
-		height: function(index) {
-			return this[index || 0].offsetHeight;
-		}
+        height: function(index) {
+            return this[index || 0].offsetHeight;
+        }
     };
 
     // globalize
