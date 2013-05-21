@@ -161,7 +161,8 @@
 
         for (; i < iz; ++i) {
             arg = args[i];
-            if (tt_type(arg) !== "object") {
+            if (tt_type(arg) !== "object" && 
+                tt_type(arg) !== "array") {
                 continue;
             }
             tt_each(Object.keys(arg), _extend);
@@ -170,9 +171,15 @@
 
         function _extend(key, index) {
             if (deep &&
-                tt_type(target[key], "object") &&
-                tt_type(arg[key], "object")) {
-                    tt_extend(target[key], arg[key]);
+                (tt_type(arg[key], "array") ||
+                tt_type(arg[key], "object"))) {
+                if (tt_type(arg[key], "object") && !tt_type(target[key], "object")) {
+                  target[key] = {};
+                }
+                if (tt_type(arg[key], "array") && !tt_type(target[key], "array")) {
+                  target[key] = [];
+                }
+                tt_extend(deep, target[key], arg[key]);
             } else {
                 target[key] = arg[key];
             }
