@@ -151,6 +151,7 @@
         var args = tt_toArray(arguments),
             i = 1, iz = args.length,
             deep = false,
+            typeRe = /(object|array)/,
             arg, target;
 
         if (args[0] === true) {
@@ -161,23 +162,21 @@
 
         for (; i < iz; ++i) {
             arg = args[i];
-            if (tt_type(arg) !== "object" && 
-                tt_type(arg) !== "array") {
-                continue;
+            if (tt_type(arg, ["object", "array"])) {
+                tt_each(Object.keys(arg), _extend);
             }
-            tt_each(Object.keys(arg), _extend);
         }
         return target;
 
         function _extend(key, index) {
-            if (deep &&
-                (tt_type(arg[key], "array") ||
-                tt_type(arg[key], "object"))) {
-                if (tt_type(arg[key], "object") && !tt_type(target[key], "object")) {
-                  target[key] = {};
-                }
-                if (tt_type(arg[key], "array") && !tt_type(target[key], "array")) {
-                  target[key] = [];
+            var argType = tt_type(arg[key]),
+                targetType = tt_type(target[key]);
+
+            if (deep && typeRe.test(argType)) {
+                if (argType === "object" && targetType === "object") {
+                    target[key] = {};
+                } else if (argType === "array" && targetType === "array") {
+                    target[key] = [];
                 }
                 tt_extend(deep, target[key], arg[key]);
             } else {
