@@ -93,42 +93,58 @@ buster.testCase("tt.js test", {
             });
             assert.isNull(res);
         },
-        "extend test": function() {
-            assert.isFunction(tt.extend);
-            var a = {
+        "extend test": {
+            "function test" : function() {
+                assert.isFunction(tt.extend);
+            },
+            "object test": function() {
+                var a = {
+                        'hoge': 1,
+                        'fuga': 2,
+                        'piyo': 3
+                    },
+                    b = {
+                        'fuga': 'a',
+                        'piyo': 'b'
+                    },
+                    c;
+
+                c = tt.extend(a, b);
+                assert.equals(a, c, {
                     'hoge': 1,
-                    'fuga': 2,
-                    'piyo': 3
-                },
-                b = {
                     'fuga': 'a',
                     'piyo': 'b'
+                });
+
+                var d = {
+                    'hoge': {
+                        'fuga': false
+                    }
                 },
-                c;
-
-            c = tt.extend(a, b);
-            assert.equals(a, c, {
-                'hoge': 1,
-                'fuga': 'a',
-                'piyo': 'b'
-            });
-
-            var d = {
-                'hoge': {
-                    'fuga': false
+                e = {
+                    'hoge': {
+                        'fuga': true
+                    }
                 }
+                tt.extend(d, e);
+                assert.equals(d, {
+                    'hoge': {
+                        'fuga': true
+                    }
+                });
             },
-            e = {
-                'hoge': {
-                    'fuga': true
-                }
+            "array test": function() {
+                var a = [1,2,3],
+                    b = [],
+                    c;
+
+                b[1] = "a";
+                b[2] = "b";
+                b[3] = "c";
+
+                c = tt.extend(a, b);
+                assert.equals(c, [1, "a", "b", "c"]);
             }
-            tt.extend(d, e);
-            assert.equals(d, {
-                'hoge': {
-                    'fuga': true
-                }
-            });
         },
         "proxy test": function() {
             var arg = "arg",
