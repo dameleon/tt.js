@@ -1,4 +1,4 @@
-/** tt.js version:1.0.3 author:kei takahashi(twitter@dameleon) at:2013-05-22 */
+/** tt.js version:1.0.4 author:kei takahashi(twitter@dameleon) at:2013-05-23 */
 ;(function(global, document, undefined) {
     "use strict";
 
@@ -339,7 +339,7 @@
         if (setting.data && setting.type === "GET") {
             setting.url =
                 setting.url +
-                setting.url.indexOf("?") > -1 ? "&" : "?" +
+                (setting.url.indexOf("?") > -1 ? "&" : "?") +
                 tt_param(setting.data);
             setting.data = null;
         } else {
