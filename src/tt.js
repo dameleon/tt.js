@@ -338,7 +338,7 @@
         if (setting.data && setting.type === "GET") {
             setting.url =
                 setting.url +
-                setting.url.indexOf("?") > -1 ? "&" : "?" +
+                (setting.url.indexOf("?") > -1 ? "&" : "?") +
                 tt_param(setting.data);
             setting.data = null;
         } else {
