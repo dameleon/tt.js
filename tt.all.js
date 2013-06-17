@@ -1,4 +1,4 @@
-/** tt.js version:1.0.4 author:kei takahashi(twitter@dameleon) at:2013-06-17 */
+/** tt.js version:1.0.5 author:kei takahashi(twitter@dameleon) at:2013-06-17 */
 ;(function(global, document, undefined) {
     "use strict";
 
