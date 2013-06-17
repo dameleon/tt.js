@@ -1,4 +1,4 @@
-/** tt.js version:1.0.4 author:kei takahashi(twitter@dameleon) at:2013-05-23 */
+/** tt.js version:1.0.4 author:kei takahashi(twitter@dameleon) at:2013-06-17 */
 ;(function(global, document, undefined) {
     "use strict";
 
@@ -337,13 +337,18 @@
         setting.type = setting.type.toUpperCase();
 
         if (setting.data && setting.type === "GET") {
-            setting.url =
-                setting.url +
-                (setting.url.indexOf("?") > -1 ? "&" : "?") +
-                tt_param(setting.data);
-            setting.data = null;
-        } else {
-            setting.data = tt_param(setting.data);
+			switch (setting.type) {
+			case "GET":
+				setting.url =
+					setting.url +
+					(setting.url.indexOf("?") > -1 ? "&" : "?") +
+					tt_param(setting.data);
+				setting.data = null;
+				break;
+			case "POST":
+				setting.data = tt_param(setting.data);
+				break;
+			}
         }
 
         xhr.onerror = function() {
@@ -364,7 +369,6 @@
 
         if (setting.type === "POST") {
             xhr.setRequestHeader("Content-type", setting.contentType);
-            xhr.setRequestHeader("Content-length", setting.data.length);
         }
         if (tt_type(setting.headers, "object")) {
             tt_each(setting.headers, function(key, value) {
