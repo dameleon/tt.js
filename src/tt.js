@@ -59,10 +59,12 @@
         if (typeof any === "string") {
             selector = any;
             parent = parent || document;
-            target = querySelectorRe.test(any) ?
+            target = any[0] === '<' ?
+                        createDom(any, parent) :
+                     querySelectorRe.test(any) ?
                         parent.querySelectorAll(any) :
                      any[0] === "#" ?
-                        [parent.getElementById(any.substring(1, any.length))] :
+                        [document.getElementById(any.substring(1, any.length))] :
                      any[0] === "." ?
                         parent.getElementsByClassName(any.substring(1, any.length)) :
                         parent.getElementsByTagName(any);
@@ -86,6 +88,33 @@
             }
         }
         return new TTWorker(target || [], selector);
+    }
+
+    function createDom(str, parent) {
+        var div = document.createElement('div');
+        div.innerHTML = str;
+        var children = [].slice.call(div.children);
+
+
+        if (parent.nodeType) {
+            var parent = parent == document ? document.body : parent;
+            children.forEach(function(child) {
+                parent.appendChild(child);
+            });
+        }
+        else {
+
+            var keys = Object.keys(parent);
+
+            children.forEach(function(child) {
+                for (var i = 0, val; val = keys[i]; i++) {
+                    child.setAttribute(val, parent[val]);
+                }
+            });
+
+
+        }
+        return children;
     }
 
     //// static methods
@@ -1230,6 +1259,7 @@
             var res = [];
 
             this.each(function() {
+                console.log('moge', query, this);
                 res = res.concat(tt(query, this).toArray());
             });
             return tt(res);
@@ -1830,6 +1860,7 @@
                 ev._tt_data = args;
             }
             this.each(function() {
+                console.log(ev);
                 this.dispatchEvent(ev);
             });
             return this;
